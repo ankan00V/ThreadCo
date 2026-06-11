@@ -12,10 +12,13 @@ from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app.models import ChannelStubLog, Order, Customer
 
+import os
+
 router = APIRouter(prefix="/channel", tags=["channel_stub"])
 logger = logging.getLogger("xeno-crm.channel_stub")
 
-WEBHOOK_URL = "http://127.0.0.1:8000/webhooks/receipt"
+PORT = os.environ.get("PORT", 8000)
+WEBHOOK_URL = f"http://127.0.0.1:{PORT}/webhooks/receipt"
 
 class SendMessageRequest(BaseModel):
     campaign_id: str
