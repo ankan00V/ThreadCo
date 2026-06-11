@@ -12,13 +12,11 @@ from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app.models import ChannelStubLog, Order, Customer
 
-import os
+from app.routers.webhooks import receive_receipt
+from app.schemas import WebhookReceiptRequest
 
 router = APIRouter(prefix="/channel", tags=["channel_stub"])
 logger = logging.getLogger("xeno-crm.channel_stub")
-
-PORT = os.environ.get("PORT", 8000)
-WEBHOOK_URL = f"http://127.0.0.1:{PORT}/webhooks/receipt"
 
 class SendMessageRequest(BaseModel):
     campaign_id: str
@@ -32,22 +30,21 @@ class SendMessageRequest(BaseModel):
 webhook_semaphore = asyncio.Semaphore(10)
 
 async def send_webhook_with_retry(payload: dict):
-    """POST to webhook endpoint with exponential backoff (up to 3 retries)."""
+    """Call the webhook handler directly instead of using HTTP to avoid Railway loopback issues."""
     async with webhook_semaphore:
-        async with httpx.AsyncClient() as client:
-            for attempt in range(1, 4):
-                try:
-                    resp = await client.post(WEBHOOK_URL, json=payload, timeout=10.0)
-                    if resp.is_success:
-                        return
-                    logger.warning(f"Webhook failed with status {resp.status_code}")
-                except Exception as e:
-                    logger.warning(f"Webhook exception: {e}")
-                
-                # Backoff: 2s, 4s, 8s
-                await asyncio.sleep(2 ** attempt)
-                
-            logger.error(f"Failed to send webhook after 3 attempts: {payload}")
+        try:
+            # Run the synchronous DB operations in a threadpool to prevent blocking the async loop
+            await asyncio.to_thread(_process_internal_webhook, payload)
+        except Exception as e:
+            logger.error(f"Internal webhook failed: {e}")
+
+def _process_internal_webhook(payload: dict):
+    db = SessionLocal()
+    try:
+        req = WebhookReceiptRequest(**payload)
+        receive_receipt(req, db)
+    finally:
+        db.close()
 
 
 def check_and_log_idempotency(db: Session, campaign_id: str, customer_id: str, event_type: str) -> bool:
