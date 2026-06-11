@@ -43,6 +43,7 @@ const SmoothVideoLoop = () => {
         muted
         playsInline
         autoPlay
+        preload="auto"
         onTimeUpdate={(e) => handleTimeUpdate(e, 0)}
         className={`absolute inset-0 z-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${active === 0 ? 'opacity-100' : 'opacity-0'}`}
       />
@@ -51,6 +52,7 @@ const SmoothVideoLoop = () => {
         src="/hero-video.mp4"
         muted
         playsInline
+        preload="auto"
         onTimeUpdate={(e) => handleTimeUpdate(e, 1)}
         className={`absolute inset-0 z-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${active === 1 ? 'opacity-100' : 'opacity-0'}`}
       />
@@ -68,7 +70,7 @@ const Logo = () => (
       <span className="font-bold text-[1.2rem] leading-none tracking-tight" style={{ color: 'black', fontFamily: 'var(--font-heading)' }}>
         ThreadCo
       </span>
-      <span className="text-[0.65rem] uppercase tracking-[0.2em] font-bold mt-1" style={{ color: 'var(--color-accent)' }}>
+      <span className="text-[0.65rem] uppercase tracking-[0.2em] font-bold mt-1" style={{ color: '#ef4d23' }}>
         Xeno CRM
       </span>
     </div>
@@ -87,7 +89,7 @@ const LandingPage = () => {
   ];
 
   return (
-    <div className="relative w-full min-h-screen overflow-hidden" style={{ fontFamily: 'var(--font-body)', color: 'black', margin: 0, padding: 0 }}>
+    <div className="relative w-full min-h-screen overflow-hidden" style={{ fontFamily: 'var(--font-body)', color: 'black', backgroundColor: '#f5f2ee', margin: 0, padding: 0 }}>
       {/* Background Video */}
       <SmoothVideoLoop />
 
@@ -106,7 +108,7 @@ const LandingPage = () => {
 
         {/* Desktop CTA */}
         <div className="hidden md:flex gap-3">
-          <button onClick={() => navigate('/dashboard')} className="text-sm font-semibold px-5 py-2.5 rounded-full hover:shadow-lg active:scale-95 transition-all" style={{ backgroundColor: 'var(--color-accent)', color: 'white' }}>
+          <button onClick={() => navigate('/dashboard')} className="text-sm font-semibold px-5 py-2.5 rounded-full hover:shadow-lg active:scale-95 transition-all" style={{ backgroundColor: '#0b0f1a', color: 'white' }}>
             Start For Free
           </button>
         </div>
@@ -173,7 +175,7 @@ const LandingPage = () => {
               </div>
 
               <div className="px-6 mt-auto flex flex-col gap-3">
-                <button onClick={() => navigate('/dashboard')} className="w-full py-3.5 rounded-full font-semibold text-[0.95rem]" style={{ backgroundColor: 'var(--color-accent)', color: 'white' }}>
+                <button onClick={() => navigate('/dashboard')} className="w-full py-3.5 rounded-full font-semibold text-[0.95rem]" style={{ backgroundColor: '#0b0f1a', color: 'white' }}>
                   Start For Free
                 </button>
               </div>
@@ -234,13 +236,13 @@ const LandingPage = () => {
             onClick={() => navigate('/dashboard')}
             className="flex items-center justify-between"
             style={{
-              backgroundColor: 'var(--color-accent)',
+              backgroundColor: '#0b0f1a',
               color: 'white',
               borderRadius: '50px',
               padding: '17px 24px',
               minWidth: '210px',
               fontSize: 'clamp(0.9rem, 2vw, 1rem)',
-              boxShadow: '0 4px 24px rgba(115,66,226,0.28)',
+              boxShadow: '0 4px 24px rgba(11,15,26,0.28)',
               fontWeight: 600,
               gap: '32px'
             }}

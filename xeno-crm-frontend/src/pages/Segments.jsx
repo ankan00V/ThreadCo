@@ -55,6 +55,9 @@ const Segments = () => {
               color: #0b0f1a !important;
               border-radius: 8px !important;
           }
+          .aicomposer-override input::placeholder, .aicomposer-override textarea::placeholder {
+              color: #a3a3a3 !important;
+          }
           .aicomposer-override p, .aicomposer-override span { color: #525252 !important; }
           .aicomposer-override button.bg-brand-500 {
               background-color: #ef4d23 !important;
@@ -62,7 +65,6 @@ const Segments = () => {
               border-radius: 8px !important;
           }
           .aicomposer-override button.bg-brand-500 * { color: #ffffff !important; }
-          .aicomposer-override .text-white { color: #ffffff !important; }
           .aicomposer-override .aicomposer-title { color: #0b0f1a !important; }
           .aicomposer-override .bg-surface-base { background: transparent !important; }
         `}</style>
