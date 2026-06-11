@@ -18,7 +18,8 @@ import httpx
 logger = logging.getLogger("xeno-crm.campaigns")
 router = APIRouter(prefix="/api/campaigns", tags=["campaigns"])
 
-CHANNEL_STUB_URL = "http://127.0.0.1:8000/channel"
+PORT = os.environ.get("PORT", 8000)
+CHANNEL_STUB_URL = f"http://127.0.0.1:{PORT}/channel"
 
 
 # ---------------------------------------------------------------------------
