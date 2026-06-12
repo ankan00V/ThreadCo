@@ -14,6 +14,7 @@ const NewCampaign = () => {
   const [channel, setChannel] = useState('whatsapp');
   const [campaignGoal, setCampaignGoal] = useState('');
   const [messageTemplate, setMessageTemplate] = useState('');
+  const [emailSubject, setEmailSubject] = useState('');
   
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -52,8 +53,10 @@ const NewCampaign = () => {
         channel: channel,
         campaign_goal: campaignGoal
       });
-      setMessageTemplate(data.message);
-      // We could also use data.subject_line or data.channel_recommendation if we wanted to build those out.
+      setMessageTemplate(data.message.body || data.message);
+      if (data.message.subject && channel === 'email') {
+        setEmailSubject(data.message.subject);
+      }
     } catch (err) {
       console.error(err);
       setError("AI Generation failed. Please try again or write manually.");
@@ -290,22 +293,48 @@ const NewCampaign = () => {
               
               {/* Message Bubble */}
               {messageTemplate ? (
-                <div className={`p-4 rounded-2xl relative shadow-sm text-sm leading-relaxed ${
-                  channel === 'whatsapp' ? 'bg-[#E7FFDB] text-gray-800 rounded-tl-sm' :
-                  channel === 'email' ? 'bg-gray-50 text-gray-800 border border-gray-200' :
-                  'bg-[#E9E9EB] text-gray-800 rounded-tl-sm'
-                }`}>
-                  <p className="whitespace-pre-wrap font-medium">
-                    {messageTemplate.replace(/\{\{name\}\}/g, 'Alex')}
-                  </p>
-                  
+                <>
+                  {channel === 'email' && (
+                    <div className="bg-gray-50 text-gray-800 border border-gray-200 p-4 rounded-2xl relative shadow-sm text-sm leading-relaxed w-full">
+                      <div className="font-bold text-sm mb-2 border-b border-gray-200 pb-2 text-gray-900">
+                        Subject: {emailSubject || 'No subject'}
+                      </div>
+                      <div className="text-sm whitespace-pre-wrap font-medium">
+                        {messageTemplate.replace(/\{\{name\}\}/g, 'Alex')}
+                      </div>
+                    </div>
+                  )}
+
                   {channel === 'whatsapp' && (
-                    <div className="absolute -left-2 top-0 w-3 h-3 bg-[#E7FFDB]" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
+                    <div className="bg-[#E7FFDB] text-gray-800 rounded-2xl rounded-tl-sm p-4 relative shadow-sm text-sm leading-relaxed w-full">
+                      <div className="text-sm whitespace-pre-wrap font-medium">
+                        {messageTemplate.replace(/\{\{name\}\}/g, 'Alex')}
+                      </div>
+                      <div className="absolute -left-2 top-0 w-3 h-3 bg-[#E7FFDB]" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
+                    </div>
                   )}
-                  {channel !== 'whatsapp' && channel !== 'email' && (
-                    <div className="absolute -left-2 top-0 w-3 h-3 bg-[#E9E9EB]" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
+
+                  {channel === 'sms' && (
+                    <div className="bg-gray-100 rounded-2xl rounded-tl-sm p-4 relative shadow-sm text-sm leading-relaxed w-full font-mono">
+                      <div className="text-sm whitespace-pre-wrap font-medium">
+                        {messageTemplate.replace(/\{\{name\}\}/g, 'Alex')}
+                      </div>
+                      <div className="text-xs text-gray-400 mt-2 font-sans text-right">
+                        {messageTemplate.length} chars
+                      </div>
+                      <div className="absolute -left-2 top-0 w-3 h-3 bg-gray-100" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
+                    </div>
                   )}
-                </div>
+
+                  {channel === 'rcs' && (
+                    <div className="bg-[#E9E9EB] text-gray-800 rounded-2xl rounded-tl-sm p-4 relative shadow-sm text-sm leading-relaxed w-full">
+                      <div className="text-sm whitespace-pre-wrap font-medium">
+                        {messageTemplate.replace(/\{\{name\}\}/g, 'Alex')}
+                      </div>
+                      <div className="absolute -left-2 top-0 w-3 h-3 bg-[#E9E9EB]" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="flex-1 flex flex-col items-center justify-center text-gray-300 space-y-3">
                   <MessageSquare className="w-12 h-12 stroke-1" />

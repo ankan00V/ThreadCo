@@ -252,25 +252,50 @@ async def generate_segment(query: str, db: Session) -> dict:
 # 2. draft_message
 # ---------------------------------------------------------------------------
 
-MESSAGE_SYSTEM_PROMPT = """You are a CRM copywriter for ThreadCo, a fashion brand in India.
-Write short, personalised campaign messages that feel human and drive action.
+MESSAGE_SYSTEM_PROMPT = """You are an expert marketing copywriter for a D2C CRM platform.
 
-Rules:
-- Use {{name}} as the personalisation placeholder for customer name
-- WhatsApp/SMS: max 160 characters, casual tone, emoji allowed
-- Email: max 300 characters, slightly more formal, no emoji
-- RCS: max 200 characters, rich and engaging, emoji allowed
-- Always include a soft CTA (call to action)
-- Write in English, reference fashion/style naturally
-- Never sound like a bulk SMS blast
+USER INTENT: {user_prompt}
+SELECTED CHANNEL: {channel} (must be one of: whatsapp, sms, email, rcs)
+DEFAULT BRAND: {brand}
 
-Respond with ONLY valid JSON, no markdown:
+CRITICAL RULES:
+1. BRAND NAME: If the user explicitly mentions a brand name, company name, or product name in their intent, you MUST use that name in the message. Do NOT default to ThreadCo if the user named their own brand.
+2. CHANNEL FORMAT:
+   - EMAIL: Return a professional message with a compelling SUBJECT line (max 50 chars), formal greeting, body, and sign-off. Use full sentences.
+   - WHATSAPP: Conversational, emoji-friendly, no subject line, short paragraphs, personal tone, clear CTA. Include 1-2 relevant emojis.
+   - SMS: Ultra-concise, under 160 characters total if possible. Punchy, urgent, no formal signature. Use short link placeholders like [link].
+   - RCS: Rich, engaging language that mentions visual/interactive elements. Slightly longer than SMS, conversational but polished.
+3. PERSONALIZATION: Always use {{name}} for the recipient's first name.
+4. TONE: Match the user's campaign goal (re-engagement = warm, sale = urgent, announcement = excited).
+
+Return ONLY valid JSON in this exact structure:
 {
-  "message": "the message text with {{name}} placeholder",
-  "subject_line": "email subject if channel is email, else null",
-  "channel_recommendation": "brief one-line reason why this channel suits this audience",
-  "estimated_open_rate": "percentage as string e.g. 65%"
+  "segment_description": "Human-readable description of the target audience",
+  "filters": {
+    "cities": ["..."],
+    "min_spend": 0,
+    "days_since_last_order": 0,
+    "gender": "M/F/null"
+  },
+  "message": {
+    "subject": "string or null",
+    "body": "The final message content"
+  },
+  "channel_recommendation": "why this channel fits"
 }"""
+
+def extract_brand(prompt: str) -> str:
+    # Simple extraction: look for "brand is", "company is", "name is"
+    patterns = [
+        r'brand\s+(?:name\s+)?is\s+([A-Z][A-Za-z0-9\s&]+)',
+        r'company\s+(?:name\s+)?is\s+([A-Z][A-Za-z0-9\s&]+)',
+        r'my\s+(?:brand|company|name)\s+is\s+([A-Z][A-Za-z0-9\s&]+)',
+    ]
+    for p in patterns:
+        match = re.search(p, prompt, re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+    return "ThreadCo"  # fallback
 
 
 async def draft_message(
@@ -287,14 +312,18 @@ async def draft_message(
         for c in sample_customers[:3]
     )
 
-    user_prompt = (
+    formatted_prompt = MESSAGE_SYSTEM_PROMPT.format(
+        user_prompt=campaign_goal,
+        channel=channel,
+        brand=extract_brand(campaign_goal)
+    )
+
+    user_payload = (
         f"Audience: {segment_name} — {segment_description}\n"
-        f"Channel: {channel}\n"
-        f"Campaign goal: {campaign_goal}\n"
         f"Sample customers:\n{sample_info}"
     )
 
-    raw = await asyncio.to_thread(_call_llm, MESSAGE_SYSTEM_PROMPT, user_prompt)
+    raw = await asyncio.to_thread(_call_llm, formatted_prompt, user_payload)
     logger.info(f"AI message response: {raw[:300]}")
 
     try:
@@ -302,10 +331,11 @@ async def draft_message(
     except (json.JSONDecodeError, ValueError):
         # Fallback if AI returns bad JSON
         return {
-            "message": f"Hey {{{{name}}}}, we've got something special for you at ThreadCo! Check it out 🛍️",
-            "subject_line": "Something special for you" if channel == "email" else None,
+            "message": {
+                "subject": "Something special for you" if channel == "email" else None,
+                "body": f"Hey {{{{name}}}}, we've got something special for you at ThreadCo! Check it out 🛍️"
+            },
             "channel_recommendation": f"{channel} is a good fit for this audience",
-            "estimated_open_rate": "50%",
         }
 
 
