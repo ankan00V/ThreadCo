@@ -67,7 +67,7 @@ const AIComposer = ({ onSaved }) => {
       const campaign = await createCampaign({
         name: campaignName,
         segment_id: result.segment_id,
-        channel: result.recommended_channel || channel,
+        channel: channel,
         message_template: result.suggested_message.message?.body || result.suggested_message.message
       });
       
@@ -366,23 +366,31 @@ const AIComposer = ({ onSaved }) => {
               Suggested Message
             </p>
 
-            {/* Channel + open rate row */}
-            <div className="flex items-center gap-3 mb-4">
-              <span className={`text-xs font-semibold px-3 py-1 
-                               rounded-full uppercase ${
-                                 result.recommended_channel === "whatsapp"
-                                   ? "bg-green-500/20 text-green-600 dark:text-green-400"
-                                   : result.recommended_channel === "email"
-                                   ? "bg-blue-500/20 text-blue-600 dark:text-blue-400"
-                                   : result.recommended_channel === "sms"
-                                   ? "bg-yellow-500/20 text-yellow-600 dark:text-yellow-400"
-                                   : "bg-purple-500/20 text-purple-600 dark:text-purple-400"
-                               }`}>
-                {result.recommended_channel || channel}
-              </span>
-              <span className="text-text-muted font-medium text-xs">
-                ~{result.suggested_message?.estimated_open_rate} open rate
-              </span>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <span className={`text-xs font-semibold px-3 py-1 
+                                 rounded-full uppercase ${
+                                   channel === "whatsapp"
+                                     ? "bg-green-500/20 text-green-600 dark:text-green-400"
+                                     : channel === "email"
+                                     ? "bg-blue-500/20 text-blue-600 dark:text-blue-400"
+                                     : channel === "sms"
+                                     ? "bg-yellow-500/20 text-yellow-600 dark:text-yellow-400"
+                                     : "bg-purple-500/20 text-purple-600 dark:text-purple-400"
+                                 }`}>
+                  {channel}
+                </span>
+                <span className="text-text-muted font-medium text-xs">
+                  ~{result.suggested_message?.estimated_open_rate || '18%'} open rate
+                </span>
+              </div>
+              
+              {/* Optional: Show recommendation if different */}
+              {result.recommended_channel && result.recommended_channel !== channel && (
+                <span className="text-[10px] uppercase font-bold text-brand-500 opacity-80">
+                  AI Recommends: {result.recommended_channel}
+                </span>
+              )}
             </div>
 
             {/* Email subject line */}
