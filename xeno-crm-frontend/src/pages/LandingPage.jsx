@@ -202,11 +202,15 @@ const LandingPage = () => {
               color: 'black'
             }}
           >
-            <span className="inline-block">
-              Drive <Zap size={24} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-2px', margin: '0 4px', color: '#192837' }} /> Hyper-Personalized <Users size={24} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-2px', margin: '0 4px', color: '#192837' }} /> Growth
+            <span className="block md:inline">
+              Drive <Zap size={24} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-2px', margin: '0 4px', color: '#192837' }} />
             </span>
-            <br />
-            with AI-Driven Segments <Brain size={24} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-2px', marginLeft: '6px', color: '#192837' }} />
+            <span className="block md:inline">
+              Hyper-Personalized <Users size={24} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-2px', margin: '0 4px', color: '#192837' }} />
+            </span>
+            <span className="block md:inline">
+              Growth <br className="hidden md:block" /> with AI-Driven Segments <Brain size={24} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-2px', marginLeft: '6px', color: '#192837' }} />
+            </span>
           </motion.h1>
 
           <motion.p
