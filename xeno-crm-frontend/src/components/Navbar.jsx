@@ -61,7 +61,7 @@ export default function Navbar() {
         {/* Right Cluster */}
         <div className="ml-auto flex items-center gap-4">
           
-          <button className="hidden sm:flex bg-[#ef4d23] hover:bg-[#d9421b] transition-colors rounded-full items-center gap-2 pl-4 pr-1.5 py-1.5 text-white">
+          <button onClick={() => navigate('/campaigns/new')} className="hidden sm:flex bg-[#ef4d23] hover:bg-[#d9421b] transition-colors rounded-full items-center gap-2 pl-4 pr-1.5 py-1.5 text-white">
             <span className="text-[13px] font-medium hidden sm:inline">Get early access</span>
             <span className="text-[13px] font-medium sm:hidden">Early access</span>
             <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
