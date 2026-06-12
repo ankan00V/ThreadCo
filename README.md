@@ -10,7 +10,7 @@ A high-performance, real-time CRM with generative AI messaging, designed for D2C
 
 ## 🤖 AI-Native Development Workflow
 
-This application was engineered utilizing a highly collaborative "AI Pair Programming" workflow leveraging Google DeepMind's Antigravity framework.
+This application was engineered utilizing a highly collaborative "AI Pair Programming" workflow.
 
 ### How AI Was Directed & Reviewed
 - **Architectural Scaffolding:** AI drafted the initial FastAPI models and React configurations. The human architect reviewed the schemas to ensure database normalization rules were strictly adhered to (e.g., standardizing `id` fields to `UUIDs` globally).
