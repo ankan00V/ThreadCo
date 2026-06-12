@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [expandedMenu, setExpandedMenu] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -81,7 +82,7 @@ export default function Navbar() {
           </button>
 
           {/* Hamburger Mobile */}
-          <button className="md:hidden p-2 text-[#0b0f1a] hover:bg-neutral-100 rounded-full transition-colors" onClick={() => setOpen(!open)}>
+          <button className="md:hidden p-2 text-[#0b0f1a] hover:bg-neutral-100 rounded-full transition-colors" onClick={() => { setOpen(!open); setExpandedMenu(null); }}>
             {open ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
@@ -96,11 +97,39 @@ export default function Navbar() {
               className="absolute top-full left-2 right-2 mt-2 bg-white rounded-2xl shadow-lg border border-neutral-200 p-4 z-50 flex flex-col gap-4 md:hidden"
             >
               {links.map((link) => (
-                <button key={link.label} onClick={() => { setOpen(false); navigate(link.path); }}
-                        className="text-[15px] font-medium text-neutral-800 flex items-center justify-between">
-                  {link.label}
-                  {link.dropdown && <ChevronDown size={16} color="#ef4d23" />}
-                </button>
+                <div key={link.label} className="flex flex-col">
+                  <button 
+                    onClick={() => { 
+                      if (link.dropdown) {
+                        setExpandedMenu(prev => prev === link.label ? null : link.label);
+                      } else {
+                        setOpen(false); 
+                        navigate(link.path); 
+                      }
+                    }}
+                    className="text-[15px] font-medium text-neutral-800 flex items-center justify-between"
+                  >
+                    {link.label}
+                    {link.dropdown && (
+                      <ChevronDown size={16} color="#ef4d23" className={`transition-transform duration-200 ${expandedMenu === link.label ? 'rotate-180' : ''}`} />
+                    )}
+                  </button>
+                  
+                  {link.dropdown && expandedMenu === link.label && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      className="flex flex-col gap-3 pl-4 mt-3 border-l-2 border-neutral-100"
+                    >
+                      <button onClick={() => { setOpen(false); navigate('/campaigns'); }} className="text-left text-[14px] text-neutral-600 font-medium hover:text-[#ef4d23] transition-colors">
+                        Campaigns
+                      </button>
+                      <button onClick={() => { setOpen(false); navigate('/analytics'); }} className="text-left text-[14px] text-neutral-600 font-medium hover:text-[#ef4d23] transition-colors">
+                        Analytics Charts
+                      </button>
+                    </motion.div>
+                  )}
+                </div>
               ))}
             </motion.div>
           )}
