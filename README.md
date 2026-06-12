@@ -1,34 +1,50 @@
-# Xeno Mini CRM
+# ThreadCo CRM (Xeno Mini CRM Assignment)
 
-A high-performance, real-time CRM with generative AI messaging, designed for D2C brands.
+ThreadCo is a full-stack, high-performance Mini CRM built as a submission for the Xeno engineering assignment. It is designed specifically for modern D2C (Direct-to-Consumer) brands to effortlessly segment their audience, design campaigns, and trigger highly personalized AI-driven communications.
 
-## Tech Stack
-- **Frontend:** React + Vite + TailwindCSS + Recharts
-- **Backend:** Python FastAPI + SQLAlchemy + Neon Postgres (Serverless PostgreSQL)
-- **AI Engine:** Nvidia NIM API (Llama-3 model)
-- **Channel Stub:** Fast, simulated Webhook APIs for delivery, open, and click tracking
+## 🎯 The Assignment (What Was Asked)
 
-## 🤖 AI-Native Development Workflow
+The objective was to build a Mini CRM system focused on segmenting audiences and dispatching campaigns. Key requirements included:
+- **Data Ingestion:** APIs to ingest Customer data and Order data into a relational database.
+- **Audience Segmentation:** Ability to create dynamic audience segments based on rules (e.g., total spend, number of visits, last visit date).
+- **Campaign Management:** A feature to create campaigns, apply a specific segment, and send personalized messages to that audience.
+- **Message Vendor Integration:** Integration with a simulated vendor API to track message delivery statuses asynchronously (e.g., SENT, FAILED, DELIVERED).
+- **Delivery Analytics:** A way to track and visualize the success of the campaigns.
 
-This application was engineered utilizing a highly collaborative "AI Pair Programming" workflow.
+## 🚀 The Solution (What We Delivered)
 
-### How AI Was Directed & Reviewed
-- **Architectural Scaffolding:** AI drafted the initial FastAPI models and React configurations. The human architect reviewed the schemas to ensure database normalization rules were strictly adhered to (e.g., standardizing `id` fields to `UUIDs` globally).
-- **Complex Logic Generation:** AI authored the complex SQL query required to compute dynamic RFM (Recency, Frequency, Monetary) tags. The human engineer tuned the threshold logic against real D2C retail benchmark assumptions.
-- **State Machine Iterations:** We iterated on the webhook lifecycle multiple times. The AI proposed an initial `simulate_message_lifecycle` flow. We mutually audited the code to ensure strict idempotent status transitions (e.g., a "read" cannot regress to "queued"), which was crucial for maintaining data integrity in high-throughput webhook streams.
+We delivered **ThreadCo**, a production-ready, beautifully designed SaaS application that exceeds the baseline requirements by focusing on scale, user experience, and generative AI.
 
-## Deployment Instructions
+### Key Features Delivered
+1. **Dynamic Audience Segmentation:** A robust rule-engine that filters users based on real-time database queries (e.g., Spend > $10K AND Visits < 3).
+2. **Generative AI Messaging:** Instead of static templates, ThreadCo integrates with **Nvidia NIM (Llama 3)** to dynamically generate highly personalized, engaging messages tailored to the specific campaign audience.
+3. **Robust Delivery Simulation:** A fast, asynchronous webhook architecture that simulates the message lifecycle (QUEUED -> SENT -> DELIVERED/FAILED -> READ) in real-time.
+4. **Interactive Analytics:** A beautifully crafted, responsive dashboard built with Recharts to visualize campaign performance, message delivery statuses, and customer growth over time.
+5. **Modern, Responsive UI:** A sleek, premium frontend experience that works seamlessly across desktop, tablet, and mobile devices.
 
-### Backend (Render / Railway)
-1. Set the following environment variables:
-   - `DATABASE_URL` (Neon Postgres Connection String)
-   - `NVIDIA_NIM_API_KEY` (Nvidia NIM Access Key)
-   - `FRONTEND_URL` (e.g. `https://xeno-crm-ui.vercel.app`)
-2. FastAPI will automatically expose a `GET /health` endpoint for readiness probes.
-3. During deployment, the application executes `seed.py` dynamically if the database is empty.
+## 💻 Tech Stack
 
-### Frontend (Vercel / Netlify)
-1. Configure the `VITE_API_URL` to point to the backend URL.
-2. Build via `npm run build` and serve statically.
+- **Frontend:** React, Vite, TailwindCSS, Framer Motion, Recharts, React Router
+- **Backend:** Python, FastAPI, SQLAlchemy, Pydantic
+- **Database:** PostgreSQL (Neon Serverless Postgres)
+- **AI Engine:** Nvidia NIM API (Llama 3)
 
-For full architectural details, please see [SYSTEM_DESIGN.md](./SYSTEM_DESIGN.md).
+## 🛠️ Getting Started
+
+### Backend Setup
+1. Navigate to the backend directory: `cd xeno-crm-backend`
+2. Create a virtual environment: `python3 -m venv venv && source venv/bin/activate`
+3. Install dependencies: `pip install -r requirements.txt`
+4. Set up your `.env` file with `DATABASE_URL` and `NVIDIA_NIM_API_KEY`.
+5. Run the server: `uvicorn main:app --reload`
+*(The app will automatically seed the database with mock customers and orders if it's empty).*
+
+### Frontend Setup
+1. Navigate to the frontend directory: `cd xeno-crm-frontend`
+2. Install dependencies: `npm install`
+3. Set your `VITE_API_URL` to point to the backend in a `.env` file (if not running on standard localhost ports).
+4. Start the development server: `npm run dev`
+
+---
+
+For deep architectural decisions and data flow logic, please refer to the [SYSTEM_DESIGN.md](./SYSTEM_DESIGN.md).
