@@ -41,12 +41,15 @@ async def generate(body: NLSegmentRequest, db: Session = Depends(get_db)):
     matched = segment_result["matched_customers"]
     sample = matched[:5]
 
+    # Combine query and campaign_goal so the LLM gets full context for drafting and extracting brand name.
+    combined_intent = f"{body.query} | Goal: {body.campaign_goal}" if body.campaign_goal else body.query
+
     # Step 2 & 3: Draft message + recommend channel in parallel
     message_task = draft_message(
         segment_name=segment_result["segment_name"],
         segment_description=segment_result["description"],
         channel=body.channel,
-        campaign_goal=body.campaign_goal or "engage this audience",
+        campaign_goal=combined_intent,
         sample_customers=sample,
     )
     channel_task = recommend_channel(

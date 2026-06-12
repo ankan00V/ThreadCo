@@ -256,10 +256,9 @@ MESSAGE_SYSTEM_PROMPT = """You are an expert marketing copywriter for a D2C CRM 
 
 USER INTENT: {user_prompt}
 SELECTED CHANNEL: {channel} (must be one of: whatsapp, sms, email, rcs)
-DEFAULT BRAND: {brand}
 
 CRITICAL RULES:
-1. BRAND NAME: If the user explicitly mentions a brand name, company name, or product name in their intent, you MUST use that name in the message. Do NOT default to ThreadCo if the user named their own brand.
+1. BRAND NAME: Analyze the USER INTENT carefully. If the user explicitly mentions a brand name, company name, or product name in their intent (e.g., "My brand is X", "We are Y"), you MUST use that name in the message (e.g. "The X Team"). Do NOT use "ThreadCo" if they named their own brand. Use "ThreadCo" ONLY as a fallback if NO brand is mentioned.
 2. CHANNEL FORMAT:
    - EMAIL: Return a professional message with a compelling SUBJECT line (max 50 chars), formal greeting, body, and sign-off. Use full sentences.
    - WHATSAPP: Conversational, emoji-friendly, no subject line, short paragraphs, personal tone, clear CTA. Include 1-2 relevant emojis.
@@ -284,18 +283,7 @@ Return ONLY valid JSON in this exact structure:
   "channel_recommendation": "why this channel fits"
 }}"""
 
-def extract_brand(prompt: str) -> str:
-    # Simple extraction: look for "brand is", "company is", "name is"
-    patterns = [
-        r'brand\s+(?:name\s+)?is\s+([A-Z][A-Za-z0-9\s&]+)',
-        r'company\s+(?:name\s+)?is\s+([A-Z][A-Za-z0-9\s&]+)',
-        r'my\s+(?:brand|company|name)\s+is\s+([A-Z][A-Za-z0-9\s&]+)',
-    ]
-    for p in patterns:
-        match = re.search(p, prompt, re.IGNORECASE)
-        if match:
-            return match.group(1).strip()
-    return "ThreadCo"  # fallback
+
 
 
 async def draft_message(
@@ -314,8 +302,7 @@ async def draft_message(
 
     formatted_prompt = MESSAGE_SYSTEM_PROMPT.format(
         user_prompt=campaign_goal,
-        channel=channel,
-        brand=extract_brand(campaign_goal)
+        channel=channel
     )
 
     user_payload = (
