@@ -151,8 +151,8 @@ const Customers = () => {
         </div>
         
         {/* Pagination */}
-        <div className="bg-white border-t border-neutral-200 px-6 py-4 flex items-center justify-between">
-          <p className="text-[12px] text-neutral-500">
+        <div className="bg-white border-t border-neutral-200 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-[12px] text-neutral-500 text-center sm:text-left">
             Showing <span className="font-semibold text-[#0b0f1a]">{((page - 1) * perPage) + 1}</span> to <span className="font-semibold text-[#0b0f1a]">{Math.min(page * perPage, filteredCustomers.length)}</span> of <span className="font-semibold text-[#0b0f1a]">{filteredCustomers.length}</span> results
           </p>
           <div className="flex gap-2">

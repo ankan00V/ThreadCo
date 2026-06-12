@@ -3,8 +3,8 @@ import Navbar from './Navbar';
 
 const Layout = ({ children }) => {
   return (
-    <div className="min-h-screen w-full bg-[#ededed] p-3 sm:p-4 font-inter">
-      <div className="relative w-full h-[calc(100vh-24px)] sm:h-[calc(100vh-32px)] overflow-hidden bg-[#d9d9d9] rounded-2xl sm:rounded-3xl flex flex-col shadow-2xl ring-1 ring-black/5">
+    <div className="min-h-screen w-full bg-[#ededed] sm:p-3 md:p-4 font-inter">
+      <div className="relative w-full h-[100dvh] sm:h-[calc(100vh-24px)] md:h-[calc(100vh-32px)] overflow-hidden bg-[#d9d9d9] sm:rounded-2xl md:rounded-3xl flex flex-col sm:shadow-2xl sm:ring-1 sm:ring-black/5">
         
         {/* Background Video */}
         <video
