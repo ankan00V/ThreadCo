@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { useInView, animate } from "motion/react";
 
 export default function AnimatedCounter({ 
-  value, suffix = "", prefix = "", decimals = 0 
+  value, suffix = "", prefix = "", decimals = 0, formatFn
 }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-50px" });
@@ -13,8 +13,11 @@ export default function AnimatedCounter({
       ease: "easeOut",
       onUpdate(val) {
         if (ref.current) {
-          ref.current.textContent = 
-            prefix + val.toFixed(decimals) + suffix;
+          if (formatFn) {
+            ref.current.textContent = formatFn(val);
+          } else {
+            ref.current.textContent = prefix + val.toFixed(decimals) + suffix;
+          }
         }
       }
     });
@@ -22,7 +25,7 @@ export default function AnimatedCounter({
 
   return (
     <span ref={ref}>
-      {prefix}0{suffix}
+      {formatFn ? formatFn(0) : `${prefix}0${suffix}`}
     </span>
   );
 }

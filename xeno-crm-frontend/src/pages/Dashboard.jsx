@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getDashboardStats } from '../api';
 import { TrendingDown, TrendingUp, ChevronDown, ChevronRight, X } from 'lucide-react';
 import Gauge from '../components/Gauge';
+import AnimatedCounter from '../components/AnimatedCounter';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -71,7 +72,7 @@ const Dashboard = () => {
               
               <div className="flex items-end gap-3 mb-6">
                 <span className="text-3xl sm:text-4xl font-bold text-[#0b0f1a]">
-                  {stats.total_customers.toLocaleString()}
+                  <AnimatedCounter value={stats.total_customers || 0} formatFn={(v) => Math.round(v).toLocaleString()} />
                 </span>
                 <div className="flex items-center gap-1 bg-[#f6ffed] text-[#52c41a] px-2 py-1 rounded-md text-xs font-medium mb-1">
                   <TrendingUp size={12} strokeWidth={3} />
@@ -103,7 +104,7 @@ const Dashboard = () => {
               
               <div className="flex items-end gap-3 mb-6">
                 <span className="text-3xl sm:text-4xl font-bold text-[#0b0f1a]">
-                  {stats.total_campaigns.toLocaleString()}
+                  <AnimatedCounter value={stats.total_campaigns || 0} formatFn={(v) => Math.round(v).toLocaleString()} />
                 </span>
                 <div className="flex items-center gap-1 bg-[#f3f4f6] text-neutral-600 px-2 py-1 rounded-md text-xs font-medium mb-1">
                   <span>Active</span>
@@ -136,7 +137,7 @@ const Dashboard = () => {
               
               <div className="flex items-end gap-3 mb-6">
                 <span className="text-3xl sm:text-4xl font-bold text-[#0b0f1a] truncate" title={`$${(stats.revenue_generated || 0).toLocaleString()}`}>
-                  ${Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(stats.revenue_generated || 0)}
+                  <AnimatedCounter value={stats.revenue_generated || 0} formatFn={(v) => '$' + Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(v)} />
                 </span>
               </div>
               <p className="text-[12px] text-neutral-400">Avg. Order Value: ${Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(stats.avg_order_value || 0)}</p>
