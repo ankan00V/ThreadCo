@@ -69,6 +69,11 @@ export const sendCampaign = async (id) => {
   return response.data;
 };
 
+export const deleteCampaign = async (id) => {
+  const response = await api.delete(`/api/campaigns/${id}`);
+  return response.data;
+};
+
 // Dashboard
 export const getDashboardStats = async () => {
   const response = await api.get('/api/campaigns/dashboard/stats');

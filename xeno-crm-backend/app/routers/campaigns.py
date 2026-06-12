@@ -103,6 +103,22 @@ def create_campaign(body: CreateCampaignRequest, db: Session = Depends(get_db)):
     logger.info(f"Campaign created: {campaign.id} ({campaign.name})")
     return campaign
 
+@router.delete("/{campaign_id}")
+def delete_campaign(campaign_id: str, db: Session = Depends(get_db)):
+    """Delete a campaign and its associated communications."""
+    campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
+    if not campaign:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+
+    # Delete associated communications to avoid foreign key constraints
+    db.query(Communication).filter(Communication.campaign_id == campaign_id).delete()
+    
+    db.delete(campaign)
+    db.commit()
+    
+    logger.info(f"Campaign deleted: {campaign_id}")
+    return {"status": "success", "message": "Campaign deleted"}
+
 
 # ── List campaigns ───────────────────────────────────────────────────────
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCampaigns } from '../api';
-import { Plus } from 'lucide-react';
+import { getCampaigns, deleteCampaign } from '../api';
+import { Plus, Trash2 } from 'lucide-react';
 
 export default function Campaigns() {
   const navigate = useNavigate();
@@ -17,6 +17,19 @@ export default function Campaigns() {
       setLoading(false);
     });
   }, []);
+
+  const handleDelete = async (e, id) => {
+    e.stopPropagation();
+    if (window.confirm("Are you sure you want to delete this campaign? This cannot be undone.")) {
+      try {
+        await deleteCampaign(id);
+        setCampaigns(prev => prev.filter(c => c.id !== id));
+      } catch (err) {
+        console.error("Failed to delete campaign:", err);
+        alert("Failed to delete campaign");
+      }
+    }
+  };
 
   return (
     <div className="w-full px-3 sm:px-4 pt-8 mt-2 max-w-[1100px] mx-auto pb-12 font-['Inter']">
@@ -60,9 +73,18 @@ export default function Campaigns() {
               <div key={c.id} onClick={() => navigate(`/campaigns/${c.id}`)} className="group bg-white rounded-2xl p-6 cursor-pointer border border-neutral-200 shadow-sm hover:shadow-md hover:border-[#ef4d23]/30 transition-all flex flex-col relative overflow-hidden">
                 <div className="flex justify-between items-start mb-3">
                   <h3 className="text-[16px] font-semibold text-[#0b0f1a] truncate pr-4">{c.name}</h3>
-                  <span className={`text-[11px] font-medium px-2 py-1 rounded-md capitalize shrink-0 ${statusColor}`}>
-                    {c.status || 'draft'}
-                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`text-[11px] font-medium px-2 py-1 rounded-md capitalize ${statusColor}`}>
+                      {c.status || 'draft'}
+                    </span>
+                    <button 
+                      onClick={(e) => handleDelete(e, c.id)}
+                      className="p-1.5 text-neutral-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                      title="Delete Campaign"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
                 
                 <div className="mb-5">
