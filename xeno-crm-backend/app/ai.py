@@ -265,24 +265,24 @@ CRITICAL RULES:
    - WHATSAPP: Conversational, emoji-friendly, no subject line, short paragraphs, personal tone, clear CTA. Include 1-2 relevant emojis.
    - SMS: Ultra-concise, under 160 characters total if possible. Punchy, urgent, no formal signature. Use short link placeholders like [link].
    - RCS: Rich, engaging language that mentions visual/interactive elements. Slightly longer than SMS, conversational but polished.
-3. PERSONALIZATION: Always use {{name}} for the recipient's first name.
+3. PERSONALIZATION: Always use {{{{name}}}} for the recipient's first name.
 4. TONE: Match the user's campaign goal (re-engagement = warm, sale = urgent, announcement = excited).
 
 Return ONLY valid JSON in this exact structure:
-{
+{{
   "segment_description": "Human-readable description of the target audience",
-  "filters": {
+  "filters": {{
     "cities": ["..."],
     "min_spend": 0,
     "days_since_last_order": 0,
     "gender": "M/F/null"
-  },
-  "message": {
+  }},
+  "message": {{
     "subject": "string or null",
     "body": "The final message content"
-  },
+  }},
   "channel_recommendation": "why this channel fits"
-}"""
+}}"""
 
 def extract_brand(prompt: str) -> str:
     # Simple extraction: look for "brand is", "company is", "name is"

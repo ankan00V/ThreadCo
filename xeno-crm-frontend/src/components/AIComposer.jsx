@@ -68,7 +68,7 @@ const AIComposer = ({ onSaved }) => {
         name: campaignName,
         segment_id: result.segment_id,
         channel: result.recommended_channel || channel,
-        message_template: result.suggested_message.message
+        message_template: result.suggested_message.message?.body || result.suggested_message.message
       });
       
       await sendCampaign(campaign.id);
@@ -399,7 +399,7 @@ const AIComposer = ({ onSaved }) => {
               <div className="bg-brand-500/10 border border-brand-500/20 
                               rounded-2xl rounded-tl-sm p-4">
                 <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">
-                  {result.suggested_message?.message}
+                  {result.suggested_message?.message?.body || result.suggested_message?.message}
                 </p>
               </div>
             </div>
