@@ -58,8 +58,18 @@ export default function Navbar() {
           ))}
         </div>
 
+        {/* Mobile Center Button */}
+        <div className="absolute left-1/2 -translate-x-1/2 sm:hidden flex items-center">
+          <button onClick={() => navigate('/campaigns/new')} className="flex bg-[#ef4d23] hover:bg-[#d9421b] transition-colors rounded-full items-center gap-1.5 pl-3 pr-1 py-1 text-white shadow-sm">
+            <span className="text-[12px] font-medium whitespace-nowrap">Early access</span>
+            <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+              <ChevronRight size={12} strokeWidth={3} />
+            </div>
+          </button>
+        </div>
+
         {/* Right Cluster */}
-        <div className="ml-auto flex items-center gap-4">
+        <div className="ml-auto flex items-center gap-2 sm:gap-4">
           
           <button onClick={() => navigate('/campaigns/new')} className="hidden sm:flex bg-[#ef4d23] hover:bg-[#d9421b] transition-colors rounded-full items-center gap-2 pl-4 pr-1.5 py-1.5 text-white">
             <span className="text-[13px] font-medium hidden sm:inline">Get early access</span>
