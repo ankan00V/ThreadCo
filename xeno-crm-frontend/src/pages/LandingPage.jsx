@@ -202,7 +202,7 @@ const LandingPage = () => {
               color: 'black'
             }}
           >
-            <span className="whitespace-nowrap">
+            <span className="inline-block">
               Drive <Zap size={24} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-2px', margin: '0 4px', color: '#192837' }} /> Hyper-Personalized <Users size={24} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-2px', margin: '0 4px', color: '#192837' }} /> Growth
             </span>
             <br />
