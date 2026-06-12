@@ -259,11 +259,11 @@ SELECTED CHANNEL: {channel} (must be one of: whatsapp, sms, email, rcs)
 
 CRITICAL RULES:
 1. BRAND NAME: Analyze the USER INTENT carefully. If the user explicitly mentions a brand name, company name, or product name in their intent (e.g., "My brand is X", "We are Y"), you MUST use that name in the message (e.g. "The X Team"). Do NOT use "ThreadCo" if they named their own brand. Use "ThreadCo" ONLY as a fallback if NO brand is mentioned.
-2. CHANNEL FORMAT:
-   - EMAIL: Return a professional message with a compelling SUBJECT line (max 50 chars), formal greeting, body, and sign-off. Use full sentences.
-   - WHATSAPP: Conversational, emoji-friendly, no subject line, short paragraphs, personal tone, clear CTA. Include 1-2 relevant emojis.
-   - SMS: Ultra-concise, under 160 characters total if possible. Punchy, urgent, no formal signature. Use short link placeholders like [link].
-   - RCS: Rich, engaging language that mentions visual/interactive elements. Slightly longer than SMS, conversational but polished.
+2. CHANNEL FORMAT STRICT RULES:
+   - WHATSAPP (Conversational, Emoji-Lite): No subject line. 2-3 short sentences max. 1-2 relevant emojis. First-name personalization. Single clear CTA (button or link). Sign-off is casual ("Team [Brand]" or just the brand name).
+   - EMAIL (Formal, Structured): Compelling subject line (40-50 chars, urgency or curiosity). Formal greeting ("Hi {{{{name}}}},"). Body: 2-3 paragraphs, scannable. Clear CTA button text. Professional sign-off with brand name. P.S. line for extra hook (optional).
+   - SMS (Punchy, Urgent, <160 chars): Hard limit: 160 characters (1 SMS segment). ALL CAPS for key words (SALE, LAST CHANCE, FREE). No formal greeting or sign-off. Short link placeholder [link]. Urgency-driven. NO EMOJIS (can break encoding or eat character budget).
+   - RCS (Rich, Interactive, Visual-Forward): Slightly longer than SMS (keep scannable). Conversational but polished. References images/carousels/suggested replies. Mentions interactive elements ("Tap to browse," "Swipe to see"). Brand voice is premium but accessible.
 3. PERSONALIZATION: Always use {{{{name}}}} for the recipient's first name.
 4. TONE: Match the user's campaign goal (re-engagement = warm, sale = urgent, announcement = excited).
 
