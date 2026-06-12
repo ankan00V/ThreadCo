@@ -17,10 +17,10 @@ export default function Navbar() {
 
   return (
     <div className="flex justify-center pt-4 sm:pt-6 px-3 sm:px-4 w-full relative z-50 font-['Inter']">
-      <div className="bg-white rounded-full shadow-sm border border-neutral-200 pl-2 pr-2 py-2 w-full max-w-[760px] relative flex items-center">
+      <div className="bg-white rounded-full shadow-sm border border-neutral-200 p-2 w-max sm:w-full sm:pl-2 sm:pr-2 sm:py-2 max-w-[760px] relative flex items-center mx-auto sm:mx-0">
         
         {/* Logo */}
-        <div className="shrink-0 ml-1 cursor-pointer flex items-center gap-2" onClick={() => navigate('/dashboard')}>
+        <div className="shrink-0 cursor-pointer flex items-center gap-2 pr-2 sm:pr-0" onClick={() => navigate('/dashboard')}>
           <img src="/app-logo.png" alt="ThreadCo Logo" className="w-8 h-8 rounded-lg shadow-sm object-cover" />
           <span className="font-bold text-[15px] hidden sm:block text-[#0b0f1a]">ThreadCo</span>
         </div>
@@ -59,8 +59,8 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Mobile Center Button */}
-        <div className="absolute left-1/2 -translate-x-1/2 sm:hidden flex items-center">
+        {/* Mobile Center Button (In flow for shrink-wrap) */}
+        <div className="sm:hidden flex items-center mx-2">
           <button onClick={() => navigate('/campaigns/new')} className="flex bg-[#ef4d23] hover:bg-[#d9421b] transition-colors rounded-full items-center gap-1.5 pl-3 pr-1 py-1 text-white shadow-sm">
             <span className="text-[12px] font-medium whitespace-nowrap">Early access</span>
             <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center shrink-0">
@@ -70,7 +70,7 @@ export default function Navbar() {
         </div>
 
         {/* Right Cluster */}
-        <div className="ml-auto flex items-center gap-2 sm:gap-4">
+        <div className="sm:ml-auto flex items-center gap-2 sm:gap-4">
           
           <button onClick={() => navigate('/campaigns/new')} className="hidden sm:flex bg-[#ef4d23] hover:bg-[#d9421b] transition-colors rounded-full items-center gap-2 pl-4 pr-1.5 py-1.5 text-white">
             <span className="text-[13px] font-medium hidden sm:inline">Get early access</span>
@@ -81,7 +81,7 @@ export default function Navbar() {
           </button>
 
           {/* Hamburger Mobile */}
-          <button className="md:hidden ml-1 p-2 text-[#0b0f1a] hover:bg-neutral-100 rounded-full transition-colors" onClick={() => setOpen(!open)}>
+          <button className="md:hidden p-2 text-[#0b0f1a] hover:bg-neutral-100 rounded-full transition-colors" onClick={() => setOpen(!open)}>
             {open ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
