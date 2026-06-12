@@ -1,26 +1,16 @@
-# ThreadCo CRM (Xeno Mini CRM Assignment)
+# ThreadCo CRM
 
-ThreadCo is a full-stack, high-performance Mini CRM built as a submission for the Xeno engineering assignment. It is designed specifically for modern D2C (Direct-to-Consumer) brands to effortlessly segment their audience, design campaigns, and trigger highly personalized AI-driven communications.
+ThreadCo is a full-stack, high-performance Mini CRM designed specifically for modern D2C (Direct-to-Consumer) brands. It enables marketing teams to effortlessly ingest data, segment their audience dynamically, design campaigns, and trigger highly personalized AI-driven communications.
 
-## 🎯 The Assignment (What Was Asked)
+## 🚀 Key Features
 
-The objective was to build a Mini CRM system focused on segmenting audiences and dispatching campaigns. Key requirements included:
-- **Data Ingestion:** APIs to ingest Customer data and Order data into a relational database.
-- **Audience Segmentation:** Ability to create dynamic audience segments based on rules (e.g., total spend, number of visits, last visit date).
-- **Campaign Management:** A feature to create campaigns, apply a specific segment, and send personalized messages to that audience.
-- **Message Vendor Integration:** Integration with a simulated vendor API to track message delivery statuses asynchronously (e.g., SENT, FAILED, DELIVERED).
-- **Delivery Analytics:** A way to track and visualize the success of the campaigns.
-
-## 🚀 The Solution (What We Delivered)
-
-We delivered **ThreadCo**, a production-ready, beautifully designed SaaS application that exceeds the baseline requirements by focusing on scale, user experience, and generative AI.
-
-### Key Features Delivered
-1. **Dynamic Audience Segmentation:** A robust rule-engine that filters users based on real-time database queries (e.g., Spend > $10K AND Visits < 3).
-2. **Generative AI Messaging:** Instead of static templates, ThreadCo integrates with **Nvidia NIM (Llama 3)** to dynamically generate highly personalized, engaging messages tailored to the specific campaign audience.
-3. **Robust Delivery Simulation:** A fast, asynchronous webhook architecture that simulates the message lifecycle (QUEUED -> SENT -> DELIVERED/FAILED -> READ) in real-time.
-4. **Interactive Analytics:** A beautifully crafted, responsive dashboard built with Recharts to visualize campaign performance, message delivery statuses, and customer growth over time.
-5. **Modern, Responsive UI:** A sleek, premium frontend experience that works seamlessly across desktop, tablet, and mobile devices.
+- **Data Ingestion APIs:** Robust endpoints to securely ingest Customer and Order data into a highly normalized relational database.
+- **Dynamic Audience Segmentation:** A powerful rule-engine that filters users based on real-time database metrics (e.g., total spend, number of visits, last visit date).
+- **Campaign Management:** An intuitive interface to create campaigns, apply specific audience segments, and dispatch messages to targeted user bases.
+- **Generative AI Messaging:** Instead of static templates, ThreadCo integrates with **Nvidia NIM (Llama 3)** to dynamically generate highly personalized, engaging messages tailored to the specific context of each campaign audience.
+- **Delivery Webhook Simulation:** A fast, asynchronous webhook architecture that simulates the message delivery lifecycle (QUEUED -> SENT -> DELIVERED/FAILED) in real-time to track vendor statuses.
+- **Interactive Analytics:** A beautifully crafted, responsive dashboard built with Recharts to visualize campaign performance, message delivery success rates, and customer growth over time.
+- **Modern, Responsive UI:** A sleek, premium frontend experience that works seamlessly across desktop, tablet, and mobile devices.
 
 ## 💻 Tech Stack
 
