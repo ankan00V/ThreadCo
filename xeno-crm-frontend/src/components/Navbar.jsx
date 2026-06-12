@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Menu, ChevronDown, ChevronRight, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const links = [
-    { label: "Dashboard", path: "/dashboard", active: true },
+    { label: "Dashboard", path: "/dashboard" },
     { label: "Customers", path: "/customers" },
     { label: "Segments", path: "/segments" },
     { label: "Marketing", path: "/campaigns", dropdown: true }
@@ -30,11 +31,11 @@ export default function Navbar() {
             <div key={link.label} className="relative group">
               <button 
                 onClick={() => !link.dropdown && navigate(link.path)} 
-                className="text-[14px] font-medium text-neutral-800 hover:text-[#ef4d23] transition-colors relative flex items-center gap-1 py-4"
+                className={`text-[14px] font-medium transition-colors relative flex items-center gap-1 py-4 ${location.pathname.startsWith(link.path) ? 'text-[#ef4d23]' : 'text-neutral-800 hover:text-[#ef4d23]'}`}
               >
                 {link.label}
-                {link.active && (
-                  <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-[3px] h-[3px] bg-black rounded-full" />
+                {location.pathname.startsWith(link.path) && (
+                  <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-[3px] h-[3px] bg-[#ef4d23] rounded-full" />
                 )}
                 {link.dropdown && (
                   <ChevronDown size={14} color="#ef4d23" strokeWidth={3} className="ml-0.5 group-hover:rotate-180 transition-transform duration-200" />
