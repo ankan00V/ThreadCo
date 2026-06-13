@@ -258,7 +258,7 @@ USER INTENT: {user_prompt}
 SELECTED CHANNEL: {channel} (must be one of: whatsapp, sms, email, rcs)
 
 CRITICAL RULES:
-1. BRAND NAME: Analyze the USER INTENT carefully. If the user explicitly mentions a brand name, company name, or product name in their intent (e.g., "My brand is X", "We are Y"), you MUST use that name in the message (e.g. "The X Team"). Do NOT use "ThreadCo" if they named their own brand. Use "ThreadCo" ONLY as a fallback if NO brand is mentioned.
+1. BRAND NAME: Analyze the USER INTENT carefully. If the user explicitly mentions a brand name (e.g., "My brand is X"), you MUST use that exact name. If NO brand name is explicitly mentioned in the intent, you MUST default to using "ThreadCo" as the brand name in the sign-off and message body. Do not invent a brand name.
 2. CHANNEL FORMAT STRICT RULES:
    - WHATSAPP (Conversational, Emoji-Lite): No subject line. 2-3 short sentences max. 1-2 relevant emojis. First-name personalization. Single clear CTA (button or link). Sign-off is casual ("Team [Brand]" or just the brand name).
    - EMAIL (Formal, Structured): Compelling subject line (40-50 chars, urgency or curiosity). Formal greeting ("Hi {{{{name}}}},"). Body: 2-3 paragraphs, scannable. Clear CTA button text. Professional sign-off with brand name. P.S. line for extra hook (optional).
