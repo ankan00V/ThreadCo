@@ -44,14 +44,14 @@ export default function Analytics() {
   return (
     <div className="w-full px-3 sm:px-4 pt-8 mt-6 max-w-[1100px] mx-auto pb-12">
       <div className="mb-8 px-2">
-        <div className="inline-flex items-center gap-2 bg-white rounded-full px-3 py-1.5 shadow-sm mb-4 border border-neutral-200">
+        <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-3 py-1.5 shadow-sm mb-4 border border-white/20">
           <span className="w-2 h-2 rounded-full bg-[#ef4d23]"></span>
-          <span className="text-[12px] font-semibold text-neutral-800">Analytics & Reporting</span>
+          <span className="text-[12px] font-semibold text-white">Analytics & Reporting</span>
         </div>
-        <h2 className="text-[#0b0f1a] font-medium" style={{ fontSize: "clamp(28px, 5vw, 42px)", lineHeight: 1.1, letterSpacing: "-0.02em" }}>
+        <h2 className="text-[#f5f5dc] font-medium" style={{ fontSize: "clamp(28px, 5vw, 42px)", lineHeight: 1.1, letterSpacing: "-0.02em", textShadow: '0 2px 10px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,1)' }}>
           Visualize your <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: "italic", fontWeight: 400 }}>Growth</span>
         </h2>
-        <p className="text-neutral-500 mt-2 text-[14px]">
+        <p className="text-white/90 mt-2 text-[14px]" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8), 0 0 2px rgba(0,0,0,1)' }}>
           Deep dive into your customer demographics, revenue trends, and tag distribution.
         </p>
       </div>

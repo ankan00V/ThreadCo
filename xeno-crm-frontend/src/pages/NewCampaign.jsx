@@ -113,12 +113,12 @@ const NewCampaign = () => {
   return (
     <div className="max-w-6xl mx-auto space-y-6 pt-8 pb-12 px-4">
       <div className="flex items-center space-x-4 mb-8">
-        <Link to="/campaigns" className="p-2 bg-white border border-gray-200 hover:bg-gray-50 rounded-full transition-colors shadow-sm">
-          <ArrowLeft className="w-5 h-5 text-gray-600" />
+        <Link to="/campaigns" className="p-2 bg-white/10 border border-white/20 hover:bg-white/20 backdrop-blur-md rounded-full transition-colors shadow-sm">
+          <ArrowLeft className="w-5 h-5 text-white" />
         </Link>
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Campaign Builder</h1>
-          <p className="text-gray-500 text-sm mt-1">Design and launch your communication strategy.</p>
+          <h1 className="text-3xl font-extrabold text-[#f5f5dc] tracking-tight" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,1)' }}>Campaign Builder</h1>
+          <p className="text-white/90 text-sm mt-1" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8), 0 0 2px rgba(0,0,0,1)' }}>Design and launch your communication strategy.</p>
         </div>
       </div>
 

@@ -35,24 +35,24 @@ const Dashboard = () => {
     <div className="w-full flex flex-col items-center">
       {/* Hero Content */}
       <div className="flex flex-col items-center px-4 pt-10 sm:pt-16 pb-8 sm:pb-12 text-center max-w-4xl mx-auto">
-        <div className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-1.5 shadow-sm">
+        <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-1.5 shadow-sm">
           <span className="w-2 h-2 rounded-full bg-[#ef4d23]"></span>
-          <span className="text-[13px] font-medium text-black">ThreadCo CRM</span>
+          <span className="text-[13px] font-medium text-white">ThreadCo CRM</span>
         </div>
         
-        <h1 className="mt-5 sm:mt-6 text-black" 
-            style={{ fontSize: "clamp(36px, 8vw, 72px)", lineHeight: 1.05, fontWeight: 500, letterSpacing: "-0.02em" }}>
+        <h1 className="mt-5 sm:mt-6 text-[#f5f5dc]" 
+            style={{ fontSize: "clamp(36px, 8vw, 72px)", lineHeight: 1.05, fontWeight: 500, letterSpacing: "-0.02em", textShadow: '0 2px 10px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,1)' }}>
           Shaping <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: "italic", fontWeight: 400 }}>Marketing</span><br />
           of tomorrow
         </h1>
         
-        <p className="mt-4 sm:mt-6 text-black px-2" style={{ fontSize: "clamp(13px, 3.5vw, 16px)" }}>
+        <p className="mt-4 sm:mt-6 text-white/90 px-2" style={{ fontSize: "clamp(13px, 3.5vw, 16px)", textShadow: '0 1px 4px rgba(0,0,0,0.8), 0 0 2px rgba(0,0,0,1)' }}>
           The All-In-One Intelligence Powering the Future of CRM & Marketing
         </p>
         
-        <button onClick={() => navigate('/campaigns/new')} className="mt-6 sm:mt-8 inline-flex items-center gap-3 bg-[#0b0f1a] hover:bg-neutral-800 transition-colors text-white rounded-full pl-6 sm:pl-7 pr-2 py-2 sm:py-2.5 shadow-lg">
+        <button onClick={() => navigate('/campaigns/new')} className="mt-6 sm:mt-8 inline-flex items-center gap-3 bg-white hover:bg-gray-200 transition-colors text-black rounded-full pl-6 sm:pl-7 pr-2 py-2 sm:py-2.5 shadow-lg">
           <span className="text-[14px] font-medium">Get Started</span>
-          <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/15 flex items-center justify-center">
+          <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-black/10 flex items-center justify-center">
             <ChevronRight size={16} strokeWidth={3} />
           </div>
         </button>
