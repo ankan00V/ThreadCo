@@ -19,7 +19,7 @@ const Layout = ({ children }) => {
           poster="https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&q=60"
           className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
         >
-          <source src="/background-video.mp4" type="video/mp4" />
+          <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4" type="video/mp4" />
         </video>
         
         {/* Overlay */}
