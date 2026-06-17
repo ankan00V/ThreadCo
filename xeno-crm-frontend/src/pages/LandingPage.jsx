@@ -67,7 +67,7 @@ const Logo = () => (
     </div>
     
     <div className="flex flex-col justify-center">
-      <span className="font-bold text-[1.2rem] leading-none tracking-tight" style={{ color: 'black', fontFamily: 'var(--font-heading)' }}>
+      <span className="font-bold text-[1.2rem] leading-none tracking-tight" style={{ color: 'white', fontFamily: 'var(--font-heading)' }}>
         ThreadCo
       </span>
       <span className="text-[0.65rem] uppercase tracking-[0.2em] font-bold mt-1" style={{ color: '#ef4d23' }}>
@@ -89,7 +89,7 @@ const LandingPage = () => {
   ];
 
   return (
-    <div className="relative w-full min-h-screen overflow-hidden" style={{ fontFamily: 'var(--font-body)', color: 'black', backgroundColor: '#f5f2ee', margin: 0, padding: 0 }}>
+    <div className="relative w-full min-h-screen overflow-hidden" style={{ fontFamily: 'var(--font-body)', color: 'white', backgroundColor: '#000000', margin: 0, padding: 0 }}>
       {/* Background Video */}
       <SmoothVideoLoop />
 
@@ -100,7 +100,7 @@ const LandingPage = () => {
         {/* Desktop Links */}
         <div className="hidden md:flex gap-8">
           {navLinks.map((link) => (
-            <button key={link.label} onClick={() => navigate(link.path)} className="text-sm font-medium transition-opacity hover:opacity-70" style={{ color: 'black' }}>
+            <button key={link.label} onClick={() => navigate(link.path)} className="text-sm font-medium transition-opacity hover:opacity-70" style={{ color: 'white' }}>
               {link.label}
             </button>
           ))}
@@ -108,14 +108,14 @@ const LandingPage = () => {
 
         {/* Desktop CTA */}
         <div className="hidden md:flex gap-3">
-          <button onClick={() => navigate('/dashboard')} className="text-sm font-semibold px-5 py-2.5 rounded-full hover:shadow-lg active:scale-95 transition-all" style={{ backgroundColor: '#0b0f1a', color: 'white' }}>
+          <button onClick={() => navigate('/dashboard')} className="text-sm font-semibold px-5 py-2.5 rounded-full hover:shadow-lg active:scale-95 transition-all" style={{ backgroundColor: 'white', color: 'black' }}>
             Start For Free
           </button>
         </div>
 
         {/* Mobile Toggle */}
         <button className="md:hidden" onClick={() => setMenuOpen(true)}>
-          <Menu size={24} color="black" />
+          <Menu size={24} color="white" />
         </button>
       </nav>
 
@@ -199,17 +199,17 @@ const LandingPage = () => {
               fontSize: 'clamp(1.65rem, 5vw, 3rem)',
               lineHeight: 1.05,
               letterSpacing: '-0.01em',
-              color: 'black'
+              color: 'white'
             }}
           >
             <span className="block md:inline">
-              Drive <Zap size={24} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-2px', margin: '0 4px', color: '#192837' }} />
+              Drive <Zap size={24} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-2px', margin: '0 4px', color: 'white' }} />
             </span>
             <span className="block md:inline">
-              Hyper-Personalized <Users size={24} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-2px', margin: '0 4px', color: '#192837' }} />
+              Hyper-Personalized <Users size={24} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-2px', margin: '0 4px', color: 'white' }} />
             </span>
             <span className="block md:inline">
-              Growth <br className="hidden md:block" /> with AI-Driven Segments <Brain size={24} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-2px', marginLeft: '6px', color: '#192837' }} />
+              Growth <br className="hidden md:block" /> with AI-Driven Segments <Brain size={24} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-2px', marginLeft: '6px', color: 'white' }} />
             </span>
           </motion.h1>
 
@@ -222,7 +222,7 @@ const LandingPage = () => {
             style={{
               fontFamily: 'var(--font-body)',
               fontSize: 'clamp(0.9rem, 2.5vw, 1.1rem)',
-              color: 'black',
+              color: 'white',
               opacity: 0.8,
               lineHeight: 1.65
             }}
@@ -240,13 +240,13 @@ const LandingPage = () => {
             onClick={() => navigate('/dashboard')}
             className="flex items-center justify-between"
             style={{
-              backgroundColor: '#0b0f1a',
-              color: 'white',
+              backgroundColor: 'white',
+              color: 'black',
               borderRadius: '50px',
               padding: '17px 24px',
               minWidth: '210px',
               fontSize: 'clamp(0.9rem, 2vw, 1rem)',
-              boxShadow: '0 4px 24px rgba(11,15,26,0.28)',
+              boxShadow: '0 4px 24px rgba(255,255,255,0.1)',
               fontWeight: 600,
               gap: '32px'
             }}
