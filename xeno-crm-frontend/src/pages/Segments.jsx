@@ -73,14 +73,14 @@ const Segments = () => {
 
       {/* Saved Segments */}
       <div className="w-full">
-        <h3 className="text-[16px] font-semibold text-[#0b0f1a] mb-4 px-2">Saved Segments</h3>
+        <h3 className="text-[16px] font-semibold text-[#f5f5dc] mb-4 px-2" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8), 0 0 2px rgba(0,0,0,1)' }}>Saved Segments</h3>
 
         {isLoading ? (
           <div className="text-center py-12 text-neutral-500 text-[13px]">
              <div className="flex justify-center mb-4">
                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ef4d23]"></div>
              </div>
-             Loading segments...
+             <span className="text-white/90" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8), 0 0 2px rgba(0,0,0,1)' }}>Loading segments...</span>
           </div>
         ) : segments.length === 0 ? (
           <div className="text-center p-12 bg-white rounded-2xl border border-neutral-200">
