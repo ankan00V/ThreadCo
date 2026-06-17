@@ -26,7 +26,7 @@ const MetricCard = ({ title, value, badge, icon: Icon, colorClass, delay }) => (
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay, duration: 0.4 }}
-    className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between"
+    className="bg-[#fcfaf5] p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between"
   >
     <div className="flex justify-between items-start mb-4">
       <div className={`p-3 rounded-2xl ${colorClass}`}>
@@ -112,7 +112,7 @@ const CampaignDetail = () => {
       {/* Top Header */}
       <div className="flex items-center space-x-4 mb-8">
         <button onClick={() => navigate('/campaigns')}
-          className="p-2 bg-white border border-gray-200 hover:bg-gray-50 rounded-full transition-colors shadow-sm">
+          className="p-2 bg-[#fcfaf5] border border-gray-200 hover:bg-gray-50 rounded-full transition-colors shadow-sm">
           <ArrowLeft className="w-5 h-5 text-gray-600" />
         </button>
         <div className="flex-1">
@@ -190,7 +190,7 @@ const CampaignDetail = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         
         {/* Conversion Funnel */}
-        <div className="lg:col-span-1 bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+        <div className="lg:col-span-1 bg-[#fcfaf5] p-8 rounded-3xl border border-gray-100 shadow-sm">
           <h3 className="text-gray-900 font-bold text-lg mb-6 flex items-center">
             Engagement Funnel
           </h3>
@@ -227,7 +227,7 @@ const CampaignDetail = () => {
         </div>
 
         {/* Communications Log */}
-        <div className="lg:col-span-2 bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full max-h-[600px]">
+        <div className="lg:col-span-2 bg-[#fcfaf5] rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full max-h-[600px]">
           <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
             <h3 className="text-gray-900 font-bold text-lg">
               Live Delivery Receipts

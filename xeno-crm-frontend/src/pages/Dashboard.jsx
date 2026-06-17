@@ -50,7 +50,7 @@ const Dashboard = () => {
           The All-In-One Intelligence Powering the Future of CRM & Marketing
         </p>
         
-        <button onClick={() => navigate('/campaigns/new')} className="mt-6 sm:mt-8 inline-flex items-center gap-3 bg-white hover:bg-gray-200 transition-colors text-black rounded-full pl-6 sm:pl-7 pr-2 py-2 sm:py-2.5 shadow-lg">
+        <button onClick={() => navigate('/campaigns/new')} className="mt-6 sm:mt-8 inline-flex items-center gap-3 bg-[#fcfaf5] hover:bg-gray-200 transition-colors text-black rounded-full pl-6 sm:pl-7 pr-2 py-2 sm:py-2.5 shadow-lg">
           <span className="text-[14px] font-medium">Get Started</span>
           <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-black/10 flex items-center justify-center">
             <ChevronRight size={16} strokeWidth={3} />
@@ -63,7 +63,7 @@ const Dashboard = () => {
         <div className="bg-[#f5f2ee] rounded-3xl p-4 sm:p-6 shadow-2xl ring-1 ring-black/5 w-full flex flex-col sm:flex-row gap-4 sm:gap-6">
           
           {/* Card 1: Customers */}
-          <div className="flex-1 bg-white rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+          <div className="flex-1 bg-[#fcfaf5] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <span className="font-semibold text-[15px] text-[#ef4d23]">Customers</span>
@@ -95,7 +95,7 @@ const Dashboard = () => {
           </div>
           
           {/* Card 2: Campaigns */}
-          <div className="flex-1 bg-white rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+          <div className="flex-1 bg-[#fcfaf5] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <span className="font-semibold text-[15px] text-[#ef4d23]">Campaigns</span>
@@ -128,7 +128,7 @@ const Dashboard = () => {
           </div>
           
           {/* Card 3: Revenue Starts */}
-          <div className="flex-1 bg-white rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between relative overflow-hidden">
+          <div className="flex-1 bg-[#fcfaf5] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between relative overflow-hidden">
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <span className="font-semibold text-[15px] text-[#ef4d23]">Revenue</span>

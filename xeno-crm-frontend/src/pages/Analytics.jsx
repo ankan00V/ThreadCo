@@ -59,7 +59,7 @@ export default function Analytics() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Revenue Trend Chart */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-neutral-200 lg:col-span-2">
+        <div className="bg-[#fcfaf5] p-6 rounded-2xl shadow-sm border border-neutral-200 lg:col-span-2">
           <h3 className="text-[15px] font-semibold text-[#0b0f1a] mb-6">Revenue Trend (YTD)</h3>
           <div className="w-full h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -78,7 +78,7 @@ export default function Analytics() {
         </div>
 
         {/* City Breakdown Chart */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-neutral-200">
+        <div className="bg-[#fcfaf5] p-6 rounded-2xl shadow-sm border border-neutral-200">
           <h3 className="text-[15px] font-semibold text-[#0b0f1a] mb-6">Customers by City</h3>
           <div className="w-full h-[250px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -97,7 +97,7 @@ export default function Analytics() {
         </div>
 
         {/* Tag Breakdown Chart */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-neutral-200">
+        <div className="bg-[#fcfaf5] p-6 rounded-2xl shadow-sm border border-neutral-200">
           <h3 className="text-[15px] font-semibold text-[#0b0f1a] mb-6">Customer Segmentation</h3>
           <div className="w-full h-[250px] flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">

@@ -45,7 +45,7 @@ const Segments = () => {
       </div>
 
       {/* AI Composer Wrapper */}
-      <div className="w-full bg-white rounded-2xl shadow-sm border border-neutral-200 p-6 mb-12 aicomposer-override">
+      <div className="w-full bg-[#fcfaf5] rounded-2xl shadow-sm border border-neutral-200 p-6 mb-12 aicomposer-override">
         <style>{`
           /* Force AIComposer to match light theme */
           .aicomposer-override * { color: #0b0f1a; }
@@ -83,14 +83,14 @@ const Segments = () => {
              <span className="text-white/90" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8), 0 0 2px rgba(0,0,0,1)' }}>Loading segments...</span>
           </div>
         ) : segments.length === 0 ? (
-          <div className="text-center p-12 bg-white rounded-2xl border border-neutral-200">
+          <div className="text-center p-12 bg-[#fcfaf5] rounded-2xl border border-neutral-200">
             <h3 className="text-[15px] font-semibold mb-2 text-[#0b0f1a]">No saved segments</h3>
             <p className="text-[13px] text-neutral-500">Use the AI composer above to generate your first audience segment.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {segments.map((seg) => (
-              <div key={seg.id} className="group bg-white rounded-2xl p-5 flex flex-col justify-between shadow-sm border border-neutral-200 transition-all hover:shadow-md hover:border-neutral-300">
+              <div key={seg.id} className="group bg-[#fcfaf5] rounded-2xl p-5 flex flex-col justify-between shadow-sm border border-neutral-200 transition-all hover:shadow-md hover:border-neutral-300">
                 
                 <div>
                   <h3 className="text-[15px] font-semibold mb-1 text-[#0b0f1a]">{seg.name}</h3>

@@ -126,7 +126,7 @@ const NewCampaign = () => {
         {/* Main Form Left Side */}
         <div className="lg:col-span-7 space-y-8">
           
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 space-y-8">
+          <div className="bg-[#fcfaf5] p-8 rounded-3xl shadow-sm border border-gray-100 space-y-8">
             <div className="space-y-6">
               <h2 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-3">1. Campaign Details</h2>
               
@@ -135,7 +135,7 @@ const NewCampaign = () => {
                 <input 
                   type="text"
                   placeholder="e.g. Q3 VIP Reactivation"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:bg-white focus:ring-2 focus:ring-[#6C47FF] focus:border-transparent outline-none transition-all shadow-inner"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:bg-[#fcfaf5] focus:ring-2 focus:ring-[#6C47FF] focus:border-transparent outline-none transition-all shadow-inner"
                   value={name}
                   onChange={e => setName(e.target.value)}
                 />
@@ -150,13 +150,13 @@ const NewCampaign = () => {
                   </Link>
                 </div>
                 <select 
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-900 focus:bg-white focus:ring-2 focus:ring-[#6C47FF] focus:border-transparent outline-none transition-all shadow-inner cursor-pointer"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-[#fcfaf5] text-gray-900 focus:bg-[#fcfaf5] focus:ring-2 focus:ring-[#6C47FF] focus:border-transparent outline-none transition-all shadow-inner cursor-pointer"
                   value={segmentId}
                   onChange={e => setSegmentId(e.target.value)}
                 >
-                  <option value="" disabled className="text-gray-500 bg-white">Select a saved audience...</option>
+                  <option value="" disabled className="text-gray-500 bg-[#fcfaf5]">Select a saved audience...</option>
                   {segments.map(s => (
-                    <option key={s.id} value={s.id} className="text-gray-900 bg-white">{s.name} ({s.customer_count} shoppers)</option>
+                    <option key={s.id} value={s.id} className="text-gray-900 bg-[#fcfaf5]">{s.name} ({s.customer_count} shoppers)</option>
                   ))}
                 </select>
               </div>
@@ -171,7 +171,7 @@ const NewCampaign = () => {
                       className={`flex-1 min-w-[100px] py-3 text-sm font-bold rounded-xl uppercase tracking-wider transition-all duration-200 ${
                         channel === c 
                           ? 'bg-[#6C47FF] text-white shadow-md ring-2 ring-[#6C47FF] ring-offset-2' 
-                          : 'bg-white border border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300'
+                          : 'bg-[#fcfaf5] border border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300'
                       }`}
                     >
                       {c}
@@ -195,7 +195,7 @@ const NewCampaign = () => {
                   <input 
                     type="text"
                     placeholder="e.g. Write a friendly reminder about abandoned carts..."
-                    className="flex-1 px-4 py-3 border border-purple-200 rounded-xl bg-white text-gray-900 focus:ring-2 focus:ring-[#6C47FF] focus:border-transparent outline-none"
+                    className="flex-1 px-4 py-3 border border-purple-200 rounded-xl bg-[#fcfaf5] text-gray-900 focus:ring-2 focus:ring-[#6C47FF] focus:border-transparent outline-none"
                     value={campaignGoal}
                     onChange={e => setCampaignGoal(e.target.value)}
                   />
@@ -216,7 +216,7 @@ const NewCampaign = () => {
                 <textarea 
                   rows={6}
                   placeholder="Hi {{name}}, check out our Summer Sale — 40% off premium threads!"
-                  className="w-full px-5 py-4 border border-gray-200 rounded-2xl bg-gray-50 text-gray-900 focus:bg-white focus:ring-2 focus:ring-[#6C47FF] focus:border-transparent outline-none resize-none shadow-inner leading-relaxed"
+                  className="w-full px-5 py-4 border border-gray-200 rounded-2xl bg-gray-50 text-gray-900 focus:bg-[#fcfaf5] focus:ring-2 focus:ring-[#6C47FF] focus:border-transparent outline-none resize-none shadow-inner leading-relaxed"
                   value={messageTemplate}
                   onChange={e => setMessageTemplate(e.target.value)}
                 />
@@ -238,7 +238,7 @@ const NewCampaign = () => {
             <button 
               onClick={() => handleLaunchInit(true)}
               disabled={isLoading}
-              className="flex-1 py-4 bg-white border-2 border-gray-200 text-gray-700 font-bold rounded-2xl hover:bg-gray-50 hover:border-gray-300 transition-colors disabled:opacity-50 shadow-sm"
+              className="flex-1 py-4 bg-[#fcfaf5] border-2 border-gray-200 text-gray-700 font-bold rounded-2xl hover:bg-gray-50 hover:border-gray-300 transition-colors disabled:opacity-50 shadow-sm"
             >
               Save as Draft
             </button>
@@ -273,7 +273,7 @@ const NewCampaign = () => {
             </div>
             
             {/* Fake Phone Screen */}
-            <div className="w-full max-w-[320px] bg-white rounded-[2rem] p-4 shadow-2xl ring-8 ring-white/5 relative overflow-hidden min-h-[400px] flex flex-col">
+            <div className="w-full max-w-[320px] bg-[#fcfaf5] rounded-[2rem] p-4 shadow-2xl ring-8 ring-white/5 relative overflow-hidden min-h-[400px] flex flex-col">
               
               {/* Fake Phone Header */}
               <div className="flex items-center space-x-3 mb-6 pb-4 border-b border-gray-100">
@@ -351,7 +351,7 @@ const NewCampaign = () => {
       {/* Confirmation Modal */}
       {showConfirmModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-gray-100">
+          <div className="bg-[#fcfaf5] rounded-3xl p-8 max-w-md w-full shadow-2xl border border-gray-100">
             <h3 className="text-xl font-bold text-gray-900 mb-4">Confirm Dispatch</h3>
             <p className="text-gray-600 mb-8">
               This will send to <strong className="text-gray-900">{selectedSegmentObj?.customer_count}</strong> customers via <strong className="text-gray-900 uppercase">{channel}</strong>. Continue?

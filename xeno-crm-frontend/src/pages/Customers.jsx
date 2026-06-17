@@ -72,7 +72,7 @@ const Customers = () => {
       </div>
 
       {/* Top Filter Bar */}
-      <div className="bg-white p-4 rounded-2xl mb-6 flex flex-col md:flex-row gap-3 shadow-sm border border-neutral-200">
+      <div className="bg-[#fcfaf5] p-4 rounded-2xl mb-6 flex flex-col md:flex-row gap-3 shadow-sm border border-neutral-200">
         <div className="flex-1 relative">
           <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400" />
           <input 
@@ -115,7 +115,7 @@ const Customers = () => {
       </div>
 
       {/* Table Container */}
-      <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
+      <div className="bg-[#fcfaf5] rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
@@ -127,7 +127,7 @@ const Customers = () => {
                 <th className="px-6 py-3 text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Last Active</th>
               </tr>
             </thead>
-            <tbody className="bg-white">
+            <tbody className="bg-[#fcfaf5]">
               {isLoading ? (
                 <tr>
                   <td colSpan="5" className="px-6 py-12 text-center text-neutral-500 text-[13px]">
@@ -151,20 +151,20 @@ const Customers = () => {
         </div>
         
         {/* Pagination */}
-        <div className="bg-white border-t border-neutral-200 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="bg-[#fcfaf5] border-t border-neutral-200 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-[12px] text-neutral-500 text-center sm:text-left">
             Showing <span className="font-semibold text-[#0b0f1a]">{((page - 1) * perPage) + 1}</span> to <span className="font-semibold text-[#0b0f1a]">{Math.min(page * perPage, filteredCustomers.length)}</span> of <span className="font-semibold text-[#0b0f1a]">{filteredCustomers.length}</span> results
           </p>
           <div className="flex gap-2">
             <button 
-              className="p-1.5 rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-50 disabled:opacity-50 disabled:hover:bg-white transition-colors"
+              className="p-1.5 rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-50 disabled:opacity-50 disabled:hover:bg-[#fcfaf5] transition-colors"
               disabled={page === 1}
               onClick={() => setPage(p => Math.max(1, p - 1))}
             >
               <ChevronLeft size={16} />
             </button>
             <button 
-              className="p-1.5 rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-50 disabled:opacity-50 disabled:hover:bg-white transition-colors"
+              className="p-1.5 rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-50 disabled:opacity-50 disabled:hover:bg-[#fcfaf5] transition-colors"
               disabled={page >= totalPages}
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
             >

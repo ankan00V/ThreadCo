@@ -18,7 +18,7 @@ export default function Navbar() {
 
   return (
     <div className="flex justify-center pt-4 sm:pt-6 px-3 sm:px-4 w-full relative z-50 font-['Inter']">
-      <div className="bg-white rounded-full shadow-sm border border-neutral-200 p-2 w-max sm:w-full sm:pl-2 sm:pr-2 sm:py-2 max-w-[760px] relative flex items-center mx-auto sm:mx-0">
+      <div className="bg-[#fcfaf5] rounded-full shadow-sm border border-neutral-200 p-2 w-max sm:w-full sm:pl-2 sm:pr-2 sm:py-2 max-w-[760px] relative flex items-center mx-auto sm:mx-0">
         
         {/* Logo */}
         <div className="shrink-0 cursor-pointer flex items-center gap-2 pr-2 sm:pr-0" onClick={() => navigate('/dashboard')}>
@@ -45,7 +45,7 @@ export default function Navbar() {
               
               {/* Dropdown Menu */}
               {link.dropdown && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-0 w-40 bg-white rounded-xl shadow-xl border border-neutral-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 overflow-hidden transform origin-top translate-y-2 group-hover:translate-y-0">
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-0 w-40 bg-[#fcfaf5] rounded-xl shadow-xl border border-neutral-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 overflow-hidden transform origin-top translate-y-2 group-hover:translate-y-0">
                   <div className="py-2">
                     <button onClick={() => navigate('/campaigns')} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-neutral-700 hover:text-[#ef4d23] hover:bg-neutral-50 transition-colors">
                       Campaigns
@@ -94,7 +94,7 @@ export default function Navbar() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="absolute top-full left-2 right-2 mt-2 bg-white rounded-2xl shadow-lg border border-neutral-200 p-4 z-50 flex flex-col gap-4 md:hidden"
+              className="absolute top-full left-2 right-2 mt-2 bg-[#fcfaf5] rounded-2xl shadow-lg border border-neutral-200 p-4 z-50 flex flex-col gap-4 md:hidden"
             >
               {links.map((link) => (
                 <div key={link.label} className="flex flex-col">

@@ -55,7 +55,7 @@ export default function Campaigns() {
           <span className="text-[14px]">Loading campaigns...</span>
         </div>
       ) : campaigns.length === 0 ? (
-        <div className="bg-white rounded-2xl p-12 text-center border border-neutral-200 shadow-sm">
+        <div className="bg-[#fcfaf5] rounded-2xl p-12 text-center border border-neutral-200 shadow-sm">
           <h3 className="text-xl font-semibold text-[#0b0f1a] mb-2">No campaigns yet</h3>
           <p className="text-neutral-500 text-[14px]">Click 'New Campaign' to create your first one.</p>
         </div>
@@ -70,7 +70,7 @@ export default function Campaigns() {
                                  'bg-orange-100 text-orange-700';
 
             return (
-              <div key={c.id} onClick={() => navigate(`/campaigns/${c.id}`)} className="group bg-white rounded-2xl p-6 cursor-pointer border border-neutral-200 shadow-sm hover:shadow-md hover:border-[#ef4d23]/30 transition-all flex flex-col relative overflow-hidden">
+              <div key={c.id} onClick={() => navigate(`/campaigns/${c.id}`)} className="group bg-[#fcfaf5] rounded-2xl p-6 cursor-pointer border border-neutral-200 shadow-sm hover:shadow-md hover:border-[#ef4d23]/30 transition-all flex flex-col relative overflow-hidden">
                 <div className="flex justify-between items-start mb-3">
                   <h3 className="text-[16px] font-semibold text-[#0b0f1a] truncate pr-4">{c.name}</h3>
                   <div className="flex items-center gap-2 shrink-0">
