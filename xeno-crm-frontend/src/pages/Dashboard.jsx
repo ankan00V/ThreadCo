@@ -51,7 +51,7 @@ const DotMetric = ({ targetValue = 0, formatType = 'comma', pitchX = 5, pitchY =
 
   let formattedString = "";
   if (formatType === 'comma') {
-    formattedString = Math.floor(displayValue).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ".");
+    formattedString = Math.floor(displayValue).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   } else if (formatType === 'compact') {
     if (targetValue >= 1000000) {
       formattedString = (displayValue / 1000000).toFixed(1);
