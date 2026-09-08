@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import { getCampaignStats, checkCampaignCompletion } from '../api';
 import { ArrowLeft, CheckCircle2, XCircle, MailOpen, MousePointerClick, RefreshCw } from 'lucide-react';
 
