@@ -207,47 +207,39 @@ export default function Dashboard() {
                 <span className="text-[10px] text-muted-foreground">Updated live</span>
               </div>
 
-              {/* Action buttons row: Send (primary/accent), Request, Transfer, Deposit, Pay Bill, Create Invoice — rounded-full pill buttons text-[10px], + "Customize" text */}
+              
+              {/* Action buttons row */}
               <div className="flex flex-wrap items-center gap-1.5">
                 <button 
                   onClick={() => navigate('/campaigns/new')}
                   className="bg-accent text-accent-foreground rounded-full px-3 py-1 font-medium text-[10px] shadow-sm hover:opacity-90 transition-opacity"
                 >
-                  Send
+                  New Campaign
                 </button>
                 <button 
                   onClick={() => navigate('/customers')}
                   className="bg-white/70 border border-white/80 text-foreground hover:bg-white rounded-full px-3 py-1 font-medium text-[10px] transition-colors"
                 >
-                  Request
+                  Customers
+                </button>
+                <button 
+                  onClick={() => navigate('/segments')}
+                  className="bg-white/70 border border-white/80 text-foreground hover:bg-white rounded-full px-3 py-1 font-medium text-[10px] transition-colors"
+                >
+                  Segments
                 </button>
                 <button 
                   onClick={() => navigate('/campaigns')}
                   className="bg-white/70 border border-white/80 text-foreground hover:bg-white rounded-full px-3 py-1 font-medium text-[10px] transition-colors"
                 >
-                  Transfer
+                  Campaigns
                 </button>
                 <button 
                   onClick={() => navigate('/analytics')}
                   className="bg-white/70 border border-white/80 text-foreground hover:bg-white rounded-full px-3 py-1 font-medium text-[10px] transition-colors"
                 >
-                  Deposit
+                  Analytics
                 </button>
-                <button 
-                  onClick={() => navigate('/campaigns')}
-                  className="bg-white/70 border border-white/80 text-foreground hover:bg-white rounded-full px-3 py-1 font-medium text-[10px] transition-colors"
-                >
-                  Pay Bill
-                </button>
-                <button 
-                  onClick={() => navigate('/campaigns/new')}
-                  className="bg-white/70 border border-white/80 text-foreground hover:bg-white rounded-full px-3 py-1 font-medium text-[10px] transition-colors"
-                >
-                  Create Invoice
-                </button>
-                <span className="text-[10px] text-muted-foreground hover:text-foreground cursor-pointer ml-1 font-medium underline underline-offset-2">
-                  Customize
-                </span>
               </div>
 
               {/* Two equal-width cards (flex-1 basis-0) side by side: */}
