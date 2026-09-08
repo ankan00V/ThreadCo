@@ -3,7 +3,38 @@ import { useNavigate } from 'react-router-dom';
 import { getDashboardStats } from '../api';
 import { ArrowUpRight, ChevronRight, Sparkles } from 'lucide-react';
 import Gauge from '../components/Gauge';
-import AnimatedCounter from '../components/AnimatedCounter';
+
+const DotMetric = ({ value, className = '' }) => (
+  <span className={`dot-metric ${className}`} aria-label={value}>
+    {value}
+  </span>
+);
+
+const RadarVisual = () => (
+  <div className="instrument instrument--radar" aria-hidden="true">
+    <span className="radar-ring radar-ring--outer" />
+    <span className="radar-ring radar-ring--inner" />
+    <span className="radar-sweep" />
+    <span className="radar-core" />
+  </div>
+);
+
+const ContextVisual = () => (
+  <div className="instrument instrument--context" aria-hidden="true">
+    <span className="context-orb context-orb--one" /><span className="context-orb context-orb--two" />
+    <div className="context-window"><i /><i /><i /></div>
+  </div>
+);
+
+const ConnectionVisual = () => (
+  <div className="instrument instrument--connections" aria-hidden="true">
+    <svg viewBox="0 0 320 190" preserveAspectRatio="none">
+      <path d="M-8 105H45c26 0 22-54 52-54h46c29 0 19 54 53 54h37c24 0 27-53 56-53h39" />
+      <path className="connection-line--soft" d="M-8 105H45c26 0 22 54 52 54h46c29 0 19-54 53-54h37c24 0 27 53 56 53h39" />
+      {[45, 97, 143, 196, 233, 289].map((x, index) => <circle key={index} cx={x} cy={index % 2 ? 51 : 105} r="5" />)}
+    </svg>
+  </div>
+);
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -49,7 +80,8 @@ const Dashboard = () => {
           <div className="performance-card__content">
             <p className="performance-card__eyebrow">Customer base</p>
             <h2>Customer<br />momentum</h2>
-            <div className="performance-card__metric"><AnimatedCounter value={stats.total_customers || 0} formatFn={(v) => Math.round(v).toLocaleString()} /></div>
+            <RadarVisual />
+            <div className="performance-card__metric"><DotMetric value={Math.round(stats.total_customers || 0).toLocaleString()} /></div>
             <p className="performance-card__caption">registered shoppers<br />across your audience</p>
             <div className="performance-card__gauge"><Gauge value={Math.min(100, Math.round(((stats.total_customers || 0) / 500) * 100))} color="#fff5f7" emptyColor="rgba(255,255,255,.2)" /></div>
             <p className="performance-card__foot"><ArrowUpRight size={15} /> {stats.new_this_month || 0} new this month</p>
@@ -61,7 +93,8 @@ const Dashboard = () => {
           <div className="performance-card__content">
             <p className="performance-card__eyebrow">Campaign activity</p>
             <h2>Campaign<br />reach</h2>
-            <div className="performance-card__metric"><AnimatedCounter value={stats.total_campaigns || 0} formatFn={(v) => Math.round(v).toLocaleString()} /></div>
+            <ContextVisual />
+            <div className="performance-card__metric"><DotMetric value={Math.round(stats.total_campaigns || 0).toLocaleString()} /></div>
             <p className="performance-card__caption">active and completed<br />campaigns</p>
             <div className="performance-card__gauge"><Gauge value={Math.min(100, Math.round(((stats.total_messages_sent || 0) / 5000) * 100))} color="#fff9ff" emptyColor="rgba(255,255,255,.2)" /></div>
             <p className="performance-card__foot"><Sparkles size={15} /> {(stats.total_messages_sent || 0).toLocaleString()} messages sent</p>
@@ -73,7 +106,8 @@ const Dashboard = () => {
           <div className="performance-card__content">
             <p className="performance-card__eyebrow">Revenue generated</p>
             <h2>Revenue<br />clarity</h2>
-            <div className="performance-card__metric performance-card__metric--currency"><AnimatedCounter value={stats.revenue_generated || 0} formatFn={(v) => '$' + Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(v)} /></div>
+            <ConnectionVisual />
+            <div className="performance-card__metric performance-card__metric--currency"><DotMetric value={'$' + Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(stats.revenue_generated || 0)} /></div>
             <p className="performance-card__caption">attributed customer<br />value</p>
             <div className="performance-card__gauge"><Gauge value={Math.min(100, Math.round(((stats.revenue_generated || 0) / 100000000) * 100))} color="#f6fffb" emptyColor="rgba(255,255,255,.2)" /></div>
             <p className="performance-card__foot"><ArrowUpRight size={15} /> ${Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(stats.avg_order_value || 0)} average order</p>
