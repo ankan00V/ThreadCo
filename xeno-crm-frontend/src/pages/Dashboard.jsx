@@ -238,7 +238,7 @@ export default function Dashboard() {
               {/* Two equal-width cards (flex-1 basis-0) side by side: */}
               <div className="flex flex-col sm:flex-row gap-3">
                 
-                {/* Balance card: "Total Revenue" with checkmark, amount $8,450,190.32 (cents in text-xs text-muted-foreground), stats (Last 30 Days, +$1.8M green, -$900K red), SVG area chart (h-20) with smooth cubic Bézier curve, linear gradient fill from accent at 15% opacity to transparent, stroke in accent color strokeWidth="1.5" */}
+                {/* Balance card: "Total Revenue" with checkmark, amount ₹8,450,190.32 (cents in text-xs text-muted-foreground), stats (Last 30 Days, +₹1.8M green, -₹900K red), SVG area chart (h-20) with smooth cubic Bézier curve, linear gradient fill from accent at 15% opacity to transparent, stroke in accent color strokeWidth="1.5" */}
                 <div className="flex-1 basis-0 bg-white/70 backdrop-blur rounded-xl p-3 border border-white/80 shadow-sm flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
@@ -249,7 +249,7 @@ export default function Dashboard() {
                     </div>
                     
                     <div className="flex items-baseline gap-1">
-                      <span className="text-xl font-bold text-foreground tracking-tight">$<AnimatedNumber value={stats.revenue_generated || 0} formatter={(v) => v.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} /></span>
+                      <span className="text-xl font-bold text-foreground tracking-tight">₹<AnimatedNumber value={stats.revenue_generated || 0} formatter={(v) => v.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} /></span>
                       <span className="text-xs text-muted-foreground font-medium"></span>
                     </div>
 
@@ -275,7 +275,7 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Accounts card: Header "Accounts" with + and ⋮ icons. Three rows (py-3, no dividers, text-xs, justify-between): Credit $98,125.50, Treasury $6,750,200.00, Operations $1,592,864.82 */}
+                {/* Accounts card: Header "Accounts" with + and ⋮ icons. Three rows (py-3, no dividers, text-xs, justify-between): Credit ₹98,125.50, Treasury ₹6,750,200.00, Operations ₹1,592,864.82 */}
                 <div className="flex-1 basis-0 bg-white/70 backdrop-blur rounded-xl p-3 border border-white/80 shadow-sm flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between pb-2 border-b border-black/5">
@@ -367,17 +367,17 @@ export default function Dashboard() {
                       </thead>
                       <tbody className="divide-y divide-black/5">
                         {[
-                          {name: 'Sarah Jenkins', phone: '+1 (555) 019-2834', status: 'Highly Engaged', ltv: '$1,240.00'},
-                          {name: 'Michael Chen', phone: '+1 (555) 847-2910', status: 'At Risk', ltv: '$890.50'},
-                          {name: 'Emma Watson', phone: '+1 (555) 233-0091', status: 'Recent Buyer', ltv: '$125.00'},
-                          {name: 'James Wilson', phone: '+1 (555) 445-8822', status: 'Highly Engaged', ltv: '$2,100.00'},
+                          {name: 'Sarah Jenkins', phone: '+1 (555) 019-2834', status: 'Highly Engaged', ltv: '₹1,240.00'},
+                          {name: 'Michael Chen', phone: '+1 (555) 847-2910', status: 'At Risk', ltv: '₹890.50'},
+                          {name: 'Emma Watson', phone: '+1 (555) 233-0091', status: 'Recent Buyer', ltv: '₹125.00'},
+                          {name: 'James Wilson', phone: '+1 (555) 445-8822', status: 'Highly Engaged', ltv: '₹2,100.00'},
                         ].map((c, i) => (
                           <tr key={i} className="hover:bg-white/50 transition-colors">
                             <td className="px-3 py-2"><div className="font-medium text-foreground">{c.name || c.first_name || 'Customer'}</div><div className="text-muted-foreground text-[9px]">{c.phone || c.email || '-'}</div></td>
                             <td className="px-3 py-2">
                               <span className={`px-1.5 py-0.5 rounded-full text-[8px] ${c.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>{c.status || 'Active'}</span>
                             </td>
-                            <td className="px-3 py-2 text-right font-medium text-foreground">${c.ltv || c.total_spent || '0.00'}</td>
+                            <td className="px-3 py-2 text-right font-medium text-foreground">₹{c.ltv || c.total_spent || '0.00'}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -447,25 +447,25 @@ export default function Dashboard() {
                     <h4 className="font-semibold text-foreground text-xs flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5 text-accent"/> Performance Analytics</h4>
                     <button onClick={() => navigate('/analytics')} className="text-[10px] text-accent font-medium hover:underline">Full Report</button>
                   </div>
-                  <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-3 flex-1">
                     <div className="grid grid-cols-3 gap-2">
                       <div className="bg-white/50 p-2 rounded-lg border border-black/5 text-center shadow-sm">
                         <div className="text-[9px] text-muted-foreground mb-1">Avg Open Rate</div>
-                        <div className="text-sm font-bold text-foreground">68.4%</div>
+                        <div className="text-sm font-bold text-foreground"><AnimatedNumber value={analytics?.avg_open_rate || 68.4} />%</div>
                       </div>
                       <div className="bg-white/50 p-2 rounded-lg border border-black/5 text-center shadow-sm">
                         <div className="text-[9px] text-muted-foreground mb-1">Click Through</div>
-                        <div className="text-sm font-bold text-foreground">14.2%</div>
+                        <div className="text-sm font-bold text-foreground"><AnimatedNumber value={analytics?.click_through || 14.2} />%</div>
                       </div>
                       <div className="bg-white/50 p-2 rounded-lg border border-black/5 text-center shadow-sm">
                         <div className="text-[9px] text-muted-foreground mb-1">Revenue / Msg</div>
-                        <div className="text-sm font-bold text-foreground">$4.12</div>
+                        <div className="text-sm font-bold text-foreground">₹<AnimatedNumber value={analytics?.revenue_per_msg || 4.12} /></div>
                       </div>
                     </div>
                     <div className="bg-white/50 p-3 rounded-lg border border-black/5 shadow-sm">
                       <div className="text-[10px] font-medium text-foreground mb-2">Channel Performance</div>
                       <div className="space-y-2">
-                        {[{label: 'WhatsApp', pct: 75, color: 'bg-emerald-500'}, {label: 'Email', pct: 45, color: 'bg-blue-500'}, {label: 'SMS', pct: 25, color: 'bg-indigo-500'}].map((ch, i) => (
+                        {[{label: 'WhatsApp', pct: analytics?.channel_wa || 75, color: 'bg-emerald-500'}, {label: 'Email', pct: analytics?.channel_email || 45, color: 'bg-blue-500'}, {label: 'SMS', pct: analytics?.channel_sms || 25, color: 'bg-indigo-500'}].map((ch, i) => (
                           <div key={i} className="flex items-center gap-2 text-[9px]">
                             <span className="w-12 text-muted-foreground">{ch.label}</span>
                             <div className="flex-1 h-1.5 bg-black/5 rounded-full overflow-hidden">
