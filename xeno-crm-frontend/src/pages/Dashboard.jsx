@@ -111,14 +111,14 @@ export default function Dashboard() {
             WebkitBackdropFilter: 'blur(20px)'
           }}
         >
-          {/* Top bar: Logo "N" in rounded box + "Nexora" + chevron | Search bar with ⌘K shortcut | "Move Money" + bell + avatar "JB" */}
+          {/* Top bar: Logo "N" in rounded box + "ThreadCo CRM" + chevron | Search bar with ⌘K shortcut | "Move Money" + bell + avatar "JB" */}
           <div className="flex items-center justify-between pb-3 border-b border-white/40">
             {/* Left Brand */}
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-md bg-foreground text-background flex items-center justify-center font-bold text-xs shadow-sm">
                 N
               </div>
-              <span className="font-semibold text-xs tracking-tight text-foreground">Nexora</span>
+              <span className="font-semibold text-xs tracking-tight text-foreground">ThreadCo CRM</span>
               <ChevronDown className="w-3.5 h-3.5 text-muted-foreground opacity-70" />
             </div>
 
@@ -215,7 +215,7 @@ export default function Dashboard() {
                 >
                   <div className="flex items-center gap-2">
                     <SlidersHorizontal className="w-3.5 h-3.5" />
-                    <span>Accounts</span>
+                    <span>Overview Metrics</span>
                   </div>
                   <ChevronDown className="w-3 h-3 opacity-60" />
                 </button>
@@ -238,7 +238,7 @@ export default function Dashboard() {
               
               {/* Greeting: "Welcome, Jane" — text-sm font-semibold */}
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-foreground tracking-tight">Welcome, Jane</h3>
+                <h3 className="text-sm font-semibold text-foreground tracking-tight">Welcome to ThreadCo</h3>
                 <span className="text-[10px] text-muted-foreground">Updated live</span>
               </div>
 
@@ -288,25 +288,25 @@ export default function Dashboard() {
               {/* Two equal-width cards (flex-1 basis-0) side by side: */}
               <div className="flex flex-col sm:flex-row gap-3">
                 
-                {/* Balance card: "Mercury Balance" with checkmark, amount $8,450,190.32 (cents in text-xs text-muted-foreground), stats (Last 30 Days, +$1.8M green, -$900K red), SVG area chart (h-20) with smooth cubic Bézier curve, linear gradient fill from accent at 15% opacity to transparent, stroke in accent color strokeWidth="1.5" */}
+                {/* Balance card: "Total Revenue" with checkmark, amount $8,450,190.32 (cents in text-xs text-muted-foreground), stats (Last 30 Days, +$1.8M green, -$900K red), SVG area chart (h-20) with smooth cubic Bézier curve, linear gradient fill from accent at 15% opacity to transparent, stroke in accent color strokeWidth="1.5" */}
                 <div className="flex-1 basis-0 bg-white/70 backdrop-blur rounded-xl p-3 border border-white/80 shadow-sm flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-1.5 text-muted-foreground text-[11px] font-medium">
-                        <span>Mercury Balance</span>
+                        <span>Total Revenue</span>
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
                       </div>
                     </div>
                     
                     <div className="flex items-baseline gap-1">
-                      <span className="text-xl font-bold text-foreground tracking-tight">$8,450,190</span>
-                      <span className="text-xs text-muted-foreground font-medium">.32</span>
+                      <span className="text-xl font-bold text-foreground tracking-tight">${stats.revenue_generated.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
+                      <span className="text-xs text-muted-foreground font-medium"></span>
                     </div>
 
                     <div className="flex items-center gap-2 mt-1 text-[10px]">
-                      <span className="text-muted-foreground">Last 30 Days</span>
-                      <span className="text-emerald-600 font-semibold flex items-center">+$1.8M</span>
-                      <span className="text-rose-500 font-semibold flex items-center">-$900K</span>
+                      <span className="text-muted-foreground">All time</span>
+                      <span className="text-emerald-600 font-semibold flex items-center"></span>
+                      <span className="text-rose-500 font-semibold flex items-center"></span>
                     </div>
                   </div>
 
@@ -338,7 +338,7 @@ export default function Dashboard() {
                 <div className="flex-1 basis-0 bg-white/70 backdrop-blur rounded-xl p-3 border border-white/80 shadow-sm flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between pb-2 border-b border-black/5">
-                      <span className="font-semibold text-xs text-foreground">Accounts</span>
+                      <span className="font-semibold text-xs text-foreground">Overview Metrics</span>
                       <div className="flex items-center gap-1.5 text-muted-foreground">
                         <Plus className="w-3.5 h-3.5 hover:text-foreground cursor-pointer" />
                         <MoreVertical className="w-3.5 h-3.5 hover:text-foreground cursor-pointer" />
@@ -347,33 +347,34 @@ export default function Dashboard() {
 
                     <div className="flex flex-col">
                       <div className="flex items-center justify-between py-3 text-xs">
-                        <span className="text-muted-foreground font-medium">Credit</span>
-                        <span className="font-semibold text-foreground">$98,125.50</span>
+                        <span className="text-muted-foreground font-medium">Total Customers</span>
+                        <span className="font-semibold text-foreground">{stats.total_customers.toLocaleString()}</span>
                       </div>
                       <div className="flex items-center justify-between py-3 text-xs">
-                        <span className="text-muted-foreground font-medium">Treasury</span>
-                        <span className="font-semibold text-foreground">$6,750,200.00</span>
+                        <span className="text-muted-foreground font-medium">Active Campaigns</span>
+                        <span className="font-semibold text-foreground">{stats.total_campaigns.toLocaleString()}</span>
                       </div>
                       <div className="flex items-center justify-between py-3 text-xs">
-                        <span className="text-muted-foreground font-medium">Operations</span>
-                        <span className="font-semibold text-foreground">$1,592,864.82</span>
+                        <span className="text-muted-foreground font-medium">Messages Sent</span>
+                        <span className="font-semibold text-foreground">{stats.total_messages_sent.toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="pt-2 border-t border-black/5 flex items-center justify-between text-[10px] text-muted-foreground">
-                    <span>3 connected entities</span>
-                    <span className="text-accent font-medium cursor-pointer hover:underline">Manage</span>
+                    <span>Real-time synched</span>
+                    <span className="text-accent font-medium cursor-pointer hover:underline"></span>
                   </div>
                 </div>
 
               </div>
 
-              {/* Transactions table: "Recent Transactions" heading, table with columns Date/Description/Amount/Status. 4 rows: AWS -$5,200 Pending (amber), Client Payment +$125,000 Completed (green), Payroll -$85,450 Completed, Office Supplies -$1,200 Completed */}
+              
+              {/* Recent Campaigns table */}
               <div className="bg-white/70 backdrop-blur rounded-xl p-3 border border-white/80 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold text-xs text-foreground">Recent Transactions</h4>
-                  <span className="text-[10px] text-accent font-medium cursor-pointer hover:underline">View all</span>
+                  <h4 className="font-semibold text-xs text-foreground">Recent Campaigns</h4>
+                  <span onClick={() => navigate('/campaigns')} className="text-[10px] text-accent font-medium cursor-pointer hover:underline">View all</span>
                 </div>
 
                 <div className="w-full overflow-x-auto">
@@ -381,58 +382,35 @@ export default function Dashboard() {
                     <thead>
                       <tr className="text-muted-foreground border-b border-black/5 pb-1">
                         <th className="pb-1.5 font-medium">Date</th>
-                        <th className="pb-1.5 font-medium">Description</th>
-                        <th className="pb-1.5 font-medium">Amount</th>
+                        <th className="pb-1.5 font-medium">Campaign Name</th>
+                        <th className="pb-1.5 font-medium">Sent</th>
                         <th className="pb-1.5 font-medium text-right">Status</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-black/5">
-                      <tr>
-                        <td className="py-2 text-muted-foreground">Today</td>
-                        <td className="py-2 font-medium text-foreground">AWS</td>
-                        <td className="py-2 text-rose-600 font-medium">-$5,200</td>
-                        <td className="py-2 text-right">
-                          <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
-                            Pending
-                          </span>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="py-2 text-muted-foreground">Yesterday</td>
-                        <td className="py-2 font-medium text-foreground">Client Payment</td>
-                        <td className="py-2 text-emerald-600 font-semibold">+$125,000</td>
-                        <td className="py-2 text-right">
-                          <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                            Completed
-                          </span>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="py-2 text-muted-foreground">Sep 04</td>
-                        <td className="py-2 font-medium text-foreground">Payroll</td>
-                        <td className="py-2 text-rose-600 font-medium">-$85,450</td>
-                        <td className="py-2 text-right">
-                          <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                            Completed
-                          </span>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="py-2 text-muted-foreground">Sep 02</td>
-                        <td className="py-2 font-medium text-foreground">Office Supplies</td>
-                        <td className="py-2 text-rose-600 font-medium">-$1,200</td>
-                        <td className="py-2 text-right">
-                          <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                            Completed
-                          </span>
-                        </td>
-                      </tr>
+                      {recentCampaigns.length > 0 ? recentCampaigns.map((camp, idx) => (
+                        <tr key={idx}>
+                          <td className="py-2 text-muted-foreground">{new Date(camp.created_at).toLocaleDateString()}</td>
+                          <td className="py-2 font-medium text-foreground">{camp.name}</td>
+                          <td className="py-2 text-muted-foreground font-medium">{camp.total_sent || 0} msgs</td>
+                          <td className="py-2 text-right">
+                            <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-semibold border ${
+                              camp.status === 'completed' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' :
+                              camp.status === 'running' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                              'bg-amber-100 text-amber-800 border-amber-200'
+                            }`}>
+                              {camp.status.charAt(0).toUpperCase() + camp.status.slice(1)}
+                            </span>
+                          </td>
+                        </tr>
+                      )) : (
+                        <tr><td colSpan="4" className="py-4 text-center text-muted-foreground">No recent campaigns</td></tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
               </div>
 
-            </div>
 
           </div>
         </div>
