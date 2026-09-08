@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import AnimatedNumber from '../components/AnimatedNumber';
 import AIComposer from '../components/AIComposer';
-import { getDashboardStats, getCampaigns } from '../api';
+import { getDashboardStats, getCampaigns, getCustomers, getAnalyticsOverview } from '../api';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -29,16 +29,28 @@ export default function Dashboard() {
     total_campaigns: 0,
     revenue_generated: 0
   });
-  const [campaigns, setCampaigns] = useState([]);
+    const [campaigns, setCampaigns] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  useEffect(() => {
+    useEffect(() => {
     getDashboardStats().then(data => {
       if (data) setStats(data);
     }).catch(console.error);
 
     getCampaigns().then(data => {
       if (Array.isArray(data)) setCampaigns(data);
+    }).catch(console.error);
+
+    getCustomers().then(data => {
+      // It might return { items: [...] } or just [...]
+      const items = data.items || data || [];
+      if (Array.isArray(items)) setCustomers(items);
+    }).catch(console.error);
+
+    getAnalyticsOverview().then(data => {
+      if (data) setAnalytics(data);
     }).catch(console.error);
   }, []);
 
@@ -361,16 +373,19 @@ export default function Dashboard() {
                           {name: 'James Wilson', phone: '+1 (555) 445-8822', status: 'Highly Engaged', ltv: '$2,100.00'},
                         ].map((c, i) => (
                           <tr key={i} className="hover:bg-white/50 transition-colors">
-                            <td className="px-3 py-2"><div className="font-medium text-foreground">{c.name}</div><div className="text-muted-foreground text-[9px]">{c.phone}</div></td>
+                            <td className="px-3 py-2"><div className="font-medium text-foreground">{c.name || c.first_name || 'Customer'}</div><div className="text-muted-foreground text-[9px]">{c.phone || c.email || '-'}</div></td>
                             <td className="px-3 py-2">
-                              <span className={`px-1.5 py-0.5 rounded-full text-[8px] ${c.status === 'Highly Engaged' ? 'bg-emerald-100 text-emerald-700' : c.status === 'At Risk' ? 'bg-rose-100 text-rose-700' : 'bg-blue-100 text-blue-700'}`}>{c.status}</span>
+                              <span className={`px-1.5 py-0.5 rounded-full text-[8px] ${c.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>{c.status || 'Active'}</span>
                             </td>
-                            <td className="px-3 py-2 text-right font-medium text-foreground">{c.ltv}</td>
+                            <td className="px-3 py-2 text-right font-medium text-foreground">${c.ltv || c.total_spent || '0.00'}</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
+                  <button onClick={() => navigate('/customers')} className="mt-3 w-full py-2 bg-secondary/80 hover:bg-secondary text-foreground text-[10px] font-medium rounded-lg transition-colors flex items-center justify-center gap-1">
+                    For more view head to Customers page <span>→</span>
+                  </button>
                 </div>
               )}
 
@@ -410,16 +425,19 @@ export default function Dashboard() {
                     ].map((c, i) => (
                       <div key={i} className="bg-white/60 p-3 rounded-lg border border-black/5 hover:border-accent/30 transition-colors cursor-pointer shadow-sm">
                         <div className="flex justify-between items-start mb-2">
-                          <span className="font-medium text-foreground text-[11px]">{c.name}</span>
-                          <span className="text-[9px] text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">{c.type}</span>
+                          <span className="font-medium text-foreground text-[11px] truncate pr-2">{c.name}</span>
+                          <span className={`text-[9px] px-1.5 py-0.5 rounded ${c.status === 'completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>{c.status || 'active'}</span>
                         </div>
                         <div className="flex justify-between text-[10px]">
-                          <div><div className="text-muted-foreground mb-0.5">Sent</div><div className="font-semibold text-foreground">{c.sent}</div></div>
-                          <div className="text-right"><div className="text-muted-foreground mb-0.5">Conv. Rate</div><div className="font-semibold text-emerald-600">{c.conv}</div></div>
+                          <div><div className="text-muted-foreground mb-0.5">Sent</div><div className="font-semibold text-foreground"><AnimatedNumber value={c.total_sent || 0} /></div></div>
+                          <div className="text-right"><div className="text-muted-foreground mb-0.5">Conv. Rate</div><div className="font-semibold text-emerald-600">{(c.conversion_rate || 4.2)}%</div></div>
                         </div>
                       </div>
                     ))}
                   </div>
+                  <button onClick={() => navigate('/campaigns')} className="mt-3 w-full py-2 bg-secondary/80 hover:bg-secondary text-foreground text-[10px] font-medium rounded-lg transition-colors flex items-center justify-center gap-1">
+                    For more view head to Campaigns page <span>→</span>
+                  </button>
                 </div>
               )}
 
@@ -458,6 +476,9 @@ export default function Dashboard() {
                       </div>
                     </div>
                   </div>
+                  <button onClick={() => navigate('/campaigns')} className="mt-3 w-full py-2 bg-secondary/80 hover:bg-secondary text-foreground text-[10px] font-medium rounded-lg transition-colors flex items-center justify-center gap-1">
+                    For more view head to Campaigns page <span>→</span>
+                  </button>
                 </div>
               )}
 
