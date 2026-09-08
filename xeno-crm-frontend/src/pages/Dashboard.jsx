@@ -186,7 +186,7 @@ const Dashboard = () => {
 
       <section className="dashboard-hero">
         <div className="dashboard-kicker"><span /> ThreadCo intelligence</div>
-        <h1 className="headline">Built for <em>intelligent</em><br />Performance</h1>
+        <h1 className="headline">Built for <em>intelligent</em><br />performance.</h1>
         <p className="intro">See the customer signals, campaign momentum, and revenue outcomes that matter—<br className="desktop-break" />at a glance.</p>
         <button onClick={() => navigate('/campaigns/new')} className="dashboard-primary-action">
           Launch campaign <span><ChevronRight size={17} strokeWidth={3} /></span>

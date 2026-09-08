@@ -93,15 +93,14 @@
 .dashboard-kicker span { width: 7px; height: 7px; border-radius: 50%; background: #ad314d; box-shadow: 0 0 0 4px rgba(173,49,77,.13); }
 .dashboard-hero h1 {
   margin: 19px 0 14px;
-  color: #fcfaf5;
-  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 4px 12px rgba(0,0,0,0.4);
+  color: #202020;
   font-size: clamp(38px, 6.2vw, 78px);
   font-weight: 400;
   letter-spacing: -.055em;
   line-height: .96;
 }
-.dashboard-hero h1 em { color: #fcfaf5; font-family: Georgia, "Times New Roman", serif; font-weight: 400; letter-spacing: -.07em; }
-.dashboard-hero > p { max-width: 590px; margin: 0 auto; color: #f5f5dc; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 8px rgba(0,0,0,0.5); font-size: clamp(14px, 1.6vw, 18px); line-height: 1.55; }
+.dashboard-hero h1 em { color: #ad314d; font-family: Georgia, "Times New Roman", serif; font-weight: 400; letter-spacing: -.07em; }
+.dashboard-hero > p { max-width: 590px; margin: 0 auto; color: #4a4a4a; font-size: clamp(14px, 1.6vw, 18px); line-height: 1.55; }
 .dashboard-primary-action {
   display: inline-flex;
   align-items: center;
