@@ -18,6 +18,7 @@ import {
   CreditCard,
   Sparkles
 } from 'lucide-react';
+import AIComposer from '../components/AIComposer';
 import { getDashboardStats, getCampaigns } from '../api';
 
 export default function Dashboard() {
@@ -28,6 +29,7 @@ export default function Dashboard() {
     revenue_generated: 8450190.32
   });
   const [campaigns, setCampaigns] = useState([]);
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   useEffect(() => {
     getDashboardStats().then(data => {
@@ -86,7 +88,7 @@ export default function Dashboard() {
           Book a demo
         </button>
         <button
-          onClick={() => navigate('/analytics')}
+          onClick={() => setActiveTab('analytics')}
           className="h-11 w-11 rounded-full border-0 bg-background shadow-[0_2px_12px_rgba(0,0,0,0.08)] hover:bg-background/80 flex items-center justify-center transition-all group active:scale-95"
           title="Watch Overview"
         >
@@ -156,7 +158,7 @@ export default function Dashboard() {
               <div className="flex flex-col gap-1">
                 
                 <button 
-                  onClick={() => navigate('/dashboard')}
+                  onClick={() => setActiveTab('dashboard')}
                   className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg font-medium text-foreground bg-white/70 border border-white/80 shadow-sm text-left"
                 >
                   <LayoutDashboard className="w-3.5 h-3.5 text-accent" />
@@ -164,7 +166,7 @@ export default function Dashboard() {
                 </button>
 
                 <button 
-                  onClick={() => navigate('/customers')}
+                  onClick={() => setActiveTab('customers')}
                   className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/40 transition-colors text-left"
                 >
                   <Users className="w-3.5 h-3.5" />
@@ -172,7 +174,7 @@ export default function Dashboard() {
                 </button>
 
                 <button 
-                  onClick={() => navigate('/segments')}
+                  onClick={() => setActiveTab('segments')}
                   className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/40 transition-colors text-left"
                 >
                   <Filter className="w-3.5 h-3.5" />
@@ -180,7 +182,7 @@ export default function Dashboard() {
                 </button>
 
                 <button 
-                  onClick={() => navigate('/campaigns')}
+                  onClick={() => setActiveTab('campaigns')}
                   className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/40 transition-colors text-left"
                 >
                   <Send className="w-3.5 h-3.5" />
@@ -188,7 +190,7 @@ export default function Dashboard() {
                 </button>
 
                 <button 
-                  onClick={() => navigate('/analytics')}
+                  onClick={() => setActiveTab('analytics')}
                   className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/40 transition-colors text-left"
                 >
                   <Building2 className="w-3.5 h-3.5" />
@@ -217,31 +219,33 @@ export default function Dashboard() {
                   New Campaign
                 </button>
                 <button 
-                  onClick={() => navigate('/customers')}
+                  onClick={() => setActiveTab('customers')}
                   className="bg-white/70 border border-white/80 text-foreground hover:bg-white rounded-full px-3 py-1 font-medium text-[10px] transition-colors"
                 >
                   Customers
                 </button>
                 <button 
-                  onClick={() => navigate('/segments')}
+                  onClick={() => setActiveTab('segments')}
                   className="bg-white/70 border border-white/80 text-foreground hover:bg-white rounded-full px-3 py-1 font-medium text-[10px] transition-colors"
                 >
                   Segments
                 </button>
                 <button 
-                  onClick={() => navigate('/campaigns')}
+                  onClick={() => setActiveTab('campaigns')}
                   className="bg-white/70 border border-white/80 text-foreground hover:bg-white rounded-full px-3 py-1 font-medium text-[10px] transition-colors"
                 >
                   Campaigns
                 </button>
                 <button 
-                  onClick={() => navigate('/analytics')}
+                  onClick={() => setActiveTab('analytics')}
                   className="bg-white/70 border border-white/80 text-foreground hover:bg-white rounded-full px-3 py-1 font-medium text-[10px] transition-colors"
                 >
                   Analytics
                 </button>
               </div>
 
+              {activeTab === 'dashboard' && (
+              <>
               {/* Two equal-width cards (flex-1 basis-0) side by side: */}
               <div className="flex flex-col sm:flex-row gap-3">
                 
@@ -331,7 +335,7 @@ export default function Dashboard() {
               <div className="bg-white/70 backdrop-blur rounded-xl p-3 border border-white/80 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-semibold text-xs text-foreground">Recent Campaigns</h4>
-                  <span onClick={() => navigate('/campaigns')} className="text-[10px] text-accent font-medium cursor-pointer hover:underline">View all</span>
+                  <span onClick={() => setActiveTab('campaigns')} className="text-[10px] text-accent font-medium cursor-pointer hover:underline">View all</span>
                 </div>
 
                 <div className="w-full overflow-x-auto">
@@ -367,6 +371,56 @@ export default function Dashboard() {
                   </table>
                 </div>
               </div>
+              </>
+              )}
+
+              {activeTab === 'customers' && (
+                <div className="flex-1 bg-white/70 backdrop-blur rounded-xl p-6 border border-white/80 shadow-sm flex flex-col items-center justify-center text-center animate-in fade-in zoom-in-95 duration-300">
+                  <Users className="w-8 h-8 text-accent mb-3" />
+                  <h4 className="font-semibold text-foreground text-sm">Customers Preview</h4>
+                  <p className="text-xs text-muted-foreground mt-1.5 max-w-xs mb-4">View a live snapshot of your audience directory. Synchronized in real-time.</p>
+                  <button onClick={() => navigate('/customers')} className="px-4 py-1.5 bg-foreground text-background rounded-full text-[11px] font-medium hover:bg-foreground/90 transition-colors">Open Full Directory</button>
+                </div>
+              )}
+
+              {activeTab === 'segments' && (
+                <div className="flex-1 bg-white/70 backdrop-blur rounded-xl p-4 border border-white/80 shadow-sm flex flex-col animate-in fade-in zoom-in-95 duration-300 overflow-hidden">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-semibold text-foreground text-xs flex items-center gap-1.5"><Filter className="w-3.5 h-3.5 text-accent"/> Segments</h4>
+                    <button onClick={() => navigate('/segments')} className="text-[10px] text-accent font-medium hover:underline">Go to full page</button>
+                  </div>
+                  <div className="aicomposer-override transform scale-[0.85] origin-top -mt-4 w-[117%]">
+                    <AIComposer onSaved={() => navigate('/segments')} />
+                  </div>
+                  <style>{`
+                    .aicomposer-override * { color: var(--foreground); }
+                    .aicomposer-override input, .aicomposer-override textarea { background: rgba(255,255,255,0.5) !important; border-color: rgba(0,0,0,0.1) !important; }
+                    .aicomposer-override input::placeholder, .aicomposer-override textarea::placeholder { color: rgba(0,0,0,0.3) !important; }
+                    .aicomposer-override p, .aicomposer-override span { color: var(--muted-foreground) !important; }
+                    .aicomposer-override button.bg-brand-500 { background: var(--accent) !important; }
+                    .aicomposer-override button.bg-brand-500 * { color: #ffffff !important; }
+                    .aicomposer-override .aicomposer-title { color: var(--foreground) !important; }
+                  `}</style>
+                </div>
+              )}
+
+              {activeTab === 'campaigns' && (
+                <div className="flex-1 bg-white/70 backdrop-blur rounded-xl p-6 border border-white/80 shadow-sm flex flex-col items-center justify-center text-center animate-in fade-in zoom-in-95 duration-300">
+                  <Send className="w-8 h-8 text-accent mb-3" />
+                  <h4 className="font-semibold text-foreground text-sm">Campaigns Preview</h4>
+                  <p className="text-xs text-muted-foreground mt-1.5 max-w-xs mb-4">Monitor active marketing flows and review recent broadcast performance.</p>
+                  <button onClick={() => navigate('/campaigns')} className="px-4 py-1.5 bg-foreground text-background rounded-full text-[11px] font-medium hover:bg-foreground/90 transition-colors">Manage Campaigns</button>
+                </div>
+              )}
+
+              {activeTab === 'analytics' && (
+                <div className="flex-1 bg-white/70 backdrop-blur rounded-xl p-6 border border-white/80 shadow-sm flex flex-col items-center justify-center text-center animate-in fade-in zoom-in-95 duration-300">
+                  <Building2 className="w-8 h-8 text-accent mb-3" />
+                  <h4 className="font-semibold text-foreground text-sm">Analytics Preview</h4>
+                  <p className="text-xs text-muted-foreground mt-1.5 max-w-xs mb-4">Dive deep into revenue metrics, conversion rates, and ROI across all channels.</p>
+                  <button onClick={() => navigate('/analytics')} className="px-4 py-1.5 bg-foreground text-background rounded-full text-[11px] font-medium hover:bg-foreground/90 transition-colors">View Analytics</button>
+                </div>
+              )}
 
 
           </div>
