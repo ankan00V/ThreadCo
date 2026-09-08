@@ -118,19 +118,12 @@ export default function Dashboard() {
           <div className="flex items-center justify-between pb-3 border-b border-white/40">
             {/* Left Brand */}
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-md bg-foreground text-background flex items-center justify-center font-bold text-xs shadow-sm">
-                N
-              </div>
+              <img src="/app-logo.png" alt="ThreadCo" className="w-6 h-6 rounded-md shadow-sm object-contain bg-white/50" />
               <span className="font-semibold text-xs tracking-tight text-foreground">ThreadCo CRM</span>
               <ChevronDown className="w-3.5 h-3.5 text-muted-foreground opacity-70" />
             </div>
 
-            {/* Search Bar */}
-            <div className="hidden sm:flex items-center gap-2 bg-white/60 border border-white/80 rounded-lg px-2.5 py-1 w-64 shadow-inner">
-              <Search className="w-3.5 h-3.5 text-muted-foreground" />
-              <span className="text-muted-foreground text-[11px]">Search commands...</span>
-              <kbd className="ml-auto text-[9px] bg-secondary/80 px-1 py-0.5 rounded text-muted-foreground font-mono">⌘K</kbd>
-            </div>
+            
 
             {/* Right Actions */}
             <div className="flex items-center gap-2">
@@ -138,13 +131,8 @@ export default function Dashboard() {
                 onClick={() => navigate('/campaigns/new')}
                 className="bg-accent hover:bg-accent/90 text-accent-foreground font-medium rounded-full px-3 py-1 text-[11px] shadow-sm transition-all"
               >New Campaign</button>
-              <div className="relative p-1 rounded-full text-foreground hover:bg-white/40 transition-colors cursor-pointer">
-                <Bell className="w-4 h-4 text-foreground/80" />
-                <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-accent rounded-full ring-2 ring-white"></span>
-              </div>
-              <div className="w-6 h-6 rounded-full bg-secondary text-foreground font-semibold flex items-center justify-center text-[10px] border border-white/70 shadow-sm">
-                JB
-              </div>
+              
+              <div className="w-6 h-6 rounded-full bg-accent/10 text-accent font-bold flex items-center justify-center text-[10px] border border-accent/20 shadow-sm">AD</div>
             </div>
           </div>
 
