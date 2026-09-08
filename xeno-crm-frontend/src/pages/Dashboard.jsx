@@ -90,7 +90,7 @@ const DotMetric = ({ targetValue = 0, formatType = 'comma', pitchX = 5, pitchY =
 
   const height = 6 * pitchY + dotRadius * 2;
   return (
-    <svg className={`dot-svg ${className}`} viewBox={`0 0 ${currentX} ${height}`} fill="currentColor" style={{ height: '1em', display: 'block', overflow: 'visible' }}>
+    <svg className={`dot-svg ${className}`} viewBox={`0 0 ${currentX} ${height}`} fill="currentColor" style={{ height: `calc(${height} * var(--u))`, display: 'block', overflow: 'visible' }}>
       {circles}
     </svg>
   );
@@ -316,7 +316,7 @@ const Dashboard = () => {
           <RadarVisual />
           
           <div className="metric metric--speed">
-            <DotMetric targetValue={stats.total_customers || 0} formatType="comma" />
+            <div className="dot-number"><DotMetric targetValue={stats.total_customers || 0} formatType="comma" /></div>
           </div>
           <p className="caption">Registered shoppers<br />across your audience</p>
           
@@ -337,7 +337,7 @@ const Dashboard = () => {
           <ContextWall />
           
           <div className="metric metric--context">
-            <DotMetric targetValue={stats.total_campaigns || 0} formatType="compact" dotRadius={2.32} />
+            <div className="dot-number"><DotMetric targetValue={stats.total_campaigns || 0} formatType="compact" dotRadius={2.32} /></div>
             <span className="metric__unit">{formatNumberStr(stats.total_campaigns || 0).replace(/[0-9.]/g, '') || ' '}</span>
           </div>
           <p className="caption">Active and completed<br />campaigns</p>
@@ -360,7 +360,7 @@ const Dashboard = () => {
           
           <div className="metric metric--connections">
             <span style={{fontSize:'calc(30.6 * var(--u))', transform:'translateY(3u)', marginRight:'4px'}}>$</span>
-            <DotMetric targetValue={stats.revenue_generated || 0} formatType="compact" />
+            <div className="dot-number"><DotMetric targetValue={stats.revenue_generated || 0} formatType="compact" /></div>
             <span className="metric__unit">{formatNumberStr(stats.revenue_generated || 0).replace(/[0-9.]/g, '')}</span>
           </div>
           <p className="caption">Revenue attributed to<br />customer outcomes</p>
