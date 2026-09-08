@@ -90,7 +90,7 @@ const DotMetric = ({ targetValue = 0, formatType = 'comma', pitchX = 5, pitchY =
 
   const height = 6 * pitchY + dotRadius * 2;
   return (
-    <svg className={`dot-svg ${className}`} viewBox={`0 0 ${currentX} ${height}`} fill="currentColor" style={{ width: '100%', height: 'auto', display: 'block', overflow: 'visible' }}>
+    <svg className={`dot-svg ${className}`} viewBox={`0 0 ${currentX} ${height}`} fill="currentColor" style={{ height: '1em', display: 'block', overflow: 'visible' }}>
       {circles}
     </svg>
   );
@@ -316,7 +316,7 @@ const Dashboard = () => {
           <RadarVisual />
           
           <div className="metric metric--speed">
-            <div className="dot-number"><DotMetric targetValue={stats.total_customers || 0} formatType="comma" /></div>
+            <DotMetric targetValue={stats.total_customers || 0} formatType="comma" />
           </div>
           <p className="caption">Registered shoppers<br />across your audience</p>
           
@@ -337,7 +337,7 @@ const Dashboard = () => {
           <ContextWall />
           
           <div className="metric metric--context">
-            <div className="dot-number"><DotMetric targetValue={stats.total_campaigns || 0} formatType="compact" dotRadius={2.32} /></div>
+            <DotMetric targetValue={stats.total_campaigns || 0} formatType="compact" dotRadius={2.32} />
             <span className="metric__unit">{formatNumberStr(stats.total_campaigns || 0).replace(/[0-9.]/g, '') || ' '}</span>
           </div>
           <p className="caption">Active and completed<br />campaigns</p>
