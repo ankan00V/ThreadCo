@@ -89,3 +89,24 @@ npm run dev
 📄 **System Design**
 
 For deep architectural decisions, data flow diagrams, and scale assumptions, see [SYSTEM_DESIGN.md](./SYSTEM_DESIGN.md).
+
+---
+
+## Render free-tier keep-warm setup
+
+The backend exposes two operational endpoints:
+
+- `/healthz` — process liveness only; used by the keep-warm workflow.
+- `/health` — database readiness; use for deployment or diagnostic checks.
+
+To enable the scheduled request, add a GitHub repository **Actions variable**
+called `BACKEND_HEALTH_URL` with the exact deployed URL ending in `/healthz`,
+for example `https://your-service.onrender.com/healthz`. The workflow at
+`.github/workflows/keep-render-awake.yml` requests it every five minutes and
+can also be run manually from the Actions tab.
+
+This is suitable for a recruiter demo, not production availability: Render can
+still restart free services, GitHub schedules can be delayed, and keeping one
+service active continuously consumes almost all of Render's 750 free instance
+hours in a 31-day month. Use a paid Render instance for a true always-on
+backend.

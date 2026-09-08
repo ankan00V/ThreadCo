@@ -1,0 +1,26 @@
+name: Keep Render backend awake
+
+on:
+  schedule:
+    # GitHub Actions supports scheduled workflows at a five-minute minimum.
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Request the liveness endpoint
+        env:
+          BACKEND_HEALTH_URL: ${{ vars.BACKEND_HEALTH_URL }}
+        run: |
+          test -n "$BACKEND_HEALTH_URL" || {
+            echo "Repository variable BACKEND_HEALTH_URL is not configured." >&2
+            exit 1
+          }
+          curl --fail --silent --show-error --location \
+            --connect-timeout 15 --max-time 90 --retry 2 --retry-all-errors \
+            "$BACKEND_HEALTH_URL"

@@ -103,6 +103,18 @@ app.include_router(channel_stub.router)
 def health_check():
     return {"status": "ok", "service": "xeno-crm"}
 
+
+@app.get("/healthz", include_in_schema=False)
+def liveness_check():
+    """Return process liveness without touching dependencies.
+
+    This endpoint is deliberately inexpensive so platform checks and the
+    external keep-warm job do not create database load or expose DB failures.
+    Use ``/health`` when a database-readiness check is required.
+    """
+    return {"status": "ok", "service": "xeno-crm"}
+
+
 @app.get("/health")
 def db_health_check(db: Session = Depends(get_db)):
     """Health check endpoint that tests DB connectivity."""
