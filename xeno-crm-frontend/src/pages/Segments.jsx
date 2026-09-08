@@ -26,7 +26,7 @@ const Segments = () => {
   }, []);
 
   return (
-    <div className="w-full px-3 sm:px-4 pt-8 mt-2 max-w-[1100px] mx-auto pb-12 font-['Inter']">
+    <div className="product-page product-page--segments w-full px-3 sm:px-4 pt-8 mt-2 max-w-[1100px] mx-auto pb-12 font-['Inter']">
       
       {/* Header */}
       <div className="mb-6 px-2 text-center flex flex-col items-center">

@@ -3,7 +3,7 @@ import Navbar from './Navbar';
 
 const Layout = ({ children }) => {
   return (
-    <div className="min-h-screen w-full bg-black font-inter">
+    <div className="product-stage min-h-screen w-full font-inter">
       <div className="relative w-full h-[100dvh] overflow-hidden flex flex-col">
         
         {/* Background Video */}
@@ -16,14 +16,14 @@ const Layout = ({ children }) => {
           disableRemotePlayback
           webkit-playsinline="true"
           x5-playsinline="true"
-          poster="https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&q=60"
+          poster="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/5c3ec08f-2dbf-4c0a-8588-f6106a789443.webp"
           className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
         >
-          <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4" type="video/mp4" />
+          <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260826_125226_45cb4f38-aa7e-47e1-885d-ae0b69745369.mp4" type="video/mp4" />
         </video>
         
         {/* Overlay */}
-        <div className="absolute inset-0 bg-white/10" />
+        <div className="absolute inset-0 product-stage__veil" />
 
         <Navbar />
 

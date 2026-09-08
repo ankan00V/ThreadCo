@@ -39,7 +39,7 @@ export default function Analytics() {
   const { summary, revenue_by_month: monthly, city_performance: cities, lifecycle_distribution: lifecycle, data_quality: quality, recommendations, query_health: queryHealth } = data;
 
   return (
-    <div className="mx-auto mt-6 w-full max-w-[1100px] px-3 pb-12 pt-8 sm:px-4">
+    <div className="product-page product-page--analytics mx-auto mt-6 w-full max-w-[1100px] px-3 pb-12 pt-8 sm:px-4">
       <div className="mb-7 px-2">
         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 backdrop-blur-md">
           <span className="h-2 w-2 rounded-full bg-[#ef4d23]" />

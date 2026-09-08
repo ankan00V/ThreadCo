@@ -111,7 +111,7 @@ const NewCampaign = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pt-8 pb-12 px-4">
+    <div className="product-page product-page--campaign-builder max-w-6xl mx-auto space-y-6 pt-8 pb-12 px-4">
       <div className="flex items-center space-x-4 mb-8">
         <Link to="/campaigns" className="p-2 bg-white/10 border border-white/20 hover:bg-white/20 backdrop-blur-md rounded-full transition-colors shadow-sm">
           <ArrowLeft className="w-5 h-5 text-white" />

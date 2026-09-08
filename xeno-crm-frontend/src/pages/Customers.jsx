@@ -54,7 +54,7 @@ const Customers = () => {
   const totalPages = Math.ceil(totalCustomers / perPage) || 1;
 
   return (
-    <div className="w-full px-3 sm:px-4 pt-8 mt-2 max-w-[1100px] mx-auto pb-12">
+    <div className="product-page product-page--customers w-full px-3 sm:px-4 pt-8 mt-2 max-w-[1100px] mx-auto pb-12">
       
       {/* Header */}
       <div className="mb-6 px-2">

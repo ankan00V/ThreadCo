@@ -108,7 +108,7 @@ const CampaignDetail = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pt-8">
+    <div className="product-page product-page--campaign-detail max-w-7xl mx-auto space-y-8 pt-8 pb-12 px-4">
       {/* Top Header */}
       <div className="flex items-center space-x-4 mb-8">
         <button onClick={() => navigate('/campaigns')}

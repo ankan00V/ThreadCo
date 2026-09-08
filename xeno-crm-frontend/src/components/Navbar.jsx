@@ -17,7 +17,7 @@ export default function Navbar() {
   ];
 
   return (
-    <div className="flex justify-center pt-4 sm:pt-6 px-3 sm:px-4 w-full relative z-50 font-['Inter']">
+    <div className="product-navbar flex justify-center pt-4 sm:pt-6 px-3 sm:px-4 w-full relative z-50 font-['Inter']">
       <div className="bg-[#fcfaf5] rounded-full shadow-sm border border-neutral-200 p-2 w-max sm:w-full sm:pl-2 sm:pr-2 sm:py-2 max-w-[760px] relative flex items-center mx-auto sm:mx-0">
         
         {/* Logo */}
