@@ -120,32 +120,89 @@ const RadarVisual = () => {
   );
 };
 
-const ContextVisual = () => (
-  <div className="context-window">
-    <div className="window-lines span1" />
-    <div className="window-lines span2" />
-    <div className="window-lines span3" />
-  </div>
+
+const ContextWall = () => (
+  <>
+    <svg className="context-backdrop" viewBox="0 0 429 554" preserveAspectRatio="none">
+      <defs>
+        <mask id="deepM">
+          <rect x="0" y="0" width="429" height="554" fill="url(#deepMaskGrad)"/>
+        </mask>
+        <linearGradient id="deepMaskGrad" x1="0" y1="0" x2="0" y2="1">
+           <stop offset="0" stopColor="#000" />
+           <stop offset=".54" stopColor="#000" />
+           <stop offset=".58" stopColor="rgba(0,0,0,.72)" />
+           <stop offset=".62" stopColor="rgba(0,0,0,.18)" />
+           <stop offset=".65" stopColor="transparent" />
+        </linearGradient>
+        <filter id="tileSoft"><feGaussianBlur stdDeviation="3.4"/></filter>
+        <filter id="groutSoft"><feGaussianBlur stdDeviation="6.5"/></filter>
+        <linearGradient id="tTLf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#d4b0ee" stopOpacity=".05"/><stop offset="1" stopColor="#c6bbff" stopOpacity=".18"/></linearGradient>
+        <linearGradient id="tTCf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#d5c2ff" stopOpacity=".22"/><stop offset=".26" stopColor="#e0bdff" stopOpacity=".26"/><stop offset=".32" stopColor="#f2a0ee" stopOpacity=".32"/><stop offset=".34" stopColor="#ff96da" stopOpacity=".34"/></linearGradient>
+        <linearGradient id="tTRf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ffe8da" stopOpacity=".56"/><stop offset=".26" stopColor="#f9c6d0" stopOpacity=".26"/><stop offset=".08" stopColor="#eba4bf" stopOpacity=".08"/></linearGradient>
+        <linearGradient id="tMRf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#e858b8" stopOpacity=".52"/><stop offset=".46" stopColor="#e6459c" stopOpacity=".46"/><stop offset="1" stopColor="#de74ba" stopOpacity=".16"/></linearGradient>
+        <linearGradient id="deepX" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="maroon"/><stop offset=".33" stopColor="coral"/><stop offset=".66" stopColor="pink"/><stop offset="1" stopColor="blue"/></linearGradient>
+      </defs>
+      <g mask="url(#deepM)" filter="url(#tileSoft)">
+         <rect x="-24" y="22" width="106" height="149" rx="15" fill="url(#tTLf)"/>
+         <rect x="88" y="22" width="247" height="150" rx="15" fill="url(#tTCf)"/>
+         <rect x="346" y="22" width="111" height="147" rx="15" fill="url(#tTRf)"/>
+         <rect x="-24" y="177" width="108" height="174" rx="15" fill="#e0c2ff" fillOpacity="0.2"/>
+         <rect x="88" y="177" width="247" height="174" rx="15" fill="#d5c2ff" fillOpacity="0.2"/>
+         <rect x="344" y="175" width="113" height="176" rx="15" fill="url(#tMRf)"/>
+      </g>
+      <rect x="-24" y="384" width="480" height="170" fill="url(#deepX)" mask="url(#deepM)"/>
+      <g filter="url(#groutSoft)">
+        <rect x="81" y="30" width="8" height="150" fill="rgba(255,255,255,0.2)"/>
+        <rect x="338" y="30" width="8" height="322" fill="rgba(255,255,255,0.2)"/>
+        <rect x="0" y="167" width="429" height="12" fill="rgba(255,255,255,0.2)"/>
+      </g>
+      <ellipse cx="352" cy="86" rx="140" ry="108" fill="#fff" opacity="0.1"/>
+      <ellipse cx="75" cy="150" rx="82" ry="54" fill="#fff" opacity="0.1"/>
+      <ellipse cx="8" cy="334" rx="76" ry="58" fill="#fff" opacity="0.1"/>
+      <ellipse cx="56" cy="215" rx="56" ry="62" fill="#fff" opacity="0.1"/>
+    </svg>
+    <div className="context-window">
+      <div className="window-lines">
+        <span className="span1" />
+        <span className="span2" />
+        <span className="span3" />
+      </div>
+    </div>
+  </>
 );
 
+
 const ConnectionVisual = () => (
-  <div className="connections-map">
-    <svg viewBox="0 0 429 238" preserveAspectRatio="none">
-      <path d="M0 5H128c27 0 36 7 39 26 2 16 9 22 24 22h106c16 0 23-8 25-25 2-16 10-23 31-23h76" stroke="#fff" strokeWidth="1" fill="none" opacity=".20"/>
-      <path d="M0 117h46c15 0 22 8 26 25 5 23 12 31 31 31h174c18 0 25-8 30-31 4-17 11-25 26-25h96" stroke="#fff" strokeWidth="1" fill="none" opacity=".30"/>
-      <path d="M0 173h87c15 0 22 7 27 25 4 15 11 22 28 22h140c17 0 25-7 29-22 5-18 12-25 28-25h90" stroke="#fff" strokeWidth="1" fill="none" opacity=".34"/>
-      <path d="M0 228h120c17 0 25-5 28-18 4-15 10-20 28-20h81c18 0 25 6 28 20 4 13 11 18 28 18h116" stroke="#fff" strokeWidth="1" fill="none" opacity=".16"/>
-      <path d="M0 5H429M0 61H429M0 117H429" stroke="#fff" strokeWidth="1" fill="none" opacity=".26"/>
-      <path d="M0 173H429" stroke="#fff" strokeWidth="1" fill="none" opacity=".09"/>
-      <path d="M0 61h95c14 0 22-6 27-20 4-13 12-20 27-20h115c15 0 23 6 27 20 5 14 13 20 28 20h110" stroke="#fff8dd" strokeWidth="1.15" fill="none" opacity=".52"/>
-      <path d="M0 117h88c15 0 22-8 25-25 4-24 12-31 31-31h129c20 0 27 7 31 31 3 17 10 25 26 25h99" stroke="#fff8dd" strokeWidth="1.15" fill="none" opacity=".94"/>
-      <circle cx="45" cy="117" r="6.5" fill="#fff"/>
-      <circle cx="133" cy="61" r="6.5" fill="#fff4a7"/>
-      <circle cx="189" cy="61" r="6.5" fill="#fff1a4"/>
-      <circle cx="319" cy="61" r="6.5" fill="#fff4a6"/>
-      <circle cx="319" cy="117" r="6.5" fill="#fff2a0"/>
-    </svg>
-  </div>
+  <svg className="connections-map" viewBox="0 0 429 238" preserveAspectRatio="none">
+    <defs>
+      <mask id="connMask">
+        <linearGradient id="connMaskGrad" x1="0" y1="0" x2="0" y2="1">
+           <stop offset="0" stopColor="#000" />
+           <stop offset=".50" stopColor="#000" />
+           <stop offset=".67" stopColor="rgba(0,0,0,.46)" />
+           <stop offset=".83" stopColor="rgba(0,0,0,.15)" />
+           <stop offset=".96" stopColor="transparent" />
+        </linearGradient>
+        <rect x="0" y="0" width="429" height="238" fill="url(#connMaskGrad)"/>
+      </mask>
+    </defs>
+    <g mask="url(#connMask)">
+      <path opacity=".20" stroke="#fff" strokeWidth="1" fill="none" d="M0 5H128c27 0 36 7 39 26 2 16 9 22 24 22h106c16 0 23-8 25-25 2-16 10-23 31-23h76" />
+      <path opacity=".30" stroke="#fff" strokeWidth="1" fill="none" d="M0 117h46c15 0 22 8 26 25 5 23 12 31 31 31h174c18 0 25-8 30-31 4-17 11-25 26-25h96" />
+      <path opacity=".34" stroke="#fff" strokeWidth="1" fill="none" d="M0 173h87c15 0 22 7 27 25 4 15 11 22 28 22h140c17 0 25-7 29-22 5-18 12-25 28-25h90" />
+      <path opacity=".16" stroke="#fff" strokeWidth="1" fill="none" d="M0 228h120c17 0 25-5 28-18 4-15 10-20 28-20h81c18 0 25 6 28 20 4 13 11 18 28 18h116" />
+      <path opacity=".26" stroke="#fff" strokeWidth="1" fill="none" d="M0 5H429M0 61H429M0 117H429" />
+      <path opacity=".09" stroke="#fff" strokeWidth="1" fill="none" d="M0 173H429" />
+      <path opacity=".52" stroke="#fff8dd" strokeWidth="1.15" fill="none" d="M0 61h95c14 0 22-6 27-20 4-13 12-20 27-20h115c15 0 23 6 27 20 5 14 13 20 28 20h110" />
+      <path opacity=".94" stroke="#fff8dd" strokeWidth="1.15" fill="none" d="M0 117h88c15 0 22-8 25-25 4-24 12-31 31-31h129c20 0 27 7 31 31 3 17 10 25 26 25h99" />
+      <circle cx="45" cy="117" r="6.5" fill="#fff" />
+      <circle cx="133" cy="61" r="6.5" fill="#fff4a7" />
+      <circle cx="189" cy="61" r="6.5" fill="#fff1a4" />
+      <circle cx="319" cy="61" r="6.5" fill="#fff4a6" />
+      <circle cx="319" cy="117" r="6.5" fill="#fff2a0" />
+    </g>
+  </svg>
 );
 
 const formatNumberStr = (num) => {
@@ -228,7 +285,7 @@ const Dashboard = () => {
           </div>
           
           <h2 className="card__title">Campaign Activity<br /><span style={{fontWeight: 400}}>Campaign reach</span></h2>
-          <ContextVisual />
+          <ContextWall />
           
           <div className="metric metric--context">
             <DotMetric value={formatNumberStr(stats.total_campaigns || 0).replace(/[A-Z]/g, '')} dotRadius={2.32} />
