@@ -150,11 +150,11 @@ export default function Dashboard() {
           {/* Body: Sidebar (w-40) + Main Content */}
           <div className="flex flex-col md:flex-row gap-3 pt-3">
             
+            
             {/* Sidebar (w-40) */}
             <div className="w-full md:w-40 shrink-0 flex flex-col justify-between gap-4 pr-1">
               <div className="flex flex-col gap-1">
                 
-                {/* Items — Home (active), Tasks (badge "10"), Transactions, Payments (chevron), Cards, Capital, Accounts (chevron) */}
                 <button 
                   onClick={() => navigate('/dashboard')}
                   className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg font-medium text-foreground bg-white/70 border border-white/80 shadow-sm text-left"
@@ -164,33 +164,11 @@ export default function Dashboard() {
                 </button>
 
                 <button 
-                  onClick={() => navigate('/campaigns')}
-                  className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/40 transition-colors text-left"
-                >
-                  <div className="flex items-center gap-2">
-                    <Send className="w-3.5 h-3.5" />
-                    <span>Tasks</span>
-                  </div>
-                  <span className="bg-accent/15 text-accent px-1.5 py-0.2 rounded-full text-[9px] font-semibold">10</span>
-                </button>
-
-                <button 
                   onClick={() => navigate('/customers')}
                   className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/40 transition-colors text-left"
                 >
                   <Users className="w-3.5 h-3.5" />
-                  <span>Transactions</span>
-                </button>
-
-                <button 
-                  onClick={() => navigate('/campaigns')}
-                  className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/40 transition-colors text-left"
-                >
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="w-3.5 h-3.5" />
-                    <span>Payments</span>
-                  </div>
-                  <ChevronDown className="w-3 h-3 opacity-60" />
+                  <span>Customers</span>
                 </button>
 
                 <button 
@@ -198,7 +176,15 @@ export default function Dashboard() {
                   className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/40 transition-colors text-left"
                 >
                   <Filter className="w-3.5 h-3.5" />
-                  <span>Cards</span>
+                  <span>Segments</span>
+                </button>
+
+                <button 
+                  onClick={() => navigate('/campaigns')}
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/40 transition-colors text-left"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Campaigns</span>
                 </button>
 
                 <button 
@@ -206,30 +192,9 @@ export default function Dashboard() {
                   className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/40 transition-colors text-left"
                 >
                   <Building2 className="w-3.5 h-3.5" />
-                  <span>Capital</span>
+                  <span>Analytics</span>
                 </button>
 
-                <button 
-                  onClick={() => navigate('/customers')}
-                  className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/40 transition-colors text-left"
-                >
-                  <div className="flex items-center gap-2">
-                    <SlidersHorizontal className="w-3.5 h-3.5" />
-                    <span>Overview Metrics</span>
-                  </div>
-                  <ChevronDown className="w-3 h-3 opacity-60" />
-                </button>
-              </div>
-
-              {/* Section Workflows: Trake rutes, Payments, Notifications, Settings */}
-              <div className="pt-2 border-t border-white/30 flex flex-col gap-1">
-                <span className="px-2.5 text-[9px] uppercase tracking-wider font-semibold text-muted-foreground/70">Workflows</span>
-                <div className="flex flex-col gap-0.5">
-                  <span onClick={() => navigate('/campaigns')} className="px-2.5 py-1 rounded text-muted-foreground hover:text-foreground cursor-pointer transition-colors">Trake rutes</span>
-                  <span onClick={() => navigate('/campaigns/new')} className="px-2.5 py-1 rounded text-muted-foreground hover:text-foreground cursor-pointer transition-colors">Payments</span>
-                  <span onClick={() => navigate('/analytics')} className="px-2.5 py-1 rounded text-muted-foreground hover:text-foreground cursor-pointer transition-colors">Notifications</span>
-                  <span onClick={() => navigate('/customers')} className="px-2.5 py-1 rounded text-muted-foreground hover:text-foreground cursor-pointer transition-colors">Settings</span>
-                </div>
               </div>
             </div>
 
@@ -315,8 +280,8 @@ export default function Dashboard() {
                     <svg className="w-full h-full overflow-visible" viewBox="0 0 300 80" preserveAspectRatio="none">
                       <defs>
                         <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="hsl(var(--accent))" stopOpacity="0.15" />
-                          <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity="0.0" />
+                          <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.15" />
+                          <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.0" />
                         </linearGradient>
                       </defs>
                       <path
@@ -326,7 +291,7 @@ export default function Dashboard() {
                       <path
                         d="M 0,65 C 40,55 70,30 110,40 C 150,50 190,15 240,25 C 270,30 285,10 300,12"
                         fill="none"
-                        stroke="hsl(var(--accent))"
+                        stroke="var(--accent)"
                         strokeWidth="1.5"
                         strokeLinecap="round"
                       />

@@ -56,27 +56,27 @@ const Segments = () => {
         }}
       >
         <style>{`
-          .aicomposer-override * { color: hsl(var(--foreground)); }
+          .aicomposer-override * { color: var(--foreground); }
           .aicomposer-override input, .aicomposer-override textarea {
               background: rgba(255, 255, 255, 0.8) !important;
               border: 1px solid rgba(255, 255, 255, 0.9) !important;
-              color: hsl(var(--foreground)) !important;
+              color: var(--foreground) !important;
               border-radius: 12px !important;
               box-shadow: inset 0 1px 2px rgba(0,0,0,0.04);
           }
           .aicomposer-override input::placeholder, .aicomposer-override textarea::placeholder {
-              color: hsl(var(--muted-foreground)) !important;
+              color: var(--muted-foreground) !important;
           }
-          .aicomposer-override p, .aicomposer-override span { color: hsl(var(--muted-foreground)) !important; }
+          .aicomposer-override p, .aicomposer-override span { color: var(--muted-foreground) !important; }
           .aicomposer-override button.bg-brand-500 {
-              background-color: hsl(var(--accent)) !important;
+              background-color: var(--accent) !important;
               color: #ffffff !important;
               border-radius: 9999px !important;
               padding: 0.6rem 1.4rem !important;
               font-weight: 500 !important;
           }
           .aicomposer-override button.bg-brand-500 * { color: #ffffff !important; }
-          .aicomposer-override .aicomposer-title { color: hsl(var(--foreground)) !important; }
+          .aicomposer-override .aicomposer-title { color: var(--foreground) !important; }
           .aicomposer-override .bg-surface-base { background: transparent !important; }
         `}</style>
         <AIComposer onSaved={fetchSegments} />
