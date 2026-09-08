@@ -1,383 +1,443 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getDashboardStats } from '../api';
-import { ChevronRight } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { 
+  Play, 
+  Search, 
+  Bell, 
+  ChevronDown, 
+  CheckCircle2, 
+  Plus, 
+  MoreVertical, 
+  LayoutDashboard,
+  Users,
+  Filter,
+  Send,
+  Building2,
+  SlidersHorizontal,
+  CreditCard,
+  Sparkles
+} from 'lucide-react';
+import { getDashboardStats, getCampaigns } from '../api';
 
-const LED_GLYPHS = {
-  "0": ["01110", "10001", "10011", "10101", "11001", "10001", "01110"],
-  "1": ["010", "110", "010", "010", "010", "010", "111"],
-  "2": ["01110", "10001", "00001", "00010", "00100", "01000", "11111"],
-  "3": ["11110", "00001", "00001", "01110", "00001", "00001", "11110"],
-  "4": ["00010", "00110", "01010", "10010", "11111", "00010", "00010"],
-  "5": ["11111", "10000", "10000", "11110", "00001", "00001", "11110"],
-  "6": ["01110", "10000", "10000", "11110", "10001", "10001", "01110"],
-  "7": ["11111", "00001", "00010", "00100", "01000", "01000", "01000"],
-  "8": ["01110", "10001", "10001", "01110", "10001", "10001", "01110"],
-  "9": ["01110", "10001", "10001", "01111", "00001", "00001", "01110"],
-  ".": ["0", "0", "0", "0", "0", "0", "1"],
-  ",": ["0", "0", "0", "0", "0", "1", "1"],
-  "I": ["111", "010", "010", "010", "010", "010", "111"],
-  "M": ["10001", "11011", "10101", "10001", "10001", "10001", "10001"],
-  "K": ["10001", "10010", "10100", "11000", "10100", "10010", "10001"],
-  "$": ["00100", "01111", "10100", "01110", "00101", "11110", "00100"]
-};
-
-const DotMetric = ({ targetValue = 0, formatType = 'comma', pitchX = 5, pitchY = 4, dotRadius = 1.55, className = '' }) => {
-  const [displayValue, setDisplayValue] = React.useState(0);
-
-  React.useEffect(() => {
-    let startTimestamp = null;
-    const duration = 1500;
-    let animationFrameId;
-
-    const step = (timestamp) => {
-      if (!startTimestamp) startTimestamp = timestamp;
-      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-      
-      const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-      
-      setDisplayValue(easeProgress * targetValue);
-      
-      if (progress < 1) {
-        animationFrameId = requestAnimationFrame(step);
-      } else {
-        setDisplayValue(targetValue);
-      }
-    };
-    
-    animationFrameId = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(animationFrameId);
-  }, [targetValue]);
-
-  let formattedString = "";
-  if (formatType === 'comma') {
-    formattedString = Math.floor(displayValue).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  } else if (formatType === 'compact') {
-    if (targetValue >= 1000000) {
-      formattedString = (displayValue / 1000000).toFixed(1);
-    } else if (targetValue >= 1000) {
-      formattedString = (displayValue / 1000).toFixed(1);
-    } else {
-      formattedString = Math.floor(displayValue).toString();
-    }
-  }
-
-  const str = String(formattedString).toUpperCase();
-  let currentX = 0;
-  const circles = [];
-
-  for (let i = 0; i < str.length; i++) {
-    const char = str[i];
-    const glyph = LED_GLYPHS[char] || LED_GLYPHS["0"];
-    const width = glyph[0].length;
-
-    for (let r = 0; r < 7; r++) {
-      for (let c = 0; c < width; c++) {
-        if (glyph[r][c] === "1") {
-          circles.push(
-            <circle
-              key={`${i}-${r}-${c}`}
-              cx={currentX + c * pitchX + dotRadius}
-              cy={r * pitchY + dotRadius}
-              r={dotRadius}
-            />
-          );
-        }
-      }
-    }
-    currentX += width * pitchX + 2; 
-  }
-
-  const height = 6 * pitchY + dotRadius * 2;
-  return (
-    <svg className={`dot-svg ${className}`} viewBox={`0 0 ${currentX} ${height}`} fill="currentColor" style={{ height: `calc(${height * 1.15} * var(--u))`, display: 'block', overflow: 'visible' }}>
-      {circles}
-    </svg>
-  );
-};
-
-const RadarVisual = () => {
-  const ticks = Array.from({length: 23}).map((_, i) => {
-    const angle = (190 + i * 5) * Math.PI / 180;
-    const outer = 142;
-    const inner = i % 5 === 0 ? 129 : 133;
-    const cx = 163, cy = 163;
-    return (
-      <line key={i} className="tick" 
-        x1={cx + Math.cos(angle) * inner} y1={cy + Math.sin(angle) * inner}
-        x2={cx + Math.cos(angle) * outer} y2={cy + Math.sin(angle) * outer}
-        stroke="rgba(255,188,210,.34)" strokeWidth={i % 5 === 0 ? 1.5 : 1}
-      />
-    );
-  });
-
-  return (
-    <svg className="gauge" viewBox="0 0 326 326">
-      <defs>
-        <linearGradient id="gaugeArc" gradientUnits="userSpaceOnUse" x1="7" y1="136" x2="312" y2="109">
-          <stop offset="0" stopColor="#ff9ab7" stopOpacity=".06"/>
-          <stop offset=".08" stopColor="#ff8caf" stopOpacity=".44"/>
-          <stop offset=".34" stopColor="#ff6796" stopOpacity=".94"/>
-          <stop offset=".58" stopColor="#ff6796" stopOpacity="1"/>
-          <stop offset=".82" stopColor="#ffe7ed" stopOpacity=".74"/>
-          <stop offset=".94" stopColor="#fff8fa" stopOpacity=".28"/>
-          <stop offset="1" stopColor="#fff" stopOpacity="0"/>
-        </linearGradient>
-        <linearGradient id="gaugeShadow" gradientUnits="userSpaceOnUse" x1="11" y1="136" x2="308" y2="110">
-          <stop offset="0" stopColor="#6e1639" stopOpacity=".04"/>
-          <stop offset=".09" stopColor="#6e1639" stopOpacity=".17"/>
-          <stop offset=".52" stopColor="#72163d" stopOpacity=".18"/>
-          <stop offset=".78" stopColor="#7b1a43" stopOpacity=".1"/>
-          <stop offset="1" stopColor="#7b1a43" stopOpacity="0"/>
-        </linearGradient>
-        <radialGradient id="radarBeam" cx="163" cy="163" r="145">
-          <stop offset=".3" stopColor="#650f35" stopOpacity="0"/>
-          <stop offset=".45" stopColor="#650f35" stopOpacity=".025"/>
-          <stop offset=".7" stopColor="#650f35" stopOpacity=".065"/>
-          <stop offset=".9" stopColor="#650f35" stopOpacity=".08"/>
-          <stop offset="1" stopColor="#650f35" stopOpacity=".05"/>
-        </radialGradient>
-        <linearGradient id="radarBeamEdge" x1="238" y1="33" x2="190.5" y2="115.4">
-          <stop offset="0" stopColor="#ffe7ef" stopOpacity=".19"/>
-          <stop offset=".48" stopColor="#ffd1df" stopOpacity=".11"/>
-          <stop offset=".82" stopColor="#ffc6d7" stopOpacity=".045"/>
-          <stop offset="1" stopColor="#ffc6d7" stopOpacity="0"/>
-        </linearGradient>
-        <filter id="radarSoft"><feGaussianBlur stdDeviation="1.35"/></filter>
-        <filter id="radarHalo"><feGaussianBlur stdDeviation="5.2"/></filter>
-        <filter id="gaugeBlur"><feGaussianBlur stdDeviation="11"/></filter>
-      </defs>
-      <path d="M11.34 136.26A154 154 0 0 1 307.71 110.33" fill="none" strokeWidth="3.2" strokeLinecap="round" stroke="url(#gaugeShadow)"/>
-      <path d="M6.91 135.48A158.5 158.5 0 0 1 311.94 108.79" fill="none" strokeWidth="2.2" strokeLinecap="round" stroke="url(#gaugeArc)"/>
-      <path d="M19.22 137.65A146 146 0 0 1 236 36.56" fill="none" strokeWidth="1.15" stroke="rgba(255,166,194,.31)"/>
-      <path d="M238 33.1A150 150 0 0 1 277.9 66.6L199.8 119.5A55 55 0 0 0 190.5 115.4Z" fill="#6a1238" opacity=".022" filter="url(#radarHalo)"/>
-      <path d="M238 33.1A150 150 0 0 1 277.9 66.6L199.8 119.5A55 55 0 0 0 190.5 115.4Z" fill="url(#radarBeam)" filter="url(#radarSoft)"/>
-      <path d="M238 33.1L190.5 115.4" stroke="url(#radarBeamEdge)" strokeWidth="1.25" strokeLinecap="round" filter="url(#radarSoft)"/>
-      <g id="gaugeTicks">{ticks}</g>
-      <ellipse cx="225" cy="166" rx="92" ry="76" fill="#fff" opacity=".055" filter="url(#gaugeBlur)"/>
-    </svg>
-  );
-};
-
-
-const ContextWall = () => (
-  <>
-    <svg className="context-backdrop" viewBox="0 0 429 554" preserveAspectRatio="none">
-      <defs>
-        <mask id="deepM">
-          <rect x="0" y="0" width="429" height="554" fill="url(#deepMaskGrad)"/>
-        </mask>
-        <linearGradient id="deepMaskGrad" x1="0" y1="0" x2="0" y2="1">
-           <stop offset="0" stopColor="#000" />
-           <stop offset=".54" stopColor="#000" />
-           <stop offset=".58" stopColor="rgba(0,0,0,.72)" />
-           <stop offset=".62" stopColor="rgba(0,0,0,.18)" />
-           <stop offset=".65" stopColor="transparent" />
-        </linearGradient>
-        <filter id="tileSoft"><feGaussianBlur stdDeviation="3.4"/></filter>
-        <filter id="groutSoft"><feGaussianBlur stdDeviation="6.5"/></filter>
-        <linearGradient id="tTLf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#d4b0ee" stopOpacity=".05"/><stop offset="1" stopColor="#c6bbff" stopOpacity=".18"/></linearGradient>
-        <linearGradient id="tTCf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#d5c2ff" stopOpacity=".22"/><stop offset=".26" stopColor="#e0bdff" stopOpacity=".26"/><stop offset=".32" stopColor="#f2a0ee" stopOpacity=".32"/><stop offset=".34" stopColor="#ff96da" stopOpacity=".34"/></linearGradient>
-        <linearGradient id="tTRf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ffe8da" stopOpacity=".56"/><stop offset=".26" stopColor="#f9c6d0" stopOpacity=".26"/><stop offset=".08" stopColor="#eba4bf" stopOpacity=".08"/></linearGradient>
-        <linearGradient id="tMRf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#e858b8" stopOpacity=".52"/><stop offset=".46" stopColor="#e6459c" stopOpacity=".46"/><stop offset="1" stopColor="#de74ba" stopOpacity=".16"/></linearGradient>
-        <linearGradient id="deepX" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="maroon"/><stop offset=".33" stopColor="coral"/><stop offset=".66" stopColor="pink"/><stop offset="1" stopColor="blue"/></linearGradient>
-      </defs>
-      <g mask="url(#deepM)" filter="url(#tileSoft)">
-         <rect x="-24" y="22" width="106" height="149" rx="15" fill="url(#tTLf)"/>
-         <rect x="88" y="22" width="247" height="150" rx="15" fill="url(#tTCf)"/>
-         <rect x="346" y="22" width="111" height="147" rx="15" fill="url(#tTRf)"/>
-         <rect x="-24" y="177" width="108" height="174" rx="15" fill="#e0c2ff" fillOpacity="0.2"/>
-         <rect x="88" y="177" width="247" height="174" rx="15" fill="#d5c2ff" fillOpacity="0.2"/>
-         <rect x="344" y="175" width="113" height="176" rx="15" fill="url(#tMRf)"/>
-      </g>
-      <rect x="-24" y="384" width="480" height="170" fill="url(#deepX)" mask="url(#deepM)"/>
-      <g filter="url(#groutSoft)">
-        <rect x="81" y="30" width="8" height="150" fill="rgba(255,255,255,0.2)"/>
-        <rect x="338" y="30" width="8" height="322" fill="rgba(255,255,255,0.2)"/>
-        <rect x="0" y="167" width="429" height="12" fill="rgba(255,255,255,0.2)"/>
-      </g>
-      <ellipse cx="352" cy="86" rx="140" ry="108" fill="#fff" opacity="0.1"/>
-      <ellipse cx="75" cy="150" rx="82" ry="54" fill="#fff" opacity="0.1"/>
-      <ellipse cx="8" cy="334" rx="76" ry="58" fill="#fff" opacity="0.1"/>
-      <ellipse cx="56" cy="215" rx="56" ry="62" fill="#fff" opacity="0.1"/>
-    </svg>
-    <div className="context-window">
-      <div className="window-lines">
-        <span className="span1" />
-        <span className="span2" />
-        <span className="span3" />
-      </div>
-    </div>
-  </>
-);
-
-
-const ConnectionVisual = () => (
-  <svg className="connections-map" viewBox="0 0 429 238" preserveAspectRatio="none">
-    <defs>
-      <mask id="connMask">
-        <linearGradient id="connMaskGrad" x1="0" y1="0" x2="0" y2="1">
-           <stop offset="0" stopColor="#000" />
-           <stop offset=".50" stopColor="#000" />
-           <stop offset=".67" stopColor="rgba(0,0,0,.46)" />
-           <stop offset=".83" stopColor="rgba(0,0,0,.15)" />
-           <stop offset=".96" stopColor="transparent" />
-        </linearGradient>
-        <rect x="0" y="0" width="429" height="238" fill="url(#connMaskGrad)"/>
-      </mask>
-    </defs>
-    <g mask="url(#connMask)">
-      <path opacity=".20" stroke="#fff" strokeWidth="1" fill="none" d="M0 5H128c27 0 36 7 39 26 2 16 9 22 24 22h106c16 0 23-8 25-25 2-16 10-23 31-23h76" />
-      <path opacity=".30" stroke="#fff" strokeWidth="1" fill="none" d="M0 117h46c15 0 22 8 26 25 5 23 12 31 31 31h174c18 0 25-8 30-31 4-17 11-25 26-25h96" />
-      <path opacity=".34" stroke="#fff" strokeWidth="1" fill="none" d="M0 173h87c15 0 22 7 27 25 4 15 11 22 28 22h140c17 0 25-7 29-22 5-18 12-25 28-25h90" />
-      <path opacity=".16" stroke="#fff" strokeWidth="1" fill="none" d="M0 228h120c17 0 25-5 28-18 4-15 10-20 28-20h81c18 0 25 6 28 20 4 13 11 18 28 18h116" />
-      <path opacity=".26" stroke="#fff" strokeWidth="1" fill="none" d="M0 5H429M0 61H429M0 117H429" />
-      <path opacity=".09" stroke="#fff" strokeWidth="1" fill="none" d="M0 173H429" />
-      <path opacity=".52" stroke="#fff8dd" strokeWidth="1.15" fill="none" d="M0 61h95c14 0 22-6 27-20 4-13 12-20 27-20h115c15 0 23 6 27 20 5 14 13 20 28 20h110" />
-      <path opacity=".94" stroke="#fff8dd" strokeWidth="1.15" fill="none" d="M0 117h88c15 0 22-8 25-25 4-24 12-31 31-31h129c20 0 27 7 31 31 3 17 10 25 26 25h99" />
-      <circle cx="45" cy="117" r="6.5" fill="#fff" />
-      <circle cx="133" cy="61" r="6.5" fill="#fff4a7" />
-      <circle cx="189" cy="61" r="6.5" fill="#fff1a4" />
-      <circle cx="319" cy="61" r="6.5" fill="#fff4a6" />
-      <circle cx="319" cy="117" r="6.5" fill="#fff2a0" />
-    </g>
-  </svg>
-);
-
-const formatNumberStr = (num) => {
-  if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
-  if (num >= 1000) return (num / 1000).toFixed(1) + "K";
-  return num.toString();
-}
-
-const Dashboard = () => {
+export default function Dashboard() {
   const navigate = useNavigate();
-  const [isEntranceActive, setIsEntranceActive] = useState(true);
   const [stats, setStats] = useState({
     total_customers: 1500,
     total_campaigns: 8,
-    revenue_generated: 11400000
+    revenue_generated: 8450190.32
   });
-  
-  useEffect(() => {
-    let timer;
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) {
-      setIsEntranceActive(false);
-    } else {
-      timer = setTimeout(() => setIsEntranceActive(false), 2000);
-    }
+  const [campaigns, setCampaigns] = useState([]);
 
-    const fetchStats = async () => {
-      try {
-        const data = await getDashboardStats();
-        setStats(data);
-      } catch (error) {
-        console.error('Failed to fetch dashboard stats', error);
-      }
-    };
-    fetchStats();
-    
-    const intervalId = setInterval(fetchStats, 3000);
-    return () => {
-      clearTimeout(timer);
-      clearInterval(intervalId);
-    };
+  useEffect(() => {
+    getDashboardStats().then(data => {
+      if (data) setStats(data);
+    }).catch(console.error);
+
+    getCampaigns().then(data => {
+      if (Array.isArray(data)) setCampaigns(data);
+    }).catch(console.error);
   }, []);
 
   return (
-    <div className="dashboard-experience">
-      <video className="dashboard-experience__motion dashboard-experience__motion--wide" autoPlay loop muted playsInline preload="auto" aria-hidden="true" poster="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/5c3ec08f-2dbf-4c0a-8588-f6106a789443.webp">
-        <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260826_125226_45cb4f38-aa7e-47e1-885d-ae0b69745369.mp4" type="video/mp4" />
-      </video>
-      <video className="dashboard-experience__motion dashboard-experience__motion--narrow" autoPlay loop muted playsInline preload="none" aria-hidden="true" poster="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/0f4926a4-e660-4df2-9195-2bfb3e341bdd.webp">
-        <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260826_125242_daae1570-386d-4bd5-8896-80499e2371e0.mp4" type="video/mp4" />
-      </video>
-      <div className="dashboard-experience__veil" aria-hidden="true" />
+    <div className="relative w-full min-h-screen flex flex-col items-center px-4 sm:px-6 md:px-12 lg:px-20 pt-8 md:pt-12 pb-24 font-body overflow-x-hidden">
+      
+      {/* 1. Badge (top) - Framer Motion: fade up from y:10, duration 0.5s */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-4 py-1.5 text-sm text-muted-foreground font-body mb-6 cursor-default hover:border-accent/40 transition-colors"
+      >
+        <span>Now with GPT-5 support ✨</span>
+      </motion.div>
 
-      <section className="dashboard-hero">
-        <div className="dashboard-kicker"><span /> ThreadCo intelligence</div>
-        <h1 className="headline">Built for <em>intelligent</em><br />performance.</h1>
-        <p className="intro">See the customer signals, campaign momentum, and revenue outcomes that matter—<br className="desktop-break" />at a glance.</p>
-        <button onClick={() => navigate('/campaigns/new')} className="dashboard-primary-action">
-          Launch campaign <span><ChevronRight size={17} strokeWidth={3} /></span>
+      {/* 2. Headline - Framer Motion: fade up from y:16, duration 0.6s, delay 0.1s */}
+      <motion.h1
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.1, ease: 'easeOut' }}
+        className="text-center font-display text-5xl md:text-6xl lg:text-[5rem] leading-[0.95] tracking-tight text-foreground max-w-xl"
+      >
+        The Future of <span className="font-display italic font-normal text-accent">Smarter</span> Automation
+      </motion.h1>
+
+      {/* 3. Subheadline - Framer Motion: fade up from y:16, duration 0.6s, delay 0.2s */}
+      <motion.p
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
+        className="mt-4 text-center text-base md:text-lg text-muted-foreground max-w-[650px] leading-relaxed font-body"
+      >
+        Automate your busywork with intelligent agents that learn, adapt, and execute—so your team can focus on what matters most.
+      </motion.p>
+
+      {/* 4. CTA Buttons - Framer Motion: fade up from y:16, duration 0.6s, delay 0.3s */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.3, ease: 'easeOut' }}
+        className="mt-5 flex items-center gap-3"
+      >
+        <button
+          onClick={() => navigate('/campaigns/new')}
+          className="rounded-full px-6 py-5 text-sm font-medium font-body bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md active:scale-95"
+        >
+          Book a demo
         </button>
-      </section>
+        <button
+          onClick={() => navigate('/analytics')}
+          className="h-11 w-11 rounded-full border-0 bg-background shadow-[0_2px_12px_rgba(0,0,0,0.08)] hover:bg-background/80 flex items-center justify-center transition-all group active:scale-95"
+          title="Watch Overview"
+        >
+          <Play className="h-4 w-4 fill-foreground text-foreground group-hover:scale-110 transition-transform ml-0.5" />
+        </button>
+      </motion.div>
 
-      <section className={`cards ${isEntranceActive ? 'entrance-active' : ''}`} aria-label="CRM performance overview">
-        
-        <article className="card card--speed">
-          <video className="card__media" autoPlay loop muted playsInline preload="auto" aria-hidden="true" poster="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/167977c6-8539-46b1-9a15-8dba566f50b8.png">
-            <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260826_130045_1a612b69-4854-4b34-8043-ccb91f2c60af.mp4" type="video/mp4" />
-          </video>
-          <div className="card__grain">
-            <svg viewBox="0 0 429 554" preserveAspectRatio="none" style={{width:'100%', height:'100%'}}>
-              <filter id="cardNoise"><feTurbulence type="fractalNoise" baseFrequency=".54" numOctaves="3" seed="27" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncR type="linear" slope="1.8" intercept="-.25"/><feFuncG type="linear" slope="1.8" intercept="-.25"/><feFuncB type="linear" slope="1.8" intercept="-.25"/><feFuncA type="table" tableValues="0 .52"/></feComponentTransfer></filter>
-              <rect width="100%" height="100%" filter="url(#cardNoise)" />
-            </svg>
-          </div>
-          
-          <h2 className="card__title">Customer Base<br /><span style={{fontWeight: 400}}>Customer momentum</span></h2>
-          <RadarVisual />
-          
-          <div className="metric metric--speed">
-            <div className="dot-number"><DotMetric targetValue={stats.total_customers || 0} formatType="comma" /></div>
-          </div>
-          <p className="caption">Registered shoppers<br />across your audience</p>
-          
-          <div className="learn-more">
-            <button type="button" onClick={() => navigate('/customers')}>Explore customers</button>
-          </div>
-        </article>
+      {/* 5. Dashboard Preview (custom coded, NOT an image) - Framer Motion: fade up from y:30, duration 0.8s, delay 0.5s */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.5, ease: 'easeOut' }}
+        className="mt-8 w-full max-w-5xl"
+      >
+        <div
+          className="rounded-2xl overflow-hidden p-3 md:p-4 text-[11px] select-none"
+          style={{
+            background: 'rgba(255, 255, 255, 0.4)',
+            border: '1px solid rgba(255, 255, 255, 0.5)',
+            boxShadow: 'var(--shadow-dashboard)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)'
+          }}
+        >
+          {/* Top bar: Logo "N" in rounded box + "Nexora" + chevron | Search bar with ⌘K shortcut | "Move Money" + bell + avatar "JB" */}
+          <div className="flex items-center justify-between pb-3 border-b border-white/40">
+            {/* Left Brand */}
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-md bg-foreground text-background flex items-center justify-center font-bold text-xs shadow-sm">
+                N
+              </div>
+              <span className="font-semibold text-xs tracking-tight text-foreground">Nexora</span>
+              <ChevronDown className="w-3.5 h-3.5 text-muted-foreground opacity-70" />
+            </div>
 
-        <article className="card card--context">
-          <video className="card__media" autoPlay loop muted playsInline preload="auto" aria-hidden="true" poster="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/0446d1d5-e65e-4db5-8090-3e30d09afc43.png">
-            <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260826_130054_dd005674-d693-4d81-80a5-357f7f10b3a3.mp4" type="video/mp4" />
-          </video>
-          <div className="card__grain">
-            <svg viewBox="0 0 429 554" preserveAspectRatio="none" style={{width:'100%', height:'100%'}}><rect width="100%" height="100%" filter="url(#cardNoise)" /></svg>
-          </div>
-          
-          <h2 className="card__title">Campaign Activity<br /><span style={{fontWeight: 400}}>Campaign reach</span></h2>
-          <ContextWall />
-          
-          <div className="metric metric--context">
-            <div className="dot-number"><DotMetric targetValue={stats.total_campaigns || 0} formatType="compact" dotRadius={2.32} /></div>
-            <span className="metric__unit">{formatNumberStr(stats.total_campaigns || 0).replace(/[0-9.]/g, '') || ' '}</span>
-          </div>
-          <p className="caption">Active and completed<br />campaigns</p>
-          
-          <div className="learn-more">
-            <button type="button" onClick={() => navigate('/campaigns')}>Explore campaigns</button>
-          </div>
-        </article>
+            {/* Search Bar */}
+            <div className="hidden sm:flex items-center gap-2 bg-white/60 border border-white/80 rounded-lg px-2.5 py-1 w-64 shadow-inner">
+              <Search className="w-3.5 h-3.5 text-muted-foreground" />
+              <span className="text-muted-foreground text-[11px]">Search commands...</span>
+              <kbd className="ml-auto text-[9px] bg-secondary/80 px-1 py-0.5 rounded text-muted-foreground font-mono">⌘K</kbd>
+            </div>
 
-        <article className="card card--connections">
-          <video className="card__media" autoPlay loop muted playsInline preload="auto" aria-hidden="true" poster="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/da8d0242-4dee-4f6d-813f-a5887e86ad77.png">
-            <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260826_130103_7550f407-f14b-40a6-9616-7a26d7a8bd9f.mp4" type="video/mp4" />
-          </video>
-          <div className="card__grain">
-            <svg viewBox="0 0 429 554" preserveAspectRatio="none" style={{width:'100%', height:'100%'}}><rect width="100%" height="100%" filter="url(#cardNoise)" /></svg>
+            {/* Right Actions */}
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => navigate('/campaigns/new')}
+                className="bg-accent hover:bg-accent/90 text-accent-foreground font-medium rounded-full px-3 py-1 text-[11px] shadow-sm transition-all"
+              >
+                Move Money
+              </button>
+              <div className="relative p-1 rounded-full text-foreground hover:bg-white/40 transition-colors cursor-pointer">
+                <Bell className="w-4 h-4 text-foreground/80" />
+                <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-accent rounded-full ring-2 ring-white"></span>
+              </div>
+              <div className="w-6 h-6 rounded-full bg-secondary text-foreground font-semibold flex items-center justify-center text-[10px] border border-white/70 shadow-sm">
+                JB
+              </div>
+            </div>
           </div>
-          
-          <h2 className="card__title">Revenue Generated<br /><span style={{fontWeight: 400}}>Revenue clarity</span></h2>
-          <ConnectionVisual />
-          
-          <div className="metric metric--connections">
-            <span style={{fontSize:'calc(30.6 * var(--u))', transform:'translateY(calc(3 * var(--u)))', marginRight:'4px'}}>$</span>
-            <div className="dot-number"><DotMetric targetValue={stats.revenue_generated || 0} formatType="compact" /></div>
-            <span className="metric__unit">{formatNumberStr(stats.revenue_generated || 0).replace(/[0-9.]/g, '')}</span>
-          </div>
-          <p className="caption">Revenue attributed to<br />customer outcomes</p>
-          
-          <div className="learn-more">
-            <button type="button" onClick={() => navigate('/analytics')}>Explore analytics</button>
-          </div>
-        </article>
 
-      </section>
+          {/* Body: Sidebar (w-40) + Main Content */}
+          <div className="flex flex-col md:flex-row gap-3 pt-3">
+            
+            {/* Sidebar (w-40) */}
+            <div className="w-full md:w-40 shrink-0 flex flex-col justify-between gap-4 pr-1">
+              <div className="flex flex-col gap-1">
+                
+                {/* Items — Home (active), Tasks (badge "10"), Transactions, Payments (chevron), Cards, Capital, Accounts (chevron) */}
+                <button 
+                  onClick={() => navigate('/dashboard')}
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg font-medium text-foreground bg-white/70 border border-white/80 shadow-sm text-left"
+                >
+                  <LayoutDashboard className="w-3.5 h-3.5 text-accent" />
+                  <span>Home</span>
+                </button>
+
+                <button 
+                  onClick={() => navigate('/campaigns')}
+                  className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/40 transition-colors text-left"
+                >
+                  <div className="flex items-center gap-2">
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Tasks</span>
+                  </div>
+                  <span className="bg-accent/15 text-accent px-1.5 py-0.2 rounded-full text-[9px] font-semibold">10</span>
+                </button>
+
+                <button 
+                  onClick={() => navigate('/customers')}
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/40 transition-colors text-left"
+                >
+                  <Users className="w-3.5 h-3.5" />
+                  <span>Transactions</span>
+                </button>
+
+                <button 
+                  onClick={() => navigate('/campaigns')}
+                  className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/40 transition-colors text-left"
+                >
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="w-3.5 h-3.5" />
+                    <span>Payments</span>
+                  </div>
+                  <ChevronDown className="w-3 h-3 opacity-60" />
+                </button>
+
+                <button 
+                  onClick={() => navigate('/segments')}
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/40 transition-colors text-left"
+                >
+                  <Filter className="w-3.5 h-3.5" />
+                  <span>Cards</span>
+                </button>
+
+                <button 
+                  onClick={() => navigate('/analytics')}
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/40 transition-colors text-left"
+                >
+                  <Building2 className="w-3.5 h-3.5" />
+                  <span>Capital</span>
+                </button>
+
+                <button 
+                  onClick={() => navigate('/customers')}
+                  className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/40 transition-colors text-left"
+                >
+                  <div className="flex items-center gap-2">
+                    <SlidersHorizontal className="w-3.5 h-3.5" />
+                    <span>Accounts</span>
+                  </div>
+                  <ChevronDown className="w-3 h-3 opacity-60" />
+                </button>
+              </div>
+
+              {/* Section Workflows: Trake rutes, Payments, Notifications, Settings */}
+              <div className="pt-2 border-t border-white/30 flex flex-col gap-1">
+                <span className="px-2.5 text-[9px] uppercase tracking-wider font-semibold text-muted-foreground/70">Workflows</span>
+                <div className="flex flex-col gap-0.5">
+                  <span onClick={() => navigate('/campaigns')} className="px-2.5 py-1 rounded text-muted-foreground hover:text-foreground cursor-pointer transition-colors">Trake rutes</span>
+                  <span onClick={() => navigate('/campaigns/new')} className="px-2.5 py-1 rounded text-muted-foreground hover:text-foreground cursor-pointer transition-colors">Payments</span>
+                  <span onClick={() => navigate('/analytics')} className="px-2.5 py-1 rounded text-muted-foreground hover:text-foreground cursor-pointer transition-colors">Notifications</span>
+                  <span onClick={() => navigate('/customers')} className="px-2.5 py-1 rounded text-muted-foreground hover:text-foreground cursor-pointer transition-colors">Settings</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Content (bg-secondary/30) */}
+            <div className="flex-1 bg-secondary/30 rounded-xl p-3 md:p-4 border border-white/50 flex flex-col gap-3.5">
+              
+              {/* Greeting: "Welcome, Jane" — text-sm font-semibold */}
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-foreground tracking-tight">Welcome, Jane</h3>
+                <span className="text-[10px] text-muted-foreground">Updated live</span>
+              </div>
+
+              {/* Action buttons row: Send (primary/accent), Request, Transfer, Deposit, Pay Bill, Create Invoice — rounded-full pill buttons text-[10px], + "Customize" text */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                <button 
+                  onClick={() => navigate('/campaigns/new')}
+                  className="bg-accent text-accent-foreground rounded-full px-3 py-1 font-medium text-[10px] shadow-sm hover:opacity-90 transition-opacity"
+                >
+                  Send
+                </button>
+                <button 
+                  onClick={() => navigate('/customers')}
+                  className="bg-white/70 border border-white/80 text-foreground hover:bg-white rounded-full px-3 py-1 font-medium text-[10px] transition-colors"
+                >
+                  Request
+                </button>
+                <button 
+                  onClick={() => navigate('/campaigns')}
+                  className="bg-white/70 border border-white/80 text-foreground hover:bg-white rounded-full px-3 py-1 font-medium text-[10px] transition-colors"
+                >
+                  Transfer
+                </button>
+                <button 
+                  onClick={() => navigate('/analytics')}
+                  className="bg-white/70 border border-white/80 text-foreground hover:bg-white rounded-full px-3 py-1 font-medium text-[10px] transition-colors"
+                >
+                  Deposit
+                </button>
+                <button 
+                  onClick={() => navigate('/campaigns')}
+                  className="bg-white/70 border border-white/80 text-foreground hover:bg-white rounded-full px-3 py-1 font-medium text-[10px] transition-colors"
+                >
+                  Pay Bill
+                </button>
+                <button 
+                  onClick={() => navigate('/campaigns/new')}
+                  className="bg-white/70 border border-white/80 text-foreground hover:bg-white rounded-full px-3 py-1 font-medium text-[10px] transition-colors"
+                >
+                  Create Invoice
+                </button>
+                <span className="text-[10px] text-muted-foreground hover:text-foreground cursor-pointer ml-1 font-medium underline underline-offset-2">
+                  Customize
+                </span>
+              </div>
+
+              {/* Two equal-width cards (flex-1 basis-0) side by side: */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                
+                {/* Balance card: "Mercury Balance" with checkmark, amount $8,450,190.32 (cents in text-xs text-muted-foreground), stats (Last 30 Days, +$1.8M green, -$900K red), SVG area chart (h-20) with smooth cubic Bézier curve, linear gradient fill from accent at 15% opacity to transparent, stroke in accent color strokeWidth="1.5" */}
+                <div className="flex-1 basis-0 bg-white/70 backdrop-blur rounded-xl p-3 border border-white/80 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-1.5 text-muted-foreground text-[11px] font-medium">
+                        <span>Mercury Balance</span>
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-xl font-bold text-foreground tracking-tight">$8,450,190</span>
+                      <span className="text-xs text-muted-foreground font-medium">.32</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 mt-1 text-[10px]">
+                      <span className="text-muted-foreground">Last 30 Days</span>
+                      <span className="text-emerald-600 font-semibold flex items-center">+$1.8M</span>
+                      <span className="text-rose-500 font-semibold flex items-center">-$900K</span>
+                    </div>
+                  </div>
+
+                  {/* SVG area chart (h-20) with smooth cubic Bézier curve, linear gradient fill from accent at 15% opacity to transparent, stroke in accent color strokeWidth="1.5" */}
+                  <div className="mt-3 w-full h-20 relative">
+                    <svg className="w-full h-full overflow-visible" viewBox="0 0 300 80" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="hsl(var(--accent))" stopOpacity="0.15" />
+                          <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity="0.0" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M 0,65 C 40,55 70,30 110,40 C 150,50 190,15 240,25 C 270,30 285,10 300,12 L 300,80 L 0,80 Z"
+                        fill="url(#chartGradient)"
+                      />
+                      <path
+                        d="M 0,65 C 40,55 70,30 110,40 C 150,50 190,15 240,25 C 270,30 285,10 300,12"
+                        fill="none"
+                        stroke="hsl(var(--accent))"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Accounts card: Header "Accounts" with + and ⋮ icons. Three rows (py-3, no dividers, text-xs, justify-between): Credit $98,125.50, Treasury $6,750,200.00, Operations $1,592,864.82 */}
+                <div className="flex-1 basis-0 bg-white/70 backdrop-blur rounded-xl p-3 border border-white/80 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between pb-2 border-b border-black/5">
+                      <span className="font-semibold text-xs text-foreground">Accounts</span>
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Plus className="w-3.5 h-3.5 hover:text-foreground cursor-pointer" />
+                        <MoreVertical className="w-3.5 h-3.5 hover:text-foreground cursor-pointer" />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col">
+                      <div className="flex items-center justify-between py-3 text-xs">
+                        <span className="text-muted-foreground font-medium">Credit</span>
+                        <span className="font-semibold text-foreground">$98,125.50</span>
+                      </div>
+                      <div className="flex items-center justify-between py-3 text-xs">
+                        <span className="text-muted-foreground font-medium">Treasury</span>
+                        <span className="font-semibold text-foreground">$6,750,200.00</span>
+                      </div>
+                      <div className="flex items-center justify-between py-3 text-xs">
+                        <span className="text-muted-foreground font-medium">Operations</span>
+                        <span className="font-semibold text-foreground">$1,592,864.82</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-black/5 flex items-center justify-between text-[10px] text-muted-foreground">
+                    <span>3 connected entities</span>
+                    <span className="text-accent font-medium cursor-pointer hover:underline">Manage</span>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Transactions table: "Recent Transactions" heading, table with columns Date/Description/Amount/Status. 4 rows: AWS -$5,200 Pending (amber), Client Payment +$125,000 Completed (green), Payroll -$85,450 Completed, Office Supplies -$1,200 Completed */}
+              <div className="bg-white/70 backdrop-blur rounded-xl p-3 border border-white/80 shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-semibold text-xs text-foreground">Recent Transactions</h4>
+                  <span className="text-[10px] text-accent font-medium cursor-pointer hover:underline">View all</span>
+                </div>
+
+                <div className="w-full overflow-x-auto">
+                  <table className="w-full text-left text-[11px]">
+                    <thead>
+                      <tr className="text-muted-foreground border-b border-black/5 pb-1">
+                        <th className="pb-1.5 font-medium">Date</th>
+                        <th className="pb-1.5 font-medium">Description</th>
+                        <th className="pb-1.5 font-medium">Amount</th>
+                        <th className="pb-1.5 font-medium text-right">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-black/5">
+                      <tr>
+                        <td className="py-2 text-muted-foreground">Today</td>
+                        <td className="py-2 font-medium text-foreground">AWS</td>
+                        <td className="py-2 text-rose-600 font-medium">-$5,200</td>
+                        <td className="py-2 text-right">
+                          <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                            Pending
+                          </span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 text-muted-foreground">Yesterday</td>
+                        <td className="py-2 font-medium text-foreground">Client Payment</td>
+                        <td className="py-2 text-emerald-600 font-semibold">+$125,000</td>
+                        <td className="py-2 text-right">
+                          <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                            Completed
+                          </span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 text-muted-foreground">Sep 04</td>
+                        <td className="py-2 font-medium text-foreground">Payroll</td>
+                        <td className="py-2 text-rose-600 font-medium">-$85,450</td>
+                        <td className="py-2 text-right">
+                          <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                            Completed
+                          </span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 text-muted-foreground">Sep 02</td>
+                        <td className="py-2 font-medium text-foreground">Office Supplies</td>
+                        <td className="py-2 text-rose-600 font-medium">-$1,200</td>
+                        <td className="py-2 text-right">
+                          <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                            Completed
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </motion.div>
+
     </div>
   );
-};
-
-export default Dashboard;
+}

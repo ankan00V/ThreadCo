@@ -47,7 +47,7 @@ export default function Analytics() {
           <span className="text-[11px] font-semibold text-foreground tracking-wide">Data Intelligence Workbench</span>
         </div>
         <h2 className="font-display text-4xl sm:text-5xl md:text-6xl text-foreground tracking-tight leading-[0.98]">
-          From business question to <span className="font-display italic font-normal text-foreground">Decision</span>
+          From business question to <span className="font-display italic font-normal text-accent">Decision</span>
         </h2>
         <p className="mt-3 text-muted-foreground text-sm md:text-base max-w-xl">
           Real aggregates, data-quality checks, and a safe query-plan diagnostic—built to show how customer decisions are supported by data.

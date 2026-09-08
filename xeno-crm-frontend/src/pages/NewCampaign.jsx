@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { ArrowLeft, Send, Sparkles, Loader2, MessageSquare, Target } from 'lucide-react';
+import { ArrowLeft, Send, Sparkles, Loader2, MessageSquare, Target, Smartphone } from 'lucide-react';
 import { getSegments, createCampaign, sendCampaign, generateMessage } from '../api';
 
 const NewCampaign = () => {
@@ -27,7 +27,7 @@ const NewCampaign = () => {
     const fetchSegs = async () => {
       try {
         const data = await getSegments();
-        setSegments(data);
+        setSegments(data || []);
       } catch (err) {
         console.error(err);
       }
@@ -111,67 +111,87 @@ const NewCampaign = () => {
   };
 
   return (
-    <div className="product-page product-page--campaign-builder max-w-6xl mx-auto space-y-6 pt-8 pb-12 px-4">
-      <div className="flex items-center space-x-4 mb-8">
-        <Link to="/campaigns" className="p-2 bg-white/10 border border-white/20 hover:bg-white/20 backdrop-blur-md rounded-full transition-colors shadow-sm">
-          <ArrowLeft className="w-5 h-5 text-white" />
+    <div className="w-full px-4 sm:px-6 md:px-12 max-w-[1100px] mx-auto pt-8 md:pt-12 pb-24 font-body">
+      
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-8">
+        <Link 
+          to="/campaigns" 
+          className="p-2.5 bg-white/70 border border-white/80 hover:bg-white backdrop-blur-md rounded-full transition-colors shadow-sm text-foreground"
+        >
+          <ArrowLeft className="w-4 h-4" />
         </Link>
         <div>
-          <h1 className="text-3xl font-extrabold text-[#f5f5dc] tracking-tight" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,1)' }}>Campaign Builder</h1>
-          <p className="text-white/90 text-sm mt-1" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8), 0 0 2px rgba(0,0,0,1)' }}>Design and launch your communication strategy.</p>
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/80 backdrop-blur-md px-3.5 py-1 text-xs text-muted-foreground font-body mb-2 shadow-sm">
+            <Sparkles className="w-3.5 h-3.5 text-accent" />
+            <span>Campaign Studio</span>
+          </div>
+          <h1 className="font-display text-3xl sm:text-4xl md:text-5xl text-foreground tracking-tight leading-[0.98]">
+            Launch a <span className="font-display italic font-normal text-accent">New Campaign</span>
+          </h1>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Main Form Left Side */}
-        <div className="lg:col-span-7 space-y-8">
+        <div className="lg:col-span-7 space-y-6">
           
-          <div className="bg-[#fcfaf5] p-8 rounded-3xl shadow-sm border border-gray-100 space-y-8">
-            <div className="space-y-6">
-              <h2 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-3">1. Campaign Details</h2>
+          <div 
+            className="rounded-2xl p-6 sm:p-8 space-y-6"
+            style={{
+              background: 'rgba(255, 255, 255, 0.4)',
+              border: '1px solid rgba(255, 255, 255, 0.5)',
+              boxShadow: 'var(--shadow-dashboard)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)'
+            }}
+          >
+            <div className="space-y-4">
+              <h2 className="text-sm font-semibold text-foreground border-b border-border/40 pb-2">1. Campaign Configuration</h2>
               
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Internal Name</label>
+                <label className="block text-xs font-medium text-foreground mb-1.5">Internal Campaign Name</label>
                 <input 
                   type="text"
-                  placeholder="e.g. Q3 VIP Reactivation"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:bg-[#fcfaf5] focus:ring-2 focus:ring-[#6C47FF] focus:border-transparent outline-none transition-all shadow-inner"
+                  placeholder="e.g. Q3 VIP Reactivation Wave"
+                  className="w-full px-3.5 py-2.5 bg-white/70 border border-white/80 rounded-xl text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-all shadow-inner"
                   value={name}
                   onChange={e => setName(e.target.value)}
                 />
               </div>
 
               <div>
-                <div className="flex justify-between items-center mb-2">
-                  <label className="block text-sm font-bold text-gray-700">Target Audience</label>
-                  <Link to="/segments" className="text-xs font-bold text-[#E62328] hover:text-[#0A0B2E] flex items-center transition-colors">
-                    <Sparkles className="w-3 h-3 mr-1" />
-                    Create segment with AI
+                <div className="flex justify-between items-center mb-1.5">
+                  <label className="block text-xs font-medium text-foreground">Target Audience Cohort</label>
+                  <Link to="/segments" className="text-xs font-medium text-accent hover:underline flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" />
+                    <span>Create segment with AI</span>
                   </Link>
                 </div>
                 <select 
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-[#fcfaf5] text-gray-900 focus:bg-[#fcfaf5] focus:ring-2 focus:ring-[#6C47FF] focus:border-transparent outline-none transition-all shadow-inner cursor-pointer"
+                  className="w-full px-3.5 py-2.5 bg-white/70 border border-white/80 rounded-xl text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-accent shadow-sm cursor-pointer"
                   value={segmentId}
                   onChange={e => setSegmentId(e.target.value)}
                 >
-                  <option value="" disabled className="text-gray-500 bg-[#fcfaf5]">Select a saved audience...</option>
+                  <option value="" disabled>Select a target audience segment...</option>
                   {segments.map(s => (
-                    <option key={s.id} value={s.id} className="text-gray-900 bg-[#fcfaf5]">{s.name} ({s.customer_count} shoppers)</option>
+                    <option key={s.id} value={s.id}>{s.name} ({s.customer_count || 0} customers)</option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-3">Delivery Channel</label>
-                <div className="flex gap-3 flex-wrap">
+                <label className="block text-xs font-medium text-foreground mb-2">Delivery Channel</label>
+                <div className="flex gap-2 flex-wrap">
                   {['whatsapp', 'sms', 'email', 'rcs'].map(c => (
                     <button
                       key={c}
+                      type="button"
                       onClick={() => setChannel(c)}
-                      className={`flex-1 min-w-[100px] py-3 text-sm font-bold rounded-xl uppercase tracking-wider transition-all duration-200 ${
+                      className={`px-4 py-2 text-xs font-semibold rounded-full uppercase tracking-wider transition-all duration-200 ${
                         channel === c 
-                          ? 'bg-[#6C47FF] text-white shadow-md ring-2 ring-[#6C47FF] ring-offset-2' 
-                          : 'bg-[#fcfaf5] border border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300'
+                          ? 'bg-accent text-accent-foreground shadow-sm ring-2 ring-accent/30' 
+                          : 'bg-white/60 border border-white/80 text-muted-foreground hover:bg-white hover:text-foreground'
                       }`}
                     >
                       {c}
@@ -181,73 +201,76 @@ const NewCampaign = () => {
               </div>
             </div>
             
-            <div className="space-y-6 pt-4">
-              <h2 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-3 flex items-center">
-                2. Message Content
+            <div className="space-y-4 pt-2">
+              <h2 className="text-sm font-semibold text-foreground border-b border-border/40 pb-2">
+                2. Message Content & AI Co-Pilot
               </h2>
 
-              <div className="bg-purple-50 p-5 rounded-2xl border border-purple-100 space-y-4">
-                <label className="block text-sm font-bold text-gray-900 flex items-center">
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  AI Co-Pilot Prompt (Optional)
+              <div className="bg-accent/5 p-4 rounded-xl border border-accent/15 space-y-3">
+                <label className="block text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-accent" />
+                  <span>AI Co-Pilot Prompt (Optional)</span>
                 </label>
-                <div className="flex gap-3">
+                <div className="flex gap-2">
                   <input 
                     type="text"
                     placeholder="e.g. Write a friendly reminder about abandoned carts..."
-                    className="flex-1 px-4 py-3 border border-purple-200 rounded-xl bg-[#fcfaf5] text-gray-900 focus:ring-2 focus:ring-[#6C47FF] focus:border-transparent outline-none"
+                    className="flex-1 px-3.5 py-2 bg-white/80 border border-white/90 rounded-xl text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent shadow-inner"
                     value={campaignGoal}
                     onChange={e => setCampaignGoal(e.target.value)}
                   />
                   <button 
+                    type="button"
                     onClick={handleGenerateAI}
                     disabled={isGenerating || !segmentId || !campaignGoal}
-                    className="px-6 py-3 bg-[#0A0B2E] hover:bg-[#E62328] text-white font-bold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center whitespace-nowrap shadow-sm"
+                    className="px-4 py-2 bg-accent hover:bg-accent/90 text-accent-foreground font-medium rounded-full text-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 shrink-0 shadow-sm"
                   >
-                    {isGenerating ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Sparkles className="w-5 h-5 mr-2" />}
-                    Generate
+                    {isGenerating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                    <span>Generate</span>
                   </button>
                 </div>
-                <p className="text-xs text-purple-600/70 font-medium">AI will analyze your selected audience and automatically tailor the tone.</p>
+                <p className="text-[11px] text-muted-foreground">AI will analyze your selected audience and automatically tailor the message voice.</p>
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Final Message Template</label>
+                <label className="block text-xs font-medium text-foreground mb-1.5">Final Message Copy</label>
                 <textarea 
-                  rows={6}
-                  placeholder="Hi {{name}}, check out our Summer Sale — 40% off premium threads!"
-                  className="w-full px-5 py-4 border border-gray-200 rounded-2xl bg-gray-50 text-gray-900 focus:bg-[#fcfaf5] focus:ring-2 focus:ring-[#6C47FF] focus:border-transparent outline-none resize-none shadow-inner leading-relaxed"
+                  rows={5}
+                  placeholder="Hi {{name}}, discover our exclusive summer styles — 40% off premium threads!"
+                  className="w-full px-4 py-3 bg-white/70 border border-white/80 rounded-xl text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent resize-none shadow-inner leading-relaxed"
                   value={messageTemplate}
                   onChange={e => setMessageTemplate(e.target.value)}
                 />
-                <p className="text-xs text-gray-500 mt-3 font-medium">
-                  Use <span className="font-mono bg-gray-200 px-1.5 py-0.5 rounded text-[#6C47FF]">{"{{name}}"}</span> to inject the recipient's first name.
+                <p className="text-[11px] text-muted-foreground mt-2 font-medium">
+                  Use <span className="font-mono bg-white/80 px-1.5 py-0.5 rounded text-accent border border-border/50">{"{{name}}"}</span> to inject the customer's first name dynamically.
                 </p>
               </div>
             </div>
             
             {error && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm font-bold flex items-center">
-                <div className="w-2 h-2 rounded-full bg-red-500 mr-3 animate-pulse" />
-                {error}
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-medium flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-pulse shrink-0" />
+                <span>{error}</span>
               </div>
             )}
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-3">
             <button 
+              type="button"
               onClick={() => handleLaunchInit(true)}
               disabled={isLoading}
-              className="flex-1 py-4 bg-[#fcfaf5] border-2 border-gray-200 text-gray-700 font-bold rounded-2xl hover:bg-gray-50 hover:border-gray-300 transition-colors disabled:opacity-50 shadow-sm"
+              className="flex-1 py-3 bg-white/70 border border-white/80 text-foreground font-medium text-xs rounded-full hover:bg-white transition-colors disabled:opacity-50 shadow-sm"
             >
               Save as Draft
             </button>
             <button 
+              type="button"
               onClick={() => handleLaunchInit(false)}
               disabled={isLoading}
-              className="flex-[2] py-4 bg-[#E63329] text-white font-extrabold rounded-2xl hover:bg-[#cc2b22] shadow-lg shadow-red-500/20 flex justify-center items-center space-x-2 disabled:opacity-50 transition-all active:scale-[0.98]"
+              className="flex-[2] py-3 bg-accent text-accent-foreground font-medium text-xs rounded-full hover:bg-accent/90 shadow-md flex justify-center items-center gap-2 disabled:opacity-50 transition-all active:scale-[0.98]"
             >
-              {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               <span>Dispatch Campaign</span>
             </button>
           </div>
@@ -255,119 +278,74 @@ const NewCampaign = () => {
 
         {/* Live Preview Right Side */}
         <div className="lg:col-span-5 sticky top-8">
-          <div className="bg-[#0A0A2E] rounded-[2.5rem] p-8 shadow-2xl border border-white/10 flex flex-col items-center">
-            
-            <div className="w-full flex items-center justify-between mb-8 pb-4 border-b border-white/10">
-              <h3 className="text-sm font-bold text-white/50 uppercase tracking-widest flex items-center">
-                <span className="w-2 h-2 rounded-full bg-green-400 mr-2 shadow-[0_0_8px_rgba(74,222,128,0.6)]"></span>
-                Device Preview
+          <div 
+            className="rounded-2xl p-6 shadow-sm flex flex-col items-center"
+            style={{
+              background: 'rgba(255, 255, 255, 0.4)',
+              border: '1px solid rgba(255, 255, 255, 0.5)',
+              boxShadow: 'var(--shadow-dashboard)',
+              backdropFilter: 'blur(16px)'
+            }}
+          >
+            <div className="w-full flex items-center justify-between mb-6 pb-3 border-b border-border/40">
+              <h3 className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Device Preview</span>
               </h3>
-              <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-white flex items-center ${
-                  channel === 'whatsapp' ? 'bg-[#25D366]' :
-                  channel === 'sms' ? 'bg-[#4A90E2]' :
-                  channel === 'rcs' ? 'bg-[#7015E7]' :
-                  'bg-[#D44638]'
-                }`}>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-accent/10 text-accent border border-accent/20">
                 {channel}
-              </div>
+              </span>
             </div>
             
-            {/* Fake Phone Screen */}
-            <div className="w-full max-w-[320px] bg-[#fcfaf5] rounded-[2rem] p-4 shadow-2xl ring-8 ring-white/5 relative overflow-hidden min-h-[400px] flex flex-col">
-              
-              {/* Fake Phone Header */}
-              <div className="flex items-center space-x-3 mb-6 pb-4 border-b border-gray-100">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-md ${
-                  channel === 'whatsapp' ? 'bg-[#25D366]' :
-                  channel === 'sms' ? 'bg-[#4A90E2]' :
-                  channel === 'rcs' ? 'bg-[#7015E7]' :
-                  'bg-[#D44638]'
-                }`}>
-                  {channel.charAt(0).toUpperCase()}
+            {/* Phone Screen Mockup */}
+            <div className="w-full max-w-[290px] bg-white/90 backdrop-blur rounded-2xl p-4 shadow-lg border border-border/60 relative overflow-hidden min-h-[380px] flex flex-col">
+              {/* Header */}
+              <div className="flex items-center gap-2.5 mb-4 pb-3 border-b border-border/40">
+                <div className="w-8 h-8 rounded-full bg-accent/15 text-accent font-bold flex items-center justify-center text-xs shadow-inner">
+                  T
                 </div>
                 <div>
-                  <div className="font-extrabold text-gray-900 text-sm">ThreadCo</div>
-                  <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">Verified Business</div>
+                  <div className="font-semibold text-foreground text-xs">ThreadCo</div>
+                  <div className="text-[9px] text-muted-foreground font-medium uppercase tracking-wider">Verified Business</div>
                 </div>
               </div>
               
               {/* Message Bubble */}
               {messageTemplate ? (
-                <>
-                  {channel === 'email' && (
-                    <div className="bg-gray-50 text-gray-800 border border-gray-200 p-4 rounded-2xl relative shadow-sm text-sm leading-relaxed w-full">
-                      <div className="font-bold text-sm mb-2 border-b border-gray-200 pb-2 text-gray-900">
-                        Subject: {emailSubject || 'No subject'}
-                      </div>
-                      <div className="text-sm whitespace-pre-wrap font-medium">
-                        {messageTemplate.replace(/\{\{name\}\}/g, 'Alex')}
-                      </div>
-                    </div>
-                  )}
-
-                  {channel === 'whatsapp' && (
-                    <div className="bg-[#E7FFDB] text-gray-800 rounded-2xl rounded-tl-sm p-4 relative shadow-sm text-sm leading-relaxed w-full">
-                      <div className="text-sm whitespace-pre-wrap font-medium">
-                        {messageTemplate.replace(/\{\{name\}\}/g, 'Alex')}
-                      </div>
-                      <div className="absolute -left-2 top-0 w-3 h-3 bg-[#E7FFDB]" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
-                    </div>
-                  )}
-
-                  {channel === 'sms' && (
-                    <div className="bg-gray-100 rounded-2xl rounded-tl-sm p-4 relative shadow-sm text-sm leading-relaxed w-full font-mono">
-                      <div className="text-sm whitespace-pre-wrap font-medium">
-                        {messageTemplate.replace(/\{\{name\}\}/g, 'Alex')}
-                      </div>
-                      <div className="text-xs text-gray-400 mt-2 font-sans text-right">
-                        {messageTemplate.length} chars
-                      </div>
-                      <div className="absolute -left-2 top-0 w-3 h-3 bg-gray-100" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
-                    </div>
-                  )}
-
-                  {channel === 'rcs' && (
-                    <div className="bg-[#E9E9EB] text-gray-800 rounded-2xl rounded-tl-sm p-4 relative shadow-sm text-sm leading-relaxed w-full">
-                      <div className="text-sm whitespace-pre-wrap font-medium">
-                        {messageTemplate.replace(/\{\{name\}\}/g, 'Alex')}
-                      </div>
-                      <div className="absolute -left-2 top-0 w-3 h-3 bg-[#E9E9EB]" style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
-                    </div>
-                  )}
-                </>
+                <div className="bg-secondary/60 text-foreground border border-border/60 p-3.5 rounded-2xl rounded-tl-sm text-xs leading-relaxed w-full font-medium">
+                  {messageTemplate.replace(/\{\{name\}\}/g, 'Alex')}
+                </div>
               ) : (
-                <div className="flex-1 flex flex-col items-center justify-center text-gray-300 space-y-3">
-                  <MessageSquare className="w-12 h-12 stroke-1" />
-                  <p className="text-xs font-bold text-center px-4">Your personalized message will appear here.</p>
+                <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground gap-2">
+                  <MessageSquare className="w-8 h-8 opacity-40" />
+                  <p className="text-[11px] text-center px-4">Your personalized message will render here in real time.</p>
                 </div>
               )}
-              
             </div>
-            
           </div>
         </div>
-        
       </div>
+
       {/* Confirmation Modal */}
       {showConfirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-          <div className="bg-[#fcfaf5] rounded-3xl p-8 max-w-md w-full shadow-2xl border border-gray-100">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Confirm Dispatch</h3>
-            <p className="text-gray-600 mb-8">
-              This will send to <strong className="text-gray-900">{selectedSegmentObj?.customer_count}</strong> customers via <strong className="text-gray-900 uppercase">{channel}</strong>. Continue?
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+          <div className="bg-white/95 rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-white/80">
+            <h3 className="text-sm font-bold text-foreground mb-2">Confirm Live Dispatch</h3>
+            <p className="text-xs text-muted-foreground mb-6">
+              This will dispatch messages to <strong className="text-foreground">{selectedSegmentObj?.customer_count || 0}</strong> customers via <strong className="text-foreground uppercase">{channel}</strong>.
             </p>
-            <div className="flex gap-4">
+            <div className="flex gap-2.5">
               <button 
                 onClick={() => setShowConfirmModal(false)}
-                className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+                className="flex-1 py-2 bg-secondary text-foreground text-xs font-medium rounded-full hover:bg-secondary/80 transition-colors"
               >
                 Cancel
               </button>
               <button 
                 onClick={() => handleLaunch(false)}
-                className="flex-[2] py-3 bg-[#E63329] text-white font-bold rounded-xl hover:bg-[#cc2b22] transition-colors"
+                className="flex-[1.5] py-2 bg-accent text-accent-foreground text-xs font-medium rounded-full hover:bg-accent/90 transition-colors shadow-sm"
               >
-                Yes, Dispatch Now
+                Dispatch Now
               </button>
             </div>
           </div>

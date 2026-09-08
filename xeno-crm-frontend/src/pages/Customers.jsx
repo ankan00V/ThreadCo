@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import CustomerRow from '../components/CustomerRow';
 import { getCustomerDirectory, getCustomerStats } from '../api';
 
@@ -54,37 +54,46 @@ const Customers = () => {
   const totalPages = Math.ceil(totalCustomers / perPage) || 1;
 
   return (
-    <div className="product-page product-page--customers w-full px-3 sm:px-4 pt-8 mt-2 max-w-[1100px] mx-auto pb-12">
+    <div className="w-full px-4 sm:px-6 md:px-12 max-w-[1100px] mx-auto pt-8 md:pt-12 pb-24 font-body">
       
       {/* Header */}
-      <div className="mb-6 px-2">
-        <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-3 py-1.5 shadow-sm mb-4 border border-white/20">
-          <span className="w-2 h-2 rounded-full bg-[#ef4d23]"></span>
-          <span className="text-[12px] font-semibold text-white">Customer Directory</span>
+      <div className="mb-6">
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/80 backdrop-blur-md px-4 py-1.5 text-xs text-muted-foreground font-body mb-3 shadow-sm">
+          <Sparkles className="w-3.5 h-3.5 text-accent" />
+          <span>Customer Directory</span>
         </div>
-        <h2 className="text-[#f5f5dc] font-medium" style={{ fontSize: "clamp(28px, 5vw, 42px)", lineHeight: 1.1, letterSpacing: "-0.02em", textShadow: '0 2px 10px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,1)' }}>
-          Explore and analyze your <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: "italic", fontWeight: 400 }}>Audience</span>
-        </h2>
-        <p className="text-white/90 mt-2 text-[14px]" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8), 0 0 2px rgba(0,0,0,1)' }}>
-          Browse, filter, and discover new high-value segments from your database.
+        <h1 className="font-display text-4xl sm:text-5xl md:text-6xl text-foreground tracking-tight leading-[0.98]">
+          Explore and analyze your <span className="font-display italic font-normal text-accent">Audience</span>
+        </h1>
+        <p className="text-muted-foreground mt-3 text-sm md:text-base max-w-xl font-body">
+          Browse, filter, and discover high-value customer cohorts directly from your synchronized database.
         </p>
       </div>
 
-      {/* Top Filter Bar */}
-      <div className="bg-[#fcfaf5] p-4 rounded-2xl mb-6 flex flex-col md:flex-row gap-3 shadow-sm border border-neutral-200">
+      {/* Top Filter Bar (Frosted Glass) */}
+      <div 
+        className="rounded-2xl p-4 mb-6 flex flex-col md:flex-row gap-3"
+        style={{
+          background: 'rgba(255, 255, 255, 0.4)',
+          border: '1px solid rgba(255, 255, 255, 0.5)',
+          boxShadow: 'var(--shadow-dashboard)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)'
+        }}
+      >
         <div className="flex-1 relative">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
           <input 
             type="text"
-            placeholder="Search customers..."
-            className="w-full pl-9 pr-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:border-[#ef4d23] focus:ring-1 focus:ring-[#ef4d23] transition-all text-[13px] text-neutral-800 placeholder-neutral-400"
+            placeholder="Search customers by name, email..."
+            className="w-full pl-9 pr-3 py-2 bg-white/70 border border-white/80 rounded-xl focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-all text-xs text-foreground placeholder-muted-foreground shadow-inner"
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
           />
         </div>
         
         <select 
-          className="bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-[13px] text-neutral-800 focus:outline-none focus:border-[#ef4d23]"
+          className="bg-white/70 border border-white/80 rounded-xl px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-accent shadow-sm"
           value={cityFilter}
           onChange={e => { setCityFilter(e.target.value); setPage(1); }}
         >
@@ -93,7 +102,7 @@ const Customers = () => {
         </select>
 
         <select 
-          className="bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-[13px] text-neutral-800 focus:outline-none focus:border-[#ef4d23]"
+          className="bg-white/70 border border-white/80 rounded-xl px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-accent shadow-sm"
           value={genderFilter}
           onChange={e => { setGenderFilter(e.target.value); setPage(1); }}
         >
@@ -104,7 +113,7 @@ const Customers = () => {
         </select>
 
         <select 
-          className="bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-[13px] text-neutral-800 focus:outline-none focus:border-[#ef4d23]"
+          className="bg-white/70 border border-white/80 rounded-xl px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-accent shadow-sm"
           value={tagFilter}
           onChange={e => { setTagFilter(e.target.value); setPage(1); }}
         >
@@ -113,33 +122,42 @@ const Customers = () => {
         </select>
       </div>
 
-      {/* Table Container */}
-      <div className="bg-[#fcfaf5] rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
+      {/* Table Container (Frosted Glass) */}
+      <div 
+        className="rounded-2xl overflow-hidden shadow-sm"
+        style={{
+          background: 'rgba(255, 255, 255, 0.4)',
+          border: '1px solid rgba(255, 255, 255, 0.5)',
+          boxShadow: 'var(--shadow-dashboard)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)'
+        }}
+      >
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-neutral-50 border-b border-neutral-200">
-                <th className="px-6 py-3 text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Customer</th>
-                <th className="px-6 py-3 text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Demographics</th>
-                <th className="px-6 py-3 text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Value</th>
-                <th className="px-6 py-3 text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Tags</th>
-                <th className="px-6 py-3 text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Last Active</th>
+              <tr className="bg-secondary/40 border-b border-border/50 text-muted-foreground text-[10px] font-semibold uppercase tracking-wider">
+                <th className="px-6 py-3.5">Customer</th>
+                <th className="px-6 py-3.5">Demographics</th>
+                <th className="px-6 py-3.5">Value</th>
+                <th className="px-6 py-3.5">Tags</th>
+                <th className="px-6 py-3.5">Last Active</th>
               </tr>
             </thead>
-            <tbody className="bg-[#fcfaf5]">
+            <tbody className="divide-y divide-border/30">
               {isLoading ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-12 text-center text-neutral-500 text-[13px]">
-                    <div className="flex justify-center mb-4">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ef4d23]"></div>
+                  <td colSpan="5" className="px-6 py-12 text-center text-muted-foreground text-xs">
+                    <div className="flex justify-center mb-3">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent"></div>
                     </div>
-                    Loading customer data...
+                    Loading customer directory...
                   </td>
                 </tr>
               ) : customers.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-12 text-center text-neutral-500 text-[13px]">
-                    No customers found matching the criteria.
+                  <td colSpan="5" className="px-6 py-12 text-center text-muted-foreground text-xs">
+                    No customers found matching the filter criteria.
                   </td>
                 </tr>
               ) : (
@@ -150,24 +168,25 @@ const Customers = () => {
         </div>
         
         {/* Pagination */}
-        <div className="bg-[#fcfaf5] border-t border-neutral-200 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-[12px] text-neutral-500 text-center sm:text-left">
-            Showing <span className="font-semibold text-[#0b0f1a]">{totalCustomers ? ((page - 1) * perPage) + 1 : 0}</span> to <span className="font-semibold text-[#0b0f1a]">{Math.min(page * perPage, totalCustomers)}</span> of <span className="font-semibold text-[#0b0f1a]">{totalCustomers}</span> results
+        <div className="bg-secondary/20 border-t border-border/50 px-6 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+          <p className="text-muted-foreground text-center sm:text-left text-[11px]">
+            Showing <span className="font-semibold text-foreground">{totalCustomers ? ((page - 1) * perPage) + 1 : 0}</span> to <span className="font-semibold text-foreground">{Math.min(page * perPage, totalCustomers)}</span> of <span className="font-semibold text-foreground">{totalCustomers}</span> customers
           </p>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-1.5">
             <button 
-              className="p-1.5 rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-50 disabled:opacity-50 disabled:hover:bg-[#fcfaf5] transition-colors"
+              className="p-1.5 rounded-full border border-white/80 bg-white/70 text-foreground hover:bg-white disabled:opacity-40 transition-colors shadow-sm"
               disabled={page === 1}
               onClick={() => setPage(p => Math.max(1, p - 1))}
             >
-              <ChevronLeft size={16} />
+              <ChevronLeft size={14} />
             </button>
+            <span className="text-[11px] text-muted-foreground px-2 font-medium">Page {page} of {totalPages}</span>
             <button 
-              className="p-1.5 rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-50 disabled:opacity-50 disabled:hover:bg-[#fcfaf5] transition-colors"
+              className="p-1.5 rounded-full border border-white/80 bg-white/70 text-foreground hover:bg-white disabled:opacity-40 transition-colors shadow-sm"
               disabled={page >= totalPages}
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
             >
-              <ChevronRight size={16} />
+              <ChevronRight size={14} />
             </button>
           </div>
         </div>

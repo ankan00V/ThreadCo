@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getSegments } from '../api';
 import AIComposer from '../components/AIComposer';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Sparkles, Layers } from 'lucide-react';
 
 const Segments = () => {
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ const Segments = () => {
     setIsLoading(true);
     try {
       const data = await getSegments();
-      setSegments(data);
+      setSegments(data || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -26,46 +26,57 @@ const Segments = () => {
   }, []);
 
   return (
-    <div className="product-page product-page--segments w-full px-3 sm:px-4 pt-8 mt-2 max-w-[1100px] mx-auto pb-12 font-['Inter']">
+    <div className="w-full px-4 sm:px-6 md:px-12 max-w-[1100px] mx-auto pt-8 md:pt-12 pb-24 font-body">
       
       {/* Header */}
-      <div className="mb-6 px-2 text-center flex flex-col items-center">
-        <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-3 py-1.5 shadow-sm mb-4 border border-white/20">
-          <span className="w-2 h-2 rounded-full bg-[#ef4d23]"></span>
-          <span className="text-[12px] font-semibold text-white">Targeting Engine</span>
+      <div className="mb-8 text-center flex flex-col items-center">
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/80 backdrop-blur-md px-4 py-1.5 text-xs text-muted-foreground font-body mb-3 shadow-sm">
+          <Sparkles className="w-3.5 h-3.5 text-accent" />
+          <span>Targeting Engine</span>
         </div>
         
-        <h2 className="text-[#f5f5dc] font-medium" style={{ fontSize: "clamp(28px, 5vw, 42px)", lineHeight: 1.1, letterSpacing: "-0.02em", textShadow: '0 2px 10px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,1)' }}>
-          AI-Driven <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: "italic", fontWeight: 400 }}>Segments</span>
-        </h2>
+        <h1 className="font-display text-4xl sm:text-5xl md:text-6xl text-foreground tracking-tight leading-[0.98]">
+          AI-Driven <span className="font-display italic font-normal text-accent">Segments</span>
+        </h1>
         
-        <p className="text-white/90 mt-3 text-[14px] max-w-lg mx-auto" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8), 0 0 2px rgba(0,0,0,1)' }}>
-          Generate precise customer segments instantly using natural language prompts.
+        <p className="text-muted-foreground mt-3 text-sm md:text-base max-w-lg mx-auto font-body">
+          Generate high-conversion customer segments instantly using natural language prompts.
         </p>
       </div>
 
-      {/* AI Composer Wrapper */}
-      <div className="w-full bg-[#fcfaf5] rounded-2xl shadow-sm border border-neutral-200 p-6 mb-12 aicomposer-override">
+      {/* AI Composer Wrapper (Frosted Glass) */}
+      <div 
+        className="w-full rounded-2xl p-6 mb-12 aicomposer-override"
+        style={{
+          background: 'rgba(255, 255, 255, 0.4)',
+          border: '1px solid rgba(255, 255, 255, 0.5)',
+          boxShadow: 'var(--shadow-dashboard)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)'
+        }}
+      >
         <style>{`
-          /* Force AIComposer to match light theme */
-          .aicomposer-override * { color: #0b0f1a; }
+          .aicomposer-override * { color: hsl(var(--foreground)); }
           .aicomposer-override input, .aicomposer-override textarea {
-              background: #f5f2ee !important;
-              border: 1px solid #e5e5e5 !important;
-              color: #0b0f1a !important;
-              border-radius: 8px !important;
+              background: rgba(255, 255, 255, 0.8) !important;
+              border: 1px solid rgba(255, 255, 255, 0.9) !important;
+              color: hsl(var(--foreground)) !important;
+              border-radius: 12px !important;
+              box-shadow: inset 0 1px 2px rgba(0,0,0,0.04);
           }
           .aicomposer-override input::placeholder, .aicomposer-override textarea::placeholder {
-              color: #a3a3a3 !important;
+              color: hsl(var(--muted-foreground)) !important;
           }
-          .aicomposer-override p, .aicomposer-override span { color: #525252 !important; }
+          .aicomposer-override p, .aicomposer-override span { color: hsl(var(--muted-foreground)) !important; }
           .aicomposer-override button.bg-brand-500 {
-              background-color: #ef4d23 !important;
+              background-color: hsl(var(--accent)) !important;
               color: #ffffff !important;
-              border-radius: 8px !important;
+              border-radius: 9999px !important;
+              padding: 0.6rem 1.4rem !important;
+              font-weight: 500 !important;
           }
           .aicomposer-override button.bg-brand-500 * { color: #ffffff !important; }
-          .aicomposer-override .aicomposer-title { color: #0b0f1a !important; }
+          .aicomposer-override .aicomposer-title { color: hsl(var(--foreground)) !important; }
           .aicomposer-override .bg-surface-base { background: transparent !important; }
         `}</style>
         <AIComposer onSaved={fetchSegments} />
@@ -73,40 +84,56 @@ const Segments = () => {
 
       {/* Saved Segments */}
       <div className="w-full">
-        <h3 className="text-[16px] font-semibold text-[#f5f5dc] mb-4 px-2" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8), 0 0 2px rgba(0,0,0,1)' }}>Saved Segments</h3>
+        <div className="flex items-center gap-2 mb-4">
+          <Layers className="w-4 h-4 text-accent" />
+          <h2 className="text-base font-semibold text-foreground">Saved Segments</h2>
+        </div>
 
         {isLoading ? (
-          <div className="text-center py-12 text-neutral-500 text-[13px]">
-             <div className="flex justify-center mb-4">
-               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ef4d23]"></div>
-             </div>
-             <span className="text-white/90" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8), 0 0 2px rgba(0,0,0,1)' }}>Loading segments...</span>
+          <div className="text-center py-12 text-muted-foreground text-xs flex flex-col items-center">
+             <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-accent mb-3"></div>
+             <span>Loading audience cohorts...</span>
           </div>
         ) : segments.length === 0 ? (
-          <div className="text-center p-12 bg-[#fcfaf5] rounded-2xl border border-neutral-200">
-            <h3 className="text-[15px] font-semibold mb-2 text-[#0b0f1a]">No saved segments</h3>
-            <p className="text-[13px] text-neutral-500">Use the AI composer above to generate your first audience segment.</p>
+          <div 
+            className="text-center p-10 rounded-2xl"
+            style={{
+              background: 'rgba(255, 255, 255, 0.4)',
+              border: '1px solid rgba(255, 255, 255, 0.5)',
+              boxShadow: 'var(--shadow-dashboard)',
+              backdropFilter: 'blur(16px)'
+            }}
+          >
+            <h3 className="text-sm font-semibold mb-1 text-foreground">No saved segments yet</h3>
+            <p className="text-xs text-muted-foreground">Use the AI composer above to synthesize your first audience segment.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {segments.map((seg) => (
-              <div key={seg.id} className="group bg-[#fcfaf5] rounded-2xl p-5 flex flex-col justify-between shadow-sm border border-neutral-200 transition-all hover:shadow-md hover:border-neutral-300">
-                
+              <div 
+                key={seg.id} 
+                className="group rounded-2xl p-5 flex flex-col justify-between transition-all hover:scale-[1.01] border border-white/60 hover:border-accent/40 shadow-sm"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.45)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)'
+                }}
+              >
                 <div>
-                  <h3 className="text-[15px] font-semibold mb-1 text-[#0b0f1a]">{seg.name}</h3>
-                  <p className="text-[13px] text-neutral-500 mb-4 line-clamp-2">{seg.description}</p>
+                  <h3 className="text-sm font-semibold mb-1 text-foreground group-hover:text-accent transition-colors">{seg.name}</h3>
+                  <p className="text-xs text-muted-foreground mb-4 line-clamp-2">{seg.description || 'Custom behavioral rule segment'}</p>
                   
-                  <div className="flex flex-wrap gap-1 mb-6">
+                  <div className="flex flex-wrap gap-1 mb-5">
                     {Object.entries(seg.filter_logic || {})
                       .filter(([_, v]) => v !== null && v !== undefined)
                       .slice(0, 3)
                       .map(([key, val]) => (
-                        <span key={key} className="text-[11px] px-2 py-0.5 rounded-md font-medium bg-neutral-100 text-neutral-600">
+                        <span key={key} className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-white/70 text-foreground border border-white/80">
                           {key.replace(/_/g, ' ')}: {String(val)}
                         </span>
                       ))}
                     {(!seg.filter_logic || Object.keys(seg.filter_logic).length === 0) && (
-                      <span className="text-[11px] px-2 py-0.5 rounded-md font-medium bg-neutral-100 text-neutral-600">
+                      <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-white/70 text-muted-foreground border border-white/80">
                         All customers
                       </span>
                     )}
@@ -115,9 +142,10 @@ const Segments = () => {
 
                 <button
                   onClick={() => navigate(`/campaigns/new?segment_id=${seg.id}`)}
-                  className="flex items-center gap-2 text-[13px] font-medium text-[#ef4d23] mt-auto hover:text-[#d9421b] transition-colors"
+                  className="flex items-center gap-1.5 text-xs font-medium text-accent mt-auto hover:opacity-80 transition-opacity"
                 >
-                  Use in Campaign <ChevronRight size={16} />
+                  <span>Use in Campaign</span>
+                  <ChevronRight size={14} />
                 </button>
 
               </div>
