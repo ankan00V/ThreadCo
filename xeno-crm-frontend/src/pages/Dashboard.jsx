@@ -90,7 +90,7 @@ const DotMetric = ({ targetValue = 0, formatType = 'comma', pitchX = 5, pitchY =
 
   const height = 6 * pitchY + dotRadius * 2;
   return (
-    <svg className={`dot-svg ${className}`} viewBox={`0 0 ${currentX} ${height}`} fill="currentColor" style={{ height: `calc(${height} * var(--u))`, display: 'block', overflow: 'visible' }}>
+    <svg className={`dot-svg ${className}`} viewBox={`0 0 ${currentX} ${height}`} fill="currentColor" style={{ height: `calc(${height * 1.15} * var(--u))`, display: 'block', overflow: 'visible' }}>
       {circles}
     </svg>
   );
@@ -252,6 +252,7 @@ const formatNumberStr = (num) => {
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [isEntranceActive, setIsEntranceActive] = useState(true);
   const [stats, setStats] = useState({
     total_customers: 1500,
     total_campaigns: 8,
@@ -259,11 +260,12 @@ const Dashboard = () => {
   });
   
   useEffect(() => {
+    let timer;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) {
       setIsEntranceActive(false);
     } else {
-      const timer = setTimeout(() => setIsEntranceActive(false), 2000);
+      timer = setTimeout(() => setIsEntranceActive(false), 2000);
     }
 
     const fetchStats = async () => {
@@ -277,7 +279,10 @@ const Dashboard = () => {
     fetchStats();
     
     const intervalId = setInterval(fetchStats, 3000);
-    return () => clearInterval(intervalId);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(intervalId);
+    };
   }, []);
 
   return (
@@ -299,7 +304,7 @@ const Dashboard = () => {
         </button>
       </section>
 
-      <section className="cards" aria-label="CRM performance overview">
+      <section className={`cards ${isEntranceActive ? 'entrance-active' : ''}`} aria-label="CRM performance overview">
         
         <article className="card card--speed">
           <video className="card__media" autoPlay loop muted playsInline preload="auto" aria-hidden="true" poster="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/167977c6-8539-46b1-9a15-8dba566f50b8.png">
@@ -359,7 +364,7 @@ const Dashboard = () => {
           <ConnectionVisual />
           
           <div className="metric metric--connections">
-            <span style={{fontSize:'calc(30.6 * var(--u))', transform:'translateY(3u)', marginRight:'4px'}}>$</span>
+            <span style={{fontSize:'calc(30.6 * var(--u))', transform:'translateY(calc(3 * var(--u)))', marginRight:'4px'}}>$</span>
             <div className="dot-number"><DotMetric targetValue={stats.revenue_generated || 0} formatType="compact" /></div>
             <span className="metric__unit">{formatNumberStr(stats.revenue_generated || 0).replace(/[0-9.]/g, '')}</span>
           </div>

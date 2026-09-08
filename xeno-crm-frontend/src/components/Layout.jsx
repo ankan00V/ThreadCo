@@ -36,7 +36,7 @@ const Layout = ({ children }) => {
         <Navbar />
 
         {/* Scrollable Content Container */}
-        <div ref={contentRef} className="relative z-10 flex-1 overflow-y-auto no-scrollbar">
+        <div ref={contentRef} className="relative z-10 flex-1 overflow-y-auto overflow-x-hidden no-scrollbar">
           {children}
         </div>
       </div>
