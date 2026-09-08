@@ -23,6 +23,9 @@ const LED_GLYPHS = {
 };
 
 const DotMetric = ({ value, pitchX = 5, pitchY = 4, dotRadius = 1.55, className = '' }) => {
+  // Use explicit units for scaling instead of hardcoded px
+  // dotRadius passed in is base size, but it needs to scale by var(--u) in the SVG
+  
   const str = String(value).toUpperCase();
   let currentX = 0;
   const circles = [];
@@ -50,8 +53,10 @@ const DotMetric = ({ value, pitchX = 5, pitchY = 4, dotRadius = 1.55, className 
   }
 
   const height = 6 * pitchY + dotRadius * 2;
+  // Apply a dynamic font-size based on var(--u) to scale the em correctly
+  // The original prompt implies this dot metric gets its size from the surrounding metric
   return (
-    <svg className={`dot-svg ${className}`} viewBox={`0 0 ${currentX} ${height}`} fill="currentColor" style={{ height: '1em', display: 'inline-block', overflow: 'visible' }}>
+    <svg className={`dot-svg ${className}`} viewBox={`0 0 ${currentX} ${height}`} fill="currentColor" style={{ height: `calc(${height} * var(--u))`, display: 'inline-block', overflow: 'visible' }}>
       {circles}
     </svg>
   );
