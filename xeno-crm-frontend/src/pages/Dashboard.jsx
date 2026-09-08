@@ -18,15 +18,16 @@ import {
   CreditCard,
   Sparkles
 } from 'lucide-react';
+import AnimatedNumber from '../components/AnimatedNumber';
 import AIComposer from '../components/AIComposer';
 import { getDashboardStats, getCampaigns } from '../api';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [stats, setStats] = useState({
-    total_customers: 1500,
-    total_campaigns: 8,
-    revenue_generated: 8450190.32
+    total_customers: 0,
+    total_campaigns: 0,
+    revenue_generated: 0
   });
   const [campaigns, setCampaigns] = useState([]);
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -254,7 +255,7 @@ export default function Dashboard() {
                     </div>
                     
                     <div className="flex items-baseline gap-1">
-                      <span className="text-xl font-bold text-foreground tracking-tight">${(stats.revenue_generated || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
+                      <span className="text-xl font-bold text-foreground tracking-tight">$<AnimatedNumber value={stats.revenue_generated || 0} formatter={(v) => v.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} /></span>
                       <span className="text-xs text-muted-foreground font-medium"></span>
                     </div>
 
@@ -274,17 +275,8 @@ export default function Dashboard() {
                           <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.0" />
                         </linearGradient>
                       </defs>
-                      <path
-                        d="M 0,65 C 40,55 70,30 110,40 C 150,50 190,15 240,25 C 270,30 285,10 300,12 L 300,80 L 0,80 Z"
-                        fill="url(#chartGradient)"
-                      />
-                      <path
-                        d="M 0,65 C 40,55 70,30 110,40 C 150,50 190,15 240,25 C 270,30 285,10 300,12"
-                        fill="none"
-                        stroke="var(--accent)"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                      />
+                      <motion.path d="M 0,65 C 40,55 70,30 110,40 C 150,50 190,15 240,25 C 270,30 285,10 300,12 L 300,80 L 0,80 Z" fill="url(#chartGradient)" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.5, delay: 0.2 }} />
+                      <motion.path d="M 0,65 C 40,55 70,30 110,40 C 150,50 190,15 240,25 C 270,30 285,10 300,12" fill="none" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, ease: "easeOut" }} />
                     </svg>
                   </div>
                 </div>
@@ -303,15 +295,15 @@ export default function Dashboard() {
                     <div className="flex flex-col">
                       <div className="flex items-center justify-between py-3 text-xs">
                         <span className="text-muted-foreground font-medium">Total Customers</span>
-                        <span className="font-semibold text-foreground">{(stats.total_customers || 0).toLocaleString()}</span>
+                        <span className="font-semibold text-foreground"><AnimatedNumber value={stats.total_customers || 0} /></span>
                       </div>
                       <div className="flex items-center justify-between py-3 text-xs">
                         <span className="text-muted-foreground font-medium">Active Campaigns</span>
-                        <span className="font-semibold text-foreground">{(stats.total_campaigns || 0).toLocaleString()}</span>
+                        <span className="font-semibold text-foreground"><AnimatedNumber value={stats.total_campaigns || 0} /></span>
                       </div>
                       <div className="flex items-center justify-between py-3 text-xs">
                         <span className="text-muted-foreground font-medium">Messages Sent</span>
-                        <span className="font-semibold text-foreground">{(stats.total_messages_sent || 0).toLocaleString()}</span>
+                        <span className="font-semibold text-foreground"><AnimatedNumber value={stats.total_messages_sent || 0} /></span>
                       </div>
                     </div>
                   </div>
