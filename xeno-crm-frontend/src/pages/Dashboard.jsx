@@ -299,7 +299,7 @@ export default function Dashboard() {
                     </div>
                     
                     <div className="flex items-baseline gap-1">
-                      <span className="text-xl font-bold text-foreground tracking-tight">${stats.revenue_generated.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
+                      <span className="text-xl font-bold text-foreground tracking-tight">${(stats.revenue_generated || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
                       <span className="text-xs text-muted-foreground font-medium"></span>
                     </div>
 
@@ -348,15 +348,15 @@ export default function Dashboard() {
                     <div className="flex flex-col">
                       <div className="flex items-center justify-between py-3 text-xs">
                         <span className="text-muted-foreground font-medium">Total Customers</span>
-                        <span className="font-semibold text-foreground">{stats.total_customers.toLocaleString()}</span>
+                        <span className="font-semibold text-foreground">{(stats.total_customers || 0).toLocaleString()}</span>
                       </div>
                       <div className="flex items-center justify-between py-3 text-xs">
                         <span className="text-muted-foreground font-medium">Active Campaigns</span>
-                        <span className="font-semibold text-foreground">{stats.total_campaigns.toLocaleString()}</span>
+                        <span className="font-semibold text-foreground">{(stats.total_campaigns || 0).toLocaleString()}</span>
                       </div>
                       <div className="flex items-center justify-between py-3 text-xs">
                         <span className="text-muted-foreground font-medium">Messages Sent</span>
-                        <span className="font-semibold text-foreground">{stats.total_messages_sent.toLocaleString()}</span>
+                        <span className="font-semibold text-foreground">{(stats.total_messages_sent || 0).toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
@@ -388,7 +388,7 @@ export default function Dashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-black/5">
-                      {recentCampaigns.length > 0 ? recentCampaigns.map((camp, idx) => (
+                      {campaigns.length > 0 ? campaigns.slice(0, 4).map((camp, idx) => (
                         <tr key={idx}>
                           <td className="py-2 text-muted-foreground">{new Date(camp.created_at).toLocaleDateString()}</td>
                           <td className="py-2 font-medium text-foreground">{camp.name}</td>
