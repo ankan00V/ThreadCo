@@ -366,12 +366,7 @@ export default function Dashboard() {
                         <tr><th className="px-3 py-2 font-medium">Customer</th><th className="px-3 py-2 font-medium">Status</th><th className="px-3 py-2 font-medium text-right">LTV</th></tr>
                       </thead>
                       <tbody className="divide-y divide-black/5">
-                        {[
-                          {name: 'Sarah Jenkins', phone: '+1 (555) 019-2834', status: 'Highly Engaged', ltv: '₹1,240.00'},
-                          {name: 'Michael Chen', phone: '+1 (555) 847-2910', status: 'At Risk', ltv: '₹890.50'},
-                          {name: 'Emma Watson', phone: '+1 (555) 233-0091', status: 'Recent Buyer', ltv: '₹125.00'},
-                          {name: 'James Wilson', phone: '+1 (555) 445-8822', status: 'Highly Engaged', ltv: '₹2,100.00'},
-                        ].map((c, i) => (
+                        {customers.slice(0, 4).map((c, i) => (
                           <tr key={i} className="hover:bg-white/50 transition-colors">
                             <td className="px-3 py-2"><div className="font-medium text-foreground">{c.name || c.first_name || 'Customer'}</div><div className="text-muted-foreground text-[9px]">{c.phone || c.email || '-'}</div></td>
                             <td className="px-3 py-2">
@@ -417,12 +412,7 @@ export default function Dashboard() {
                     <button onClick={() => navigate('/campaigns')} className="text-[10px] text-accent font-medium hover:underline">Manage All</button>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {[
-                      {name: 'VIP Early Access', type: 'WhatsApp', sent: '12,450', conv: '4.2%'},
-                      {name: 'Cart Abandonment', type: 'Email', sent: '840', conv: '12.8%'},
-                      {name: 'Win-back Offer', type: 'SMS', sent: '5,200', conv: '1.9%'},
-                      {name: 'Welcome Series', type: 'Omnichannel', sent: '1,120', conv: '22.4%'},
-                    ].map((c, i) => (
+                    {campaigns.slice(0, 4).map((c, i) => (
                       <div key={i} className="bg-white/60 p-3 rounded-lg border border-black/5 hover:border-accent/30 transition-colors cursor-pointer shadow-sm">
                         <div className="flex justify-between items-start mb-2">
                           <span className="font-medium text-foreground text-[11px] truncate pr-2">{c.name}</span>
