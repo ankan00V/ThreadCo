@@ -349,11 +349,34 @@ export default function Dashboard() {
               )}
 
               {activeTab === 'customers' && (
-                <div className="flex-1 bg-white/70 backdrop-blur rounded-xl p-6 border border-white/80 shadow-sm flex flex-col items-center justify-center text-center animate-in fade-in zoom-in-95 duration-300">
-                  <Users className="w-8 h-8 text-accent mb-3" />
-                  <h4 className="font-semibold text-foreground text-sm">Customers Preview</h4>
-                  <p className="text-xs text-muted-foreground mt-1.5 max-w-xs mb-4">View a live snapshot of your audience directory. Synchronized in real-time.</p>
-                  <button onClick={() => navigate('/customers')} className="px-4 py-1.5 bg-foreground text-background rounded-full text-[11px] font-medium hover:bg-foreground/90 transition-colors">Open Full Directory</button>
+                <div className="flex-1 bg-white/70 backdrop-blur rounded-xl p-4 border border-white/80 shadow-sm flex flex-col animate-in fade-in zoom-in-95 duration-300">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-semibold text-foreground text-xs flex items-center gap-1.5"><Users className="w-3.5 h-3.5 text-accent"/> Audience Directory</h4>
+                    <button onClick={() => navigate('/customers')} className="text-[10px] text-accent font-medium hover:underline">View All</button>
+                  </div>
+                  <div className="bg-white/50 rounded-lg border border-black/5 overflow-hidden">
+                    <table className="w-full text-[10px] text-left">
+                      <thead className="bg-black/5 text-muted-foreground">
+                        <tr><th className="px-3 py-2 font-medium">Customer</th><th className="px-3 py-2 font-medium">Status</th><th className="px-3 py-2 font-medium text-right">LTV</th></tr>
+                      </thead>
+                      <tbody className="divide-y divide-black/5">
+                        {[
+                          {name: 'Sarah Jenkins', phone: '+1 (555) 019-2834', status: 'Highly Engaged', ltv: '$1,240.00'},
+                          {name: 'Michael Chen', phone: '+1 (555) 847-2910', status: 'At Risk', ltv: '$890.50'},
+                          {name: 'Emma Watson', phone: '+1 (555) 233-0091', status: 'Recent Buyer', ltv: '$125.00'},
+                          {name: 'James Wilson', phone: '+1 (555) 445-8822', status: 'Highly Engaged', ltv: '$2,100.00'},
+                        ].map((c, i) => (
+                          <tr key={i} className="hover:bg-white/50 transition-colors">
+                            <td className="px-3 py-2"><div className="font-medium text-foreground">{c.name}</div><div className="text-muted-foreground text-[9px]">{c.phone}</div></td>
+                            <td className="px-3 py-2">
+                              <span className={`px-1.5 py-0.5 rounded-full text-[8px] ${c.status === 'Highly Engaged' ? 'bg-emerald-100 text-emerald-700' : c.status === 'At Risk' ? 'bg-rose-100 text-rose-700' : 'bg-blue-100 text-blue-700'}`}>{c.status}</span>
+                            </td>
+                            <td className="px-3 py-2 text-right font-medium text-foreground">{c.ltv}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
 
@@ -379,20 +402,68 @@ export default function Dashboard() {
               )}
 
               {activeTab === 'campaigns' && (
-                <div className="flex-1 bg-white/70 backdrop-blur rounded-xl p-6 border border-white/80 shadow-sm flex flex-col items-center justify-center text-center animate-in fade-in zoom-in-95 duration-300">
-                  <Send className="w-8 h-8 text-accent mb-3" />
-                  <h4 className="font-semibold text-foreground text-sm">Campaigns Preview</h4>
-                  <p className="text-xs text-muted-foreground mt-1.5 max-w-xs mb-4">Monitor active marketing flows and review recent broadcast performance.</p>
-                  <button onClick={() => navigate('/campaigns')} className="px-4 py-1.5 bg-foreground text-background rounded-full text-[11px] font-medium hover:bg-foreground/90 transition-colors">Manage Campaigns</button>
+                <div className="flex-1 bg-white/70 backdrop-blur rounded-xl p-4 border border-white/80 shadow-sm flex flex-col animate-in fade-in zoom-in-95 duration-300">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-semibold text-foreground text-xs flex items-center gap-1.5"><Send className="w-3.5 h-3.5 text-accent"/> Active Campaigns</h4>
+                    <button onClick={() => navigate('/campaigns')} className="text-[10px] text-accent font-medium hover:underline">Manage All</button>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {[
+                      {name: 'VIP Early Access', type: 'WhatsApp', sent: '12,450', conv: '4.2%'},
+                      {name: 'Cart Abandonment', type: 'Email', sent: '840', conv: '12.8%'},
+                      {name: 'Win-back Offer', type: 'SMS', sent: '5,200', conv: '1.9%'},
+                      {name: 'Welcome Series', type: 'Omnichannel', sent: '1,120', conv: '22.4%'},
+                    ].map((c, i) => (
+                      <div key={i} className="bg-white/60 p-3 rounded-lg border border-black/5 hover:border-accent/30 transition-colors cursor-pointer shadow-sm">
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="font-medium text-foreground text-[11px]">{c.name}</span>
+                          <span className="text-[9px] text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">{c.type}</span>
+                        </div>
+                        <div className="flex justify-between text-[10px]">
+                          <div><div className="text-muted-foreground mb-0.5">Sent</div><div className="font-semibold text-foreground">{c.sent}</div></div>
+                          <div className="text-right"><div className="text-muted-foreground mb-0.5">Conv. Rate</div><div className="font-semibold text-emerald-600">{c.conv}</div></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
               {activeTab === 'analytics' && (
-                <div className="flex-1 bg-white/70 backdrop-blur rounded-xl p-6 border border-white/80 shadow-sm flex flex-col items-center justify-center text-center animate-in fade-in zoom-in-95 duration-300">
-                  <Building2 className="w-8 h-8 text-accent mb-3" />
-                  <h4 className="font-semibold text-foreground text-sm">Analytics Preview</h4>
-                  <p className="text-xs text-muted-foreground mt-1.5 max-w-xs mb-4">Dive deep into revenue metrics, conversion rates, and ROI across all channels.</p>
-                  <button onClick={() => navigate('/analytics')} className="px-4 py-1.5 bg-foreground text-background rounded-full text-[11px] font-medium hover:bg-foreground/90 transition-colors">View Analytics</button>
+                <div className="flex-1 bg-white/70 backdrop-blur rounded-xl p-4 border border-white/80 shadow-sm flex flex-col animate-in fade-in zoom-in-95 duration-300">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-semibold text-foreground text-xs flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5 text-accent"/> Performance Analytics</h4>
+                    <button onClick={() => navigate('/analytics')} className="text-[10px] text-accent font-medium hover:underline">Full Report</button>
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="bg-white/50 p-2 rounded-lg border border-black/5 text-center shadow-sm">
+                        <div className="text-[9px] text-muted-foreground mb-1">Avg Open Rate</div>
+                        <div className="text-sm font-bold text-foreground">68.4%</div>
+                      </div>
+                      <div className="bg-white/50 p-2 rounded-lg border border-black/5 text-center shadow-sm">
+                        <div className="text-[9px] text-muted-foreground mb-1">Click Through</div>
+                        <div className="text-sm font-bold text-foreground">14.2%</div>
+                      </div>
+                      <div className="bg-white/50 p-2 rounded-lg border border-black/5 text-center shadow-sm">
+                        <div className="text-[9px] text-muted-foreground mb-1">Revenue / Msg</div>
+                        <div className="text-sm font-bold text-foreground">$4.12</div>
+                      </div>
+                    </div>
+                    <div className="bg-white/50 p-3 rounded-lg border border-black/5 shadow-sm">
+                      <div className="text-[10px] font-medium text-foreground mb-2">Channel Performance</div>
+                      <div className="space-y-2">
+                        {[{label: 'WhatsApp', pct: 75, color: 'bg-emerald-500'}, {label: 'Email', pct: 45, color: 'bg-blue-500'}, {label: 'SMS', pct: 25, color: 'bg-indigo-500'}].map((ch, i) => (
+                          <div key={i} className="flex items-center gap-2 text-[9px]">
+                            <span className="w-12 text-muted-foreground">{ch.label}</span>
+                            <div className="flex-1 h-1.5 bg-black/5 rounded-full overflow-hidden">
+                              <motion.div initial={{width: 0}} animate={{width: `${ch.pct}%`}} transition={{duration: 1, delay: i*0.1}} className={`h-full ${ch.color}`}></motion.div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
