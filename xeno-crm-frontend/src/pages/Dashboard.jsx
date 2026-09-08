@@ -414,6 +414,7 @@ export default function Dashboard() {
 
           </div>
         </div>
+            </div>
       </motion.div>
 
     </div>
