@@ -13,7 +13,7 @@ import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import (
-    Column, String, Integer, Float, Boolean, DateTime, ForeignKey, JSON, Text,
+    Column, String, Integer, Float, Boolean, DateTime, ForeignKey, JSON, Text, Index,
 )
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from sqlalchemy.orm import relationship
@@ -31,6 +31,12 @@ def _utcnow():
 
 class Customer(Base):
     __tablename__ = "customers"
+    __table_args__ = (
+        # Match the customer-directory and AI-segment filter paths.
+        Index("ix_customers_active_city_spend", "is_active", "city", "total_spent"),
+        Index("ix_customers_active_last_order", "is_active", "last_order_date"),
+        Index("ix_customers_tags_gin", "tags", postgresql_using="gin"),
+    )
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String, nullable=False)
@@ -60,6 +66,11 @@ class Customer(Base):
 
 class Order(Base):
     __tablename__ = "orders"
+    __table_args__ = (
+        # Covers a customer's recent-order view and completed-order time-series rollups.
+        Index("ix_orders_customer_created", "customer_id", "created_at"),
+        Index("ix_orders_status_created", "status", "created_at"),
+    )
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     customer_id = Column(UUID(as_uuid=True), ForeignKey("customers.id"), nullable=False)
@@ -137,6 +148,10 @@ class Campaign(Base):
 
 class Communication(Base):
     __tablename__ = "communications"
+    __table_args__ = (
+        Index("ix_communications_campaign_status", "campaign_id", "status"),
+        Index("ix_communications_campaign_updated", "campaign_id", "updated_at"),
+    )
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     campaign_id = Column(UUID(as_uuid=True), ForeignKey("campaigns.id"), nullable=False)

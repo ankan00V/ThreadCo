@@ -56,6 +56,75 @@ def customer_stats(db: Session = Depends(get_db)):
 
 # ── List / search customers ──────────────────────────────────────────────
 
+def _apply_customer_filters(
+    query,
+    *,
+    city: Optional[str],
+    gender: Optional[str],
+    tag: Optional[str],
+    min_spent: Optional[float],
+    max_spent: Optional[float],
+    search: Optional[str],
+):
+    """Apply the directory's filters once for both list and paginated routes."""
+    if city:
+        query = query.filter(Customer.city == city)
+    if gender:
+        query = query.filter(Customer.gender == gender)
+    if tag:
+        query = query.filter(Customer.tags.any(tag))
+    if min_spent is not None:
+        query = query.filter(Customer.total_spent >= min_spent)
+    if max_spent is not None:
+        query = query.filter(Customer.total_spent <= max_spent)
+    if search:
+        pattern = f"%{search.strip()}%"
+        query = query.filter(
+            or_(
+                Customer.name.ilike(pattern),
+                Customer.email.ilike(pattern),
+            )
+        )
+    return query
+
+
+@router.get("/directory")
+def customer_directory(
+    city: Optional[str] = None,
+    gender: Optional[str] = None,
+    tag: Optional[str] = None,
+    min_spent: Optional[float] = None,
+    max_spent: Optional[float] = None,
+    search: Optional[str] = Query(None, max_length=100),
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    db: Session = Depends(get_db),
+):
+    """Server-side directory filtering and pagination for large customer sets."""
+    base_query = _apply_customer_filters(
+        db.query(Customer).filter(Customer.is_active == True),  # noqa: E712
+        city=city,
+        gender=gender,
+        tag=tag,
+        min_spent=min_spent,
+        max_spent=max_spent,
+        search=search,
+    )
+    total = base_query.order_by(None).count()
+    items = (
+        base_query
+        .order_by(Customer.total_spent.desc(), Customer.id)
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+    return {
+        "items": [CustomerResponse.model_validate(customer).model_dump() for customer in items],
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+    }
+
 @router.get("", response_model=List[CustomerResponse])
 def list_customers(
     city: Optional[str] = None,
@@ -69,26 +138,15 @@ def list_customers(
     db: Session = Depends(get_db),
 ):
     """List customers with optional filters."""
-    query = db.query(Customer).filter(Customer.is_active == True)  # noqa: E712
-
-    if city:
-        query = query.filter(Customer.city == city)
-    if gender:
-        query = query.filter(Customer.gender == gender)
-    if tag:
-        query = query.filter(Customer.tags.any(tag))
-    if min_spent is not None:
-        query = query.filter(Customer.total_spent >= min_spent)
-    if max_spent is not None:
-        query = query.filter(Customer.total_spent <= max_spent)
-    if search:
-        pattern = f"%{search}%"
-        query = query.filter(
-            or_(
-                Customer.name.ilike(pattern),
-                Customer.email.ilike(pattern),
-            )
-        )
+    query = _apply_customer_filters(
+        db.query(Customer).filter(Customer.is_active == True),  # noqa: E712
+        city=city,
+        gender=gender,
+        tag=tag,
+        min_spent=min_spent,
+        max_spent=max_spent,
+        search=search,
+    )
 
     query = query.order_by(Customer.total_spent.desc())
     return query.offset(offset).limit(limit).all()

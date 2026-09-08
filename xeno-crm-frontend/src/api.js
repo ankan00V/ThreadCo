@@ -12,8 +12,18 @@ export const getCustomers = async (filters = {}) => {
   return response.data;
 };
 
+export const getCustomerDirectory = async (filters = {}) => {
+  const response = await api.get('/api/customers/directory', { params: filters });
+  return response.data;
+};
+
 export const getCustomerStats = async () => {
   const response = await api.get('/api/customers/stats');
+  return response.data;
+};
+
+export const getAnalyticsOverview = async () => {
+  const response = await api.get('/api/analytics/overview');
   return response.data;
 };
 

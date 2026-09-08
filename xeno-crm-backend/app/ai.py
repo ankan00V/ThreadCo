@@ -50,6 +50,9 @@ def _call_llm(system_prompt: str, user_message: str) -> str:
         temperature=0.7,
         top_p=0.95,
         max_tokens=4096,
+        # The selected Nemotron model supports a thinking mode.  This service
+        # consumes strict JSON, so reasoning must stay out of message.content.
+        extra_body={"chat_template_kwargs": {"enable_thinking": False}},
     )
     content = response.choices[0].message.content or ""
     return content.strip()

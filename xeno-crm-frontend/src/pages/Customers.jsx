@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Search, ChevronLeft, ChevronRight, Users } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import CustomerRow from '../components/CustomerRow';
-import { getCustomers } from '../api';
+import { getCustomerDirectory, getCustomerStats } from '../api';
 
 const Customers = () => {
   const [customers, setCustomers] = useState([]);
+  const [totalCustomers, setTotalCustomers] = useState(0);
+  const [directoryStats, setDirectoryStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   
   // Filters
@@ -18,41 +20,38 @@ const Customers = () => {
   const perPage = 20;
 
   useEffect(() => {
+    getCustomerStats().then(setDirectoryStats).catch(console.error);
+  }, []);
+
+  useEffect(() => {
     const fetchCustomers = async () => {
       setIsLoading(true);
       try {
-        const data = await getCustomers({ limit: 500 });
-        setCustomers(Array.isArray(data) ? data : []);
+        const data = await getCustomerDirectory({
+          limit: perPage,
+          offset: (page - 1) * perPage,
+          search: search || undefined,
+          city: cityFilter || undefined,
+          tag: tagFilter || undefined,
+          gender: genderFilter || undefined,
+        });
+        setCustomers(data.items || []);
+        setTotalCustomers(data.total || 0);
       } catch (err) {
         console.error(err);
+        setCustomers([]);
+        setTotalCustomers(0);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchCustomers();
-  }, []);
+    const debounce = window.setTimeout(fetchCustomers, search ? 250 : 0);
+    return () => window.clearTimeout(debounce);
+  }, [page, search, cityFilter, tagFilter, genderFilter]);
 
-  // Compute derived filter lists
-  const cities = useMemo(() => [...new Set(customers.map(c => c.city))], [customers]);
-  const tags = useMemo(() => {
-    const allTags = customers.flatMap(c => c.tags || []);
-    return [...new Set(allTags)];
-  }, [customers]);
-
-  // Apply filters locally
-  const filteredCustomers = useMemo(() => {
-    return customers.filter(c => {
-      const matchSearch = (c.name?.toLowerCase() || '').includes(search.toLowerCase()) || 
-                          (c.email?.toLowerCase() || '').includes(search.toLowerCase());
-      const matchCity = cityFilter ? c.city === cityFilter : true;
-      const matchTag = tagFilter ? (c.tags || []).includes(tagFilter) : true;
-      const matchGender = genderFilter ? c.gender === genderFilter : true;
-      return matchSearch && matchCity && matchTag && matchGender;
-    });
-  }, [customers, search, cityFilter, tagFilter, genderFilter]);
-
-  const totalPages = Math.ceil(filteredCustomers.length / perPage) || 1;
-  const paginatedCustomers = filteredCustomers.slice((page - 1) * perPage, page * perPage);
+  const cities = Object.keys(directoryStats?.city_breakdown || {}).sort();
+  const tags = Object.keys(directoryStats?.tag_breakdown || {}).sort();
+  const totalPages = Math.ceil(totalCustomers / perPage) || 1;
 
   return (
     <div className="w-full px-3 sm:px-4 pt-8 mt-2 max-w-[1100px] mx-auto pb-12">
@@ -137,14 +136,14 @@ const Customers = () => {
                     Loading customer data...
                   </td>
                 </tr>
-              ) : paginatedCustomers.length === 0 ? (
+              ) : customers.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="px-6 py-12 text-center text-neutral-500 text-[13px]">
                     No customers found matching the criteria.
                   </td>
                 </tr>
               ) : (
-                paginatedCustomers.map(c => <CustomerRow key={c.id} customer={c} />)
+                customers.map(c => <CustomerRow key={c.id} customer={c} />)
               )}
             </tbody>
           </table>
@@ -153,7 +152,7 @@ const Customers = () => {
         {/* Pagination */}
         <div className="bg-[#fcfaf5] border-t border-neutral-200 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-[12px] text-neutral-500 text-center sm:text-left">
-            Showing <span className="font-semibold text-[#0b0f1a]">{((page - 1) * perPage) + 1}</span> to <span className="font-semibold text-[#0b0f1a]">{Math.min(page * perPage, filteredCustomers.length)}</span> of <span className="font-semibold text-[#0b0f1a]">{filteredCustomers.length}</span> results
+            Showing <span className="font-semibold text-[#0b0f1a]">{totalCustomers ? ((page - 1) * perPage) + 1 : 0}</span> to <span className="font-semibold text-[#0b0f1a]">{Math.min(page * perPage, totalCustomers)}</span> of <span className="font-semibold text-[#0b0f1a]">{totalCustomers}</span> results
           </p>
           <div className="flex gap-2">
             <button 

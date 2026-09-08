@@ -213,24 +213,32 @@ def get_campaign(campaign_id: str, db: Session = Depends(get_db)):
         .all()
     )
 
+    def communication_detail(comm: Communication) -> dict:
+        """Serialize fields that actually exist in the durable event trail."""
+        events = comm.events_json or []
+
+        def event_timestamp(event_type: str):
+            event = next((item for item in events if item.get("event_type") == event_type), None)
+            return event.get("timestamp") if event else None
+
+        failed_event = next((item for item in events if item.get("event_type") == "failed"), None)
+        return {
+            "id": str(comm.id),
+            "customer_id": str(comm.customer_id),
+            "recipient": comm.recipient,
+            "channel": comm.channel,
+            "status": comm.status,
+            "events": events,
+            "sent_at": comm.sent_at.isoformat() if comm.sent_at else None,
+            "delivered_at": event_timestamp("delivered"),
+            "opened_at": event_timestamp("opened"),
+            "clicked_at": event_timestamp("clicked"),
+            "failed_reason": (failed_event or {}).get("metadata", {}).get("reason"),
+        }
+
     return {
         "campaign": CampaignResponse.model_validate(campaign).model_dump(),
-        "communications": [
-            {
-                "id": str(c.id),
-                "customer_id": str(c.customer_id),
-                "recipient": c.recipient,
-                "channel": c.channel,
-                "status": c.status,
-                "message": c.message,
-                "sent_at": c.sent_at.isoformat() if c.sent_at else None,
-                "delivered_at": c.delivered_at.isoformat() if c.delivered_at else None,
-                "opened_at": c.opened_at.isoformat() if c.opened_at else None,
-                "clicked_at": c.clicked_at.isoformat() if c.clicked_at else None,
-                "failed_reason": c.failed_reason,
-            }
-            for c in comms
-        ],
+        "communications": [communication_detail(comm) for comm in comms],
     }
 
 
@@ -505,4 +513,3 @@ def get_campaign_communications(campaign_id: str, limit: int = 50, offset: int =
         "page": (offset // limit) + 1 if limit else 1,
         "page_size": limit
     }
-

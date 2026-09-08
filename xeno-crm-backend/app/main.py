@@ -14,13 +14,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
-from app.database import engine, Base, get_db
+from app.database import engine, Base, ensure_performance_indexes, get_db
 
 # Import models so Base.metadata knows about all tables
 from app import models  # noqa: F401
 
 # Import routers
-from app.routers import customers, segments, campaigns, webhooks, channel_stub
+from app.routers import analytics, customers, segments, campaigns, webhooks, channel_stub
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -32,6 +32,7 @@ logger = logging.getLogger("uvicorn.error")
 async def lifespan(app: FastAPI):
     try:
         Base.metadata.create_all(bind=engine)
+        ensure_performance_indexes()
         logger.info("Database tables created successfully.")
         
         # Verify DB connection and auto-seed if empty
@@ -81,6 +82,10 @@ if frontend_url:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    # Vercel gives each preview deployment a unique subdomain. Restrict the
+    # pattern to this project's preview hostname instead of allowing all
+    # browser origins.
+    allow_origin_regex=r"https://thread-[a-z0-9-]+-ankan00vs-projects\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -90,6 +95,7 @@ app.add_middleware(
 # Register routers
 # ---------------------------------------------------------------------------
 app.include_router(customers.router)
+app.include_router(analytics.router)
 app.include_router(segments.router)
 app.include_router(campaigns.router)
 app.include_router(webhooks.router)
@@ -123,4 +129,3 @@ def db_health_check(db: Session = Depends(get_db)):
         return {"status": "ok", "service": "xeno-crm", "database": "connected"}
     except Exception as e:
         return {"status": "error", "service": "xeno-crm", "database": "disconnected", "error": str(e)}
-
