@@ -332,3 +332,91 @@
 .product-page--analytics .text-white\/90 { color: #4a4a4a !important; text-shadow: none !important; }
 @keyframes product-page-enter { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { .product-page { animation: none; } }
+
+
+.entrance-active .card { will-change: opacity, transform, scale, clip-path, filter; }
+.entrance-active .card__title { will-change: opacity, transform, scale, clip-path, filter; }
+.entrance-active .gauge { will-change: opacity, transform, scale, clip-path, filter; }
+.entrance-active .context-window { will-change: opacity, transform, scale, clip-path, filter; }
+.entrance-active .connections-map { will-change: opacity, transform, scale, clip-path, filter; }
+.entrance-active .metric { will-change: opacity, transform, scale, clip-path, filter; }
+.entrance-active .caption { will-change: opacity, transform, scale, clip-path, filter; }
+.entrance-active .learn-more { will-change: opacity, transform, scale, clip-path, filter; }
+
+@keyframes card-establish {
+  from { opacity: .52; transform: translateY(10px) scale(.985); }
+  to { opacity: 1; transform: none; scale: 1; }
+}
+
+@keyframes card-title-reveal {
+  from { opacity: 0; transform: translateY(calc(8 * var(--u))); clip-path: inset(0 0 48% 0); }
+  to { opacity: 1; transform: none; clip-path: inset(-8% -2% -8% -2%); }
+}
+
+@keyframes gauge-resolve {
+  from { opacity: 0; transform: translateY(calc(9 * var(--u))) scale(.972); clip-path: inset(0 7% 18% 7%); }
+  to { opacity: 1; transform: none; scale: 1; clip-path: inset(-3%); }
+}
+
+@keyframes panel-resolve {
+  from { opacity: 0; transform: translateY(calc(10 * var(--u))) scale(.972); clip-path: inset(8% 4% 8% 4%); }
+  to { opacity: 1; transform: none; scale: 1; clip-path: inset(-3%); }
+}
+
+@keyframes network-resolve {
+  from { opacity: 0; transform: translateY(calc(6 * var(--u))); clip-path: inset(45% 0 45% 0); }
+  to { opacity: .78; transform: none; clip-path: inset(0); }
+}
+
+@keyframes metric-resolve {
+  from { opacity: 0; transform: translateY(calc(7 * var(--u))) scale(.985); filter: blur(2.5px); }
+  to { opacity: 1; transform: none; scale: 1; filter: none; }
+}
+
+@keyframes support-reveal {
+  from { opacity: 0; transform: translateY(calc(8 * var(--u))); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes control-settle {
+  from { opacity: 0; transform: translateY(calc(6 * var(--u))) scale(.975); }
+  to { opacity: 1; transform: none; scale: 1; }
+}
+
+.entrance-active .card { animation: card-establish .76s cubic-bezier(.16,1,.3,1) both; }
+.entrance-active .card--speed { animation-delay: .46s; }
+.entrance-active .card--context { animation-delay: .58s; }
+.entrance-active .card--connections { animation-delay: .70s; }
+
+.entrance-active .card__title { animation: card-title-reveal .62s cubic-bezier(.22,1,.36,1) both; }
+.entrance-active .card--speed .card__title { animation-delay: calc(.46s + .14s); }
+.entrance-active .card--context .card__title { animation-delay: calc(.58s + .14s); }
+.entrance-active .card--connections .card__title { animation-delay: calc(.70s + .14s); }
+
+.entrance-active .gauge { animation: gauge-resolve .82s cubic-bezier(.16,1,.3,1) both; animation-delay: calc(.46s + .30s); }
+.entrance-active .context-window { animation: panel-resolve .82s cubic-bezier(.16,1,.3,1) both; animation-delay: calc(.58s + .30s); }
+.entrance-active .connections-map { animation: network-resolve .82s cubic-bezier(.16,1,.3,1) both; animation-delay: calc(.70s + .30s); }
+
+.entrance-active .metric { animation: metric-resolve .66s cubic-bezier(.16,1,.3,1) both; }
+.entrance-active .card--speed .metric { animation-delay: calc(.46s + .48s); }
+.entrance-active .card--context .metric { animation-delay: calc(.58s + .48s); }
+.entrance-active .card--connections .metric { animation-delay: calc(.70s + .48s); }
+
+.entrance-active .caption { animation: support-reveal .54s cubic-bezier(.22,1,.36,1) both; }
+.entrance-active .card--speed .caption { animation-delay: calc(.46s + .64s); }
+.entrance-active .card--context .caption { animation-delay: calc(.58s + .64s); }
+.entrance-active .card--connections .caption { animation-delay: calc(.70s + .64s); }
+
+.entrance-active .learn-more { animation: control-settle .52s cubic-bezier(.16,1,.3,1) both; }
+.entrance-active .card--speed .learn-more { animation-delay: calc(.46s + .80s); }
+.entrance-active .card--context .learn-more { animation-delay: calc(.58s + .80s); }
+.entrance-active .card--connections .learn-more { animation-delay: calc(.70s + .80s); }
+
+@media (max-width: 767px) {
+  .entrance-active .card { animation-delay: .40s !important; }
+  .entrance-active .card__title { animation-delay: calc(.40s + .14s) !important; }
+  .entrance-active .gauge, .entrance-active .context-window, .entrance-active .connections-map { animation-delay: calc(.40s + .30s) !important; }
+  .entrance-active .metric { animation-delay: calc(.40s + .48s) !important; }
+  .entrance-active .caption { animation-delay: calc(.40s + .64s) !important; }
+  .entrance-active .learn-more { animation-delay: calc(.40s + .80s) !important; }
+}

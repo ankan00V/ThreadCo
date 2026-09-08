@@ -272,7 +272,7 @@ const Dashboard = () => {
           <RadarVisual />
           
           <div className="metric metric--speed">
-            <DotMetric value={(stats.total_customers || 0).toLocaleString()} />
+            <DotMetric targetValue={stats.total_customers || 0} formatType="comma" />
           </div>
           <p className="caption">Registered shoppers<br />across your audience</p>
           
@@ -293,7 +293,7 @@ const Dashboard = () => {
           <ContextWall />
           
           <div className="metric metric--context">
-            <DotMetric value={formatNumberStr(stats.total_campaigns || 0).replace(/[A-Z]/g, '')} dotRadius={2.32} />
+            <DotMetric targetValue={stats.total_campaigns || 0} formatType="compact" dotRadius={2.32} />
             <span className="metric__unit">{formatNumberStr(stats.total_campaigns || 0).replace(/[0-9.]/g, '') || ' '}</span>
           </div>
           <p className="caption">Active and completed<br />campaigns</p>
@@ -316,7 +316,7 @@ const Dashboard = () => {
           
           <div className="metric metric--connections">
             <span style={{fontSize:'calc(30.6 * var(--u))', transform:'translateY(3u)', marginRight:'4px'}}>$</span>
-            <DotMetric value={formatNumberStr(stats.revenue_generated || 0).replace(/[A-Z]/g, '')} />
+            <DotMetric targetValue={stats.revenue_generated || 0} formatType="compact" />
             <span className="metric__unit">{formatNumberStr(stats.revenue_generated || 0).replace(/[0-9.]/g, '')}</span>
           </div>
           <p className="caption">Revenue attributed to<br />customer outcomes</p>
