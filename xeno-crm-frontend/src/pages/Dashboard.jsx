@@ -22,11 +22,47 @@ const LED_GLYPHS = {
   "$": ["00100", "01111", "10100", "01110", "00101", "11110", "00100"]
 };
 
-const DotMetric = ({ value, pitchX = 5, pitchY = 4, dotRadius = 1.55, className = '' }) => {
-  // Use explicit units for scaling instead of hardcoded px
-  // dotRadius passed in is base size, but it needs to scale by var(--u) in the SVG
-  
-  const str = String(value).toUpperCase();
+const DotMetric = ({ targetValue = 0, formatType = 'comma', pitchX = 5, pitchY = 4, dotRadius = 1.55, className = '' }) => {
+  const [displayValue, setDisplayValue] = React.useState(0);
+
+  React.useEffect(() => {
+    let startTimestamp = null;
+    const duration = 1500;
+    let animationFrameId;
+
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      
+      const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      
+      setDisplayValue(easeProgress * targetValue);
+      
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(step);
+      } else {
+        setDisplayValue(targetValue);
+      }
+    };
+    
+    animationFrameId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [targetValue]);
+
+  let formattedString = "";
+  if (formatType === 'comma') {
+    formattedString = Math.floor(displayValue).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ".");
+  } else if (formatType === 'compact') {
+    if (targetValue >= 1000000) {
+      formattedString = (displayValue / 1000000).toFixed(1);
+    } else if (targetValue >= 1000) {
+      formattedString = (displayValue / 1000).toFixed(1);
+    } else {
+      formattedString = Math.floor(displayValue).toString();
+    }
+  }
+
+  const str = String(formattedString).toUpperCase();
   let currentX = 0;
   const circles = [];
 
@@ -53,10 +89,8 @@ const DotMetric = ({ value, pitchX = 5, pitchY = 4, dotRadius = 1.55, className 
   }
 
   const height = 6 * pitchY + dotRadius * 2;
-  // Apply a dynamic font-size based on var(--u) to scale the em correctly
-  // The original prompt implies this dot metric gets its size from the surrounding metric
   return (
-    <svg className={`dot-svg ${className}`} viewBox={`0 0 ${currentX} ${height}`} fill="currentColor" style={{ height: `calc(${height} * var(--u))`, display: 'inline-block', overflow: 'visible' }}>
+    <svg className={`dot-svg ${className}`} viewBox={`0 0 ${currentX} ${height}`} fill="currentColor" style={{ width: '100%', height: 'auto', display: 'block', overflow: 'visible' }}>
       {circles}
     </svg>
   );
@@ -225,15 +259,25 @@ const Dashboard = () => {
   });
   
   useEffect(() => {
-    const load = async () => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) {
+      setIsEntranceActive(false);
+    } else {
+      const timer = setTimeout(() => setIsEntranceActive(false), 2000);
+    }
+
+    const fetchStats = async () => {
       try {
-        const s = await getDashboardStats();
-        if (s) setStats(s);
-      } catch(e) {
-        console.error("Load failed:", e);
+        const data = await getDashboardStats();
+        setStats(data);
+      } catch (error) {
+        console.error('Failed to fetch dashboard stats', error);
       }
     };
-    load();
+    fetchStats();
+    
+    const intervalId = setInterval(fetchStats, 3000);
+    return () => clearInterval(intervalId);
   }, []);
 
   return (
@@ -272,7 +316,7 @@ const Dashboard = () => {
           <RadarVisual />
           
           <div className="metric metric--speed">
-            <DotMetric targetValue={stats.total_customers || 0} formatType="comma" />
+            <div className="dot-number"><DotMetric targetValue={stats.total_customers || 0} formatType="comma" /></div>
           </div>
           <p className="caption">Registered shoppers<br />across your audience</p>
           
@@ -293,7 +337,7 @@ const Dashboard = () => {
           <ContextWall />
           
           <div className="metric metric--context">
-            <DotMetric targetValue={stats.total_campaigns || 0} formatType="compact" dotRadius={2.32} />
+            <div className="dot-number"><DotMetric targetValue={stats.total_campaigns || 0} formatType="compact" dotRadius={2.32} /></div>
             <span className="metric__unit">{formatNumberStr(stats.total_campaigns || 0).replace(/[0-9.]/g, '') || ' '}</span>
           </div>
           <p className="caption">Active and completed<br />campaigns</p>
