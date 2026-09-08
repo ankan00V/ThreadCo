@@ -210,35 +210,36 @@ export default function Dashboard() {
               </div>
 
               
+              
               {/* Action buttons row */}
               <div className="flex flex-wrap items-center gap-1.5">
                 <button 
-                  onClick={() => navigate('/campaigns/new')}
-                  className="bg-accent text-accent-foreground rounded-full px-3 py-1 font-medium text-[10px] shadow-sm hover:opacity-90 transition-opacity"
+                  onClick={() => setActiveTab('dashboard')}
+                  className={`rounded-full px-3 py-1 font-medium text-[10px] shadow-sm transition-all ${activeTab === 'dashboard' ? 'bg-accent text-accent-foreground' : 'bg-white/70 border border-white/80 text-foreground hover:bg-white'}`}
                 >
-                  New Campaign
+                  Overview
                 </button>
                 <button 
                   onClick={() => setActiveTab('customers')}
-                  className="bg-white/70 border border-white/80 text-foreground hover:bg-white rounded-full px-3 py-1 font-medium text-[10px] transition-colors"
+                  className={`rounded-full px-3 py-1 font-medium text-[10px] shadow-sm transition-all ${activeTab === 'customers' ? 'bg-accent text-accent-foreground' : 'bg-white/70 border border-white/80 text-foreground hover:bg-white'}`}
                 >
                   Customers
                 </button>
                 <button 
                   onClick={() => setActiveTab('segments')}
-                  className="bg-white/70 border border-white/80 text-foreground hover:bg-white rounded-full px-3 py-1 font-medium text-[10px] transition-colors"
+                  className={`rounded-full px-3 py-1 font-medium text-[10px] shadow-sm transition-all ${activeTab === 'segments' ? 'bg-accent text-accent-foreground' : 'bg-white/70 border border-white/80 text-foreground hover:bg-white'}`}
                 >
                   Segments
                 </button>
                 <button 
                   onClick={() => setActiveTab('campaigns')}
-                  className="bg-white/70 border border-white/80 text-foreground hover:bg-white rounded-full px-3 py-1 font-medium text-[10px] transition-colors"
+                  className={`rounded-full px-3 py-1 font-medium text-[10px] shadow-sm transition-all ${activeTab === 'campaigns' ? 'bg-accent text-accent-foreground' : 'bg-white/70 border border-white/80 text-foreground hover:bg-white'}`}
                 >
                   Campaigns
                 </button>
                 <button 
                   onClick={() => setActiveTab('analytics')}
-                  className="bg-white/70 border border-white/80 text-foreground hover:bg-white rounded-full px-3 py-1 font-medium text-[10px] transition-colors"
+                  className={`rounded-full px-3 py-1 font-medium text-[10px] shadow-sm transition-all ${activeTab === 'analytics' ? 'bg-accent text-accent-foreground' : 'bg-white/70 border border-white/80 text-foreground hover:bg-white'}`}
                 >
                   Analytics
                 </button>
