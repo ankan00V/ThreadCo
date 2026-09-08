@@ -158,7 +158,7 @@ export default function Dashboard() {
               <div className="flex flex-col gap-1">
                 
                 <button 
-                  onClick={() => setActiveTab('dashboard')}
+                  onClick={() => navigate('/dashboard')}
                   className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg font-medium text-foreground bg-white/70 border border-white/80 shadow-sm text-left"
                 >
                   <LayoutDashboard className="w-3.5 h-3.5 text-accent" />
@@ -166,7 +166,7 @@ export default function Dashboard() {
                 </button>
 
                 <button 
-                  onClick={() => setActiveTab('customers')}
+                  onClick={() => navigate('/customers')}
                   className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/40 transition-colors text-left"
                 >
                   <Users className="w-3.5 h-3.5" />
@@ -174,7 +174,7 @@ export default function Dashboard() {
                 </button>
 
                 <button 
-                  onClick={() => setActiveTab('segments')}
+                  onClick={() => navigate('/segments')}
                   className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/40 transition-colors text-left"
                 >
                   <Filter className="w-3.5 h-3.5" />
@@ -182,7 +182,7 @@ export default function Dashboard() {
                 </button>
 
                 <button 
-                  onClick={() => setActiveTab('campaigns')}
+                  onClick={() => navigate('/campaigns')}
                   className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/40 transition-colors text-left"
                 >
                   <Send className="w-3.5 h-3.5" />
@@ -190,7 +190,7 @@ export default function Dashboard() {
                 </button>
 
                 <button 
-                  onClick={() => setActiveTab('analytics')}
+                  onClick={() => navigate('/analytics')}
                   className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/40 transition-colors text-left"
                 >
                   <Building2 className="w-3.5 h-3.5" />
