@@ -6,16 +6,16 @@ import { ArrowLeft, CheckCircle2, XCircle, MailOpen, MousePointerClick, RefreshC
 
 const StatusBadge = ({ status }) => {
   const styles = {
-    queued: 'bg-gray-100 text-gray-600 border-gray-200',
-    delivered: 'bg-purple-50 text-purple-700 border-purple-200',
-    opened: 'bg-blue-50 text-blue-700 border-blue-200',
-    clicked: 'bg-green-50 text-green-700 border-green-200',
-    converted: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-    failed: 'bg-red-50 text-red-700 border-red-200'
+    queued: 'bg-secondary/50 text-muted-foreground border-border',
+    delivered: 'bg-accent/10 text-accent border-accent/20',
+    opened: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
+    clicked: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
+    converted: 'bg-violet-500/10 text-violet-600 border-violet-500/20',
+    failed: 'bg-red-500/10 text-red-600 border-red-500/20'
   };
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider border ${styles[status] || styles.queued}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${styles[status] || styles.queued}`}>
       {status}
     </span>
   );
@@ -26,21 +26,21 @@ const MetricCard = ({ title, value, badge, icon: Icon, colorClass, delay }) => (
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay, duration: 0.4 }}
-    className="bg-[#fcfaf5] p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between"
+    className="frosted-glass-card p-5 rounded-2xl flex flex-col justify-between"
   >
     <div className="flex justify-between items-start mb-4">
-      <div className={`p-3 rounded-2xl ${colorClass}`}>
-        <Icon className="w-6 h-6" />
+      <div className={`p-2.5 rounded-xl ${colorClass}`}>
+        <Icon className="w-5 h-5" />
       </div>
       {badge && (
-        <span className="px-2.5 py-1 bg-gray-50 text-gray-600 text-xs font-bold rounded-lg border border-gray-200 whitespace-nowrap">
+        <span className="px-2 py-1 bg-white/60 text-muted-foreground text-[10px] font-bold uppercase tracking-wider rounded-lg border border-white/80 whitespace-nowrap shadow-sm">
           {badge}
         </span>
       )}
     </div>
     <div>
-      <h3 className="text-gray-500 text-sm font-bold uppercase tracking-wider mb-1">{title}</h3>
-      <div className="text-3xl font-extrabold text-gray-900">{value}</div>
+      <h3 className="text-muted-foreground text-[11px] font-bold uppercase tracking-wider mb-1">{title}</h3>
+      <div className="text-2xl sm:text-3xl font-display font-medium text-foreground">{value}</div>
     </div>
   </motion.div>
 );
@@ -100,58 +100,58 @@ const CampaignDetail = () => {
 
   if (isLoading && !stats) {
     return (
-      <div className="flex items-center justify-center h-64 text-gray-400 font-medium">
-        <RefreshCw className="w-6 h-6 animate-spin mr-2" />
+      <div className="flex items-center justify-center h-64 text-muted-foreground font-medium font-body">
+        <RefreshCw className="w-6 h-6 animate-spin mr-2 text-accent" />
         Loading campaign details...
       </div>
     );
   }
 
   return (
-    <div className="product-page product-page--campaign-detail max-w-7xl mx-auto space-y-8 pt-8 pb-12 px-4">
+    <div className="w-full px-4 sm:px-6 md:px-12 max-w-[1100px] mx-auto pt-8 md:pt-12 pb-24 font-body">
       {/* Top Header */}
-      <div className="flex items-center space-x-4 mb-8">
+      <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4 mb-8">
         <button onClick={() => navigate('/campaigns')}
-          className="p-2 bg-[#fcfaf5] border border-gray-200 hover:bg-gray-50 rounded-full transition-colors shadow-sm">
-          <ArrowLeft className="w-5 h-5 text-gray-600" />
+          className="p-2.5 bg-white/70 border border-white/80 hover:bg-white rounded-full transition-colors shadow-sm self-start">
+          <ArrowLeft className="w-5 h-5 text-muted-foreground" />
         </button>
         <div className="flex-1">
-          <div className="flex items-center gap-4">
-            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
-              {stats?.name}
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl text-foreground tracking-tight leading-[0.98]">
+              {stats?.name || "Campaign Details"}
             </h1>
-            <span className={`text-xs px-3 py-1.5 rounded-full border font-bold uppercase tracking-wider
+            <span className={`text-[10px] px-2.5 py-1 rounded-full border font-semibold uppercase tracking-wider mt-1 md:mt-0
               ${stats?.status === 'completed' 
-                ? 'bg-green-50 text-green-700 border-green-200'
-                : 'bg-blue-50 text-blue-700 border-blue-200'
+                ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+                : 'bg-blue-500/10 text-blue-600 border-blue-500/20'
               }`}>
               {stats?.status}
             </span>
-            <span className="text-xs px-3 py-1.5 rounded-full border bg-purple-50 text-purple-700 border-purple-200 font-bold uppercase tracking-wider">
+            <span className="text-[10px] px-2.5 py-1 rounded-full border bg-accent/10 text-accent border-accent/20 font-semibold uppercase tracking-wider mt-1 md:mt-0">
               {stats?.channel}
             </span>
           </div>
-          <p className="text-gray-500 text-sm mt-2 font-medium flex items-center">
+          <p className="text-muted-foreground text-sm mt-3 font-medium flex flex-wrap items-center gap-1.5">
             Dispatched on {stats?.sent_at 
               ? new Date(stats.sent_at).toLocaleDateString('en-IN', {
                   day:'numeric', month:'long', year:'numeric',
                   hour:'2-digit', minute:'2-digit'
                 })
               : '—'}
-            <span className="mx-2">•</span>
-            {stats?.total_sent || 0} Recipients
+            <span className="mx-1 text-border/60">•</span>
+            <span className="text-foreground font-semibold">{stats?.total_sent || 0}</span> Recipients
           </p>
         </div>
       </div>
 
       {/* Metric Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
         <MetricCard 
           title="Delivered"
           value={`${stats?.total_delivered||0}`}
           badge={`${(stats?.delivery_rate||0).toFixed(0)}% Rate`}
           icon={CheckCircle2}
-          colorClass="bg-purple-100 text-purple-600"
+          colorClass="bg-accent/10 text-accent"
           delay={0.1} 
         />
         <MetricCard 
@@ -159,7 +159,7 @@ const CampaignDetail = () => {
           value={stats?.total_opened||0}
           badge={`${(stats?.open_rate||0).toFixed(0)}% Rate`}
           icon={MailOpen}
-          colorClass="bg-blue-100 text-blue-600"
+          colorClass="bg-blue-500/10 text-blue-600"
           delay={0.2} 
         />
         <MetricCard 
@@ -167,7 +167,7 @@ const CampaignDetail = () => {
           value={stats?.total_clicked||0}
           badge={`${(stats?.click_rate||0).toFixed(0)}% Rate`}
           icon={MousePointerClick}
-          colorClass="bg-green-100 text-green-600"
+          colorClass="bg-emerald-500/10 text-emerald-600"
           delay={0.3} 
         />
         <MetricCard 
@@ -175,50 +175,50 @@ const CampaignDetail = () => {
           value={stats?.converted||0}
           badge={`₹${(stats?.total_revenue_attributed||0).toLocaleString('en-IN', { maximumFractionDigits: 0 })} Rev`}
           icon={CheckCircle2}
-          colorClass="bg-emerald-100 text-emerald-600"
+          colorClass="bg-violet-500/10 text-violet-600"
           delay={0.4} 
         />
         <MetricCard 
           title="Failed"
           value={stats?.total_failed||0}
           icon={XCircle}
-          colorClass="bg-red-100 text-red-600"
+          colorClass="bg-red-500/10 text-red-600"
           delay={0.5} 
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
         
         {/* Conversion Funnel */}
-        <div className="lg:col-span-1 bg-[#fcfaf5] p-8 rounded-3xl border border-gray-100 shadow-sm">
-          <h3 className="text-gray-900 font-bold text-lg mb-6 flex items-center">
-            Engagement Funnel
+        <div className="lg:col-span-1 frosted-glass-wrapper p-6 lg:p-8 rounded-3xl">
+          <h3 className="text-foreground font-display text-2xl md:text-3xl mb-6">
+            Engagement <span className="italic font-normal">Funnel</span>
           </h3>
           <div className="space-y-6">
             {[
-              { label: "Sent", value: stats?.total_sent||0, color: "#6C47FF", pct: 100 },
-              { label: "Delivered", value: stats?.total_delivered||0, color: "#A48DFF", pct: stats?.total_sent ? (stats.total_delivered/stats.total_sent*100) : 0 },
-              { label: "Opened", value: stats?.total_opened||0, color: "#3B82F6", pct: stats?.total_sent ? (stats.total_opened/stats.total_sent*100) : 0 },
-              { label: "Clicked", value: stats?.total_clicked||0, color: "#10B981", pct: stats?.total_sent ? (stats.total_clicked/stats.total_sent*100) : 0 },
-              { label: "Converted", value: stats?.converted||0, color: "#059669", pct: stats?.total_sent ? (stats.converted/stats.total_sent*100) : 0 },
+              { label: "Sent", value: stats?.total_sent||0, color: "var(--accent)", pct: 100 },
+              { label: "Delivered", value: stats?.total_delivered||0, color: "#a855f7", pct: stats?.total_sent ? (stats.total_delivered/stats.total_sent*100) : 0 },
+              { label: "Opened", value: stats?.total_opened||0, color: "#3b82f6", pct: stats?.total_sent ? (stats.total_opened/stats.total_sent*100) : 0 },
+              { label: "Clicked", value: stats?.total_clicked||0, color: "#10b981", pct: stats?.total_sent ? (stats.total_clicked/stats.total_sent*100) : 0 },
+              { label: "Converted", value: stats?.converted||0, color: "#8b5cf6", pct: stats?.total_sent ? (stats.converted/stats.total_sent*100) : 0 },
             ].map((stage, i) => (
               <div key={stage.label}>
-                <div className="flex justify-between text-sm mb-2 font-bold">
-                  <span className="text-gray-600">{stage.label}</span>
-                  <span className="text-gray-900">
+                <div className="flex justify-between text-xs mb-2 font-semibold">
+                  <span className="text-muted-foreground">{stage.label}</span>
+                  <span className="text-foreground">
                     {stage.value}
-                    <span className="text-gray-400 ml-2 font-medium">
+                    <span className="text-muted-foreground/50 ml-2 font-medium">
                       ({stage.pct.toFixed(0)}%)
                     </span>
                   </span>
                 </div>
-                <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-2.5 bg-secondary/50 rounded-full overflow-hidden border border-border/30">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${stage.pct}%` }}
                     transition={{ duration: 1, delay: 0.3 + i * 0.15, ease: "easeOut" }}
                     className="h-full rounded-full"
-                    style={{ background: stage.color }}
+                    style={{ backgroundColor: stage.color }}
                   />
                 </div>
               </div>
@@ -227,61 +227,61 @@ const CampaignDetail = () => {
         </div>
 
         {/* Communications Log */}
-        <div className="lg:col-span-2 bg-[#fcfaf5] rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full max-h-[600px]">
-          <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-            <h3 className="text-gray-900 font-bold text-lg">
-              Live Delivery Receipts
+        <div className="lg:col-span-2 frosted-glass-wrapper rounded-3xl overflow-hidden flex flex-col h-[500px] lg:h-[600px]">
+          <div className="p-5 md:p-6 border-b border-border/30 flex justify-between items-center bg-white/30 backdrop-blur-md">
+            <h3 className="text-foreground font-display text-2xl md:text-3xl">
+              Live <span className="italic font-normal">Delivery</span> Receipts
             </h3>
-            <div className="flex items-center text-xs font-bold text-green-600 bg-green-50 px-3 py-1.5 rounded-lg border border-green-200">
+            <div className="flex items-center text-[10px] font-bold text-emerald-600 bg-emerald-500/10 px-2.5 py-1.5 rounded-lg border border-emerald-500/20">
               {stats?.status === 'completed' ? (
                 <>
-                  <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 text-green-500" />
+                  <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 text-emerald-500" />
                   Completed
                 </>
               ) : (
                 <>
-                  <span className="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse" />
                   Syncing
                 </>
               )}
             </div>
           </div>
           
-          <div className="overflow-auto flex-1 p-2">
-            <table className="w-full text-left">
+          <div className="overflow-x-auto overflow-y-auto flex-1 p-2">
+            <table className="w-full text-left min-w-[500px]">
               <thead>
                 <tr>
                   {["Customer", "Recipient", "Status", "Delivered", "Clicked"].map(h => (
-                    <th key={h} className="px-4 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100">
+                    <th key={h} className="px-4 py-3 text-[10px] font-bold text-muted-foreground uppercase tracking-wider border-b border-border/30 bg-secondary/20 first:rounded-tl-lg last:rounded-tr-lg">
                       {h}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-border/20">
                 {stats?.communications?.map((comm, i) => (
                   <motion.tr
                     key={comm.id}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: i * 0.02 }}
-                    className="hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0"
+                    className="hover:bg-white/40 transition-colors"
                   >
-                    <td className="px-4 py-4 text-sm text-gray-900 font-bold">
+                    <td className="px-4 py-3 text-xs text-foreground font-semibold">
                       {comm.customer_name}
                     </td>
-                    <td className="px-4 py-4 text-xs text-gray-500 font-mono">
+                    <td className="px-4 py-3 text-[11px] text-muted-foreground font-mono">
                       {comm.recipient}
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="px-4 py-3">
                       <StatusBadge status={comm.status} />
                     </td>
-                    <td className="px-4 py-4 text-xs font-medium text-gray-500">
+                    <td className="px-4 py-3 text-[11px] font-medium text-muted-foreground">
                       {comm.delivered_at 
                         ? new Date(comm.delivered_at).toLocaleTimeString('en-IN')
                         : '—'}
                     </td>
-                    <td className="px-4 py-4 text-xs font-medium text-gray-500">
+                    <td className="px-4 py-3 text-[11px] font-medium text-muted-foreground">
                       {comm.clicked_at 
                         ? new Date(comm.clicked_at).toLocaleTimeString('en-IN')
                         : '—'}
@@ -291,8 +291,8 @@ const CampaignDetail = () => {
               </tbody>
             </table>
             
-            {stats?.communications?.length === 0 && (
-              <div className="text-center py-12 text-gray-500 font-medium">
+            {(!stats?.communications || stats.communications.length === 0) && (
+              <div className="text-center py-12 text-muted-foreground text-sm font-medium">
                 No communications found for this campaign.
               </div>
             )}

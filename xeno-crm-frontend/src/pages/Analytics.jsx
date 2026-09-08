@@ -5,15 +5,15 @@ import {
 } from 'recharts';
 import { getAnalyticsOverview } from '../api';
 
-const COLORS = ['#ef4d23', '#18181b', '#6366f1', '#0f766e', '#ca8a04', '#db2777'];
+const COLORS = ['#6366f1', '#a855f7', '#3b82f6', '#10b981', '#8b5cf6', '#f43f5e']; // updated semantic colors
 const inr = (value) => `₹${Number(value || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
 
 function Metric({ label, value, note }) {
   return (
-    <div className="rounded-2xl border border-neutral-200 bg-[#fcfaf5] p-5 shadow-sm">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-500">{label}</p>
-      <p className="mt-2 text-3xl font-semibold text-[#111827]">{Number(value || 0).toLocaleString()}</p>
-      <p className="mt-2 text-xs text-neutral-500">{note}</p>
+    <div className="frosted-glass-card rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className="mt-2 text-2xl sm:text-3xl font-display font-medium text-foreground">{Number(value || 0).toLocaleString()}</p>
+      <p className="mt-2 text-[11px] text-muted-foreground/80">{note}</p>
     </div>
   );
 }
@@ -29,81 +29,198 @@ export default function Analytics() {
   }, []);
 
   if (!data && !error) {
-    return <div className="flex min-h-[500px] items-center justify-center"><div className="h-10 w-10 animate-spin rounded-full border-b-2 border-[#ef4d23]" /></div>;
+    return <div className="flex min-h-[500px] items-center justify-center font-body"><div className="h-8 w-8 animate-spin rounded-full border-b-2 border-accent" /></div>;
   }
 
   if (error) {
-    return <div className="mx-auto mt-12 max-w-xl rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-800">{error}</div>;
+    return <div className="mx-auto mt-12 max-w-xl rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-800 font-body shadow-sm">{error}</div>;
   }
 
   const { summary, revenue_by_month: monthly, city_performance: cities, lifecycle_distribution: lifecycle, data_quality: quality, recommendations, query_health: queryHealth } = data;
 
   return (
-    <div className="product-page product-page--analytics mx-auto mt-6 w-full max-w-[1100px] px-3 pb-12 pt-8 sm:px-4">
-      <div className="mb-7 px-2">
-        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 backdrop-blur-md">
-          <span className="h-2 w-2 rounded-full bg-[#ef4d23]" />
-          <span className="text-[12px] font-semibold text-white">Data Intelligence Workbench</span>
+    <div className="w-full px-4 sm:px-6 md:px-12 max-w-[1100px] mx-auto pt-8 md:pt-12 pb-24 font-body">
+      
+      <div className="mb-10 px-2">
+        <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-border bg-background/80 backdrop-blur-md px-4 py-1.5 shadow-sm">
+          <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
+          <span className="text-[11px] font-semibold text-foreground tracking-wide">Data Intelligence Workbench</span>
         </div>
-        <h2 className="text-[#f5f5dc]" style={{ fontSize: 'clamp(28px, 5vw, 42px)', lineHeight: 1.1, textShadow: '0 2px 10px rgba(0,0,0,.8)' }}>
-          From business question to <span style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic' }}>decision</span>
+        <h2 className="font-display text-4xl sm:text-5xl md:text-6xl text-foreground tracking-tight leading-[0.98]">
+          From business question to <span className="font-display italic font-normal text-foreground">Decision</span>
         </h2>
-        <p className="mt-2 max-w-3xl text-sm text-white/90" style={{ textShadow: '0 1px 4px rgba(0,0,0,.8)' }}>
+        <p className="mt-3 text-muted-foreground text-sm md:text-base max-w-xl">
           Real aggregates, data-quality checks, and a safe query-plan diagnostic—built to show how customer decisions are supported by data.
         </p>
       </div>
 
-      <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Metric label="Customers" value={summary.customers} note="Active customer base" />
         <Metric label="Completed orders" value={summary.completed_orders} note="Used for revenue analysis" />
         <Metric label="Campaigns" value={summary.active_campaigns} note="Draft, sending, or running" />
         <Metric label="Communications" value={summary.communications} note="Delivery-event records" />
       </div>
 
-      <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900">
-        <span className="font-semibold">Data scope:</span> {data.data_notice}
+      <div className="mb-8 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-5 py-4 text-[13px] text-amber-800 backdrop-blur-sm">
+        <span className="font-bold uppercase tracking-wider text-[11px] mr-2">Data scope:</span> {data.data_notice}
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <section className="rounded-2xl border border-neutral-200 bg-[#fcfaf5] p-5 shadow-sm lg:col-span-2">
-          <div className="mb-5 flex flex-wrap items-end justify-between gap-2">
-            <div><h3 className="font-semibold text-[#111827]">Completed-order revenue by month</h3><p className="mt-1 text-xs text-neutral-500">Calculated from actual completed orders; no illustrative trend data.</p></div>
-            <span className="text-xs text-neutral-500">Last 12 months</span>
+      <div className="grid grid-cols-1 gap-6 lg:gap-8 lg:grid-cols-2">
+        
+        {/* Revenue Trend */}
+        <section className="frosted-glass-wrapper rounded-3xl p-6 lg:p-8 shadow-sm lg:col-span-2">
+          <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h3 className="text-foreground font-display text-2xl md:text-3xl mb-1">Completed-order <span className="italic font-normal">Revenue</span></h3>
+              <p className="text-[12px] text-muted-foreground">Calculated from actual completed orders; no illustrative trend data.</p>
+            </div>
+            <span className="text-[11px] font-bold tracking-wider uppercase text-muted-foreground bg-white/60 px-3 py-1.5 rounded-lg border border-white/80 shadow-sm">Last 12 months</span>
           </div>
-          <div className="h-[280px]">
+          <div className="h-[320px]">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={monthly} margin={{ top: 5, right: 20, bottom: 5, left: 5 }}>
-                <CartesianGrid stroke="#eceae5" strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#6b7280' }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#6b7280' }} tickFormatter={(v) => `₹${Math.round(v / 100000)}L`} />
-                <Tooltip formatter={(value, name) => [name === 'revenue' ? inr(value) : Number(value).toLocaleString(), name === 'revenue' ? 'Revenue' : name]} />
-                <Line type="monotone" dataKey="revenue" stroke="#ef4d23" strokeWidth={3} dot={{ r: 3 }} />
+              <LineChart data={monthly} margin={{ top: 10, right: 20, bottom: 5, left: 10 }}>
+                <CartesianGrid stroke="rgba(0,0,0,0.05)" strokeDasharray="4 4" vertical={false} />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#6b7280', fontWeight: 500 }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#6b7280', fontWeight: 500 }} tickFormatter={(v) => `₹${Math.round(v / 100000)}L`} dx={-10} />
+                <Tooltip 
+                  contentStyle={{ background: 'rgba(255, 255, 255, 0.9)', border: '1px solid rgba(255,255,255,0.6)', borderRadius: '12px', backdropFilter: 'blur(8px)', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)', fontWeight: 600, fontSize: '12px' }}
+                  itemStyle={{ color: '#111827' }}
+                  formatter={(value, name) => [name === 'revenue' ? inr(value) : Number(value).toLocaleString(), name === 'revenue' ? 'Revenue' : name]} 
+                />
+                <Line type="monotone" dataKey="revenue" stroke="#6366f1" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: '#fff', stroke: '#6366f1' }} activeDot={{ r: 6, strokeWidth: 0, fill: '#6366f1' }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </section>
 
-        <section className="rounded-2xl border border-neutral-200 bg-[#fcfaf5] p-5 shadow-sm">
-          <h3 className="font-semibold text-[#111827]">Customer value by city</h3><p className="mt-1 text-xs text-neutral-500">Rank cities by recorded customer spend, not volume alone.</p>
-          <div className="mt-4 h-[260px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={cities} margin={{ top: 5, right: 5, bottom: 30, left: 5 }}><CartesianGrid stroke="#eceae5" strokeDasharray="3 3" vertical={false} /><XAxis dataKey="city" angle={-35} textAnchor="end" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} /><YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => `₹${Math.round(v / 100000)}L`} /><Tooltip formatter={(value, name) => [name === 'revenue' ? inr(value) : Number(value).toLocaleString(), name === 'revenue' ? 'Recorded spend' : name]} /><Bar dataKey="revenue" fill="#18181b" radius={[5, 5, 0, 0]} /></BarChart></ResponsiveContainer></div>
+        {/* City Performance */}
+        <section className="frosted-glass-wrapper rounded-3xl p-6 lg:p-8 shadow-sm">
+          <div className="mb-6">
+            <h3 className="text-foreground font-display text-2xl md:text-3xl mb-1">Customer <span className="italic font-normal">Value</span> by City</h3>
+            <p className="text-[12px] text-muted-foreground">Rank cities by recorded customer spend, not volume alone.</p>
+          </div>
+          <div className="h-[280px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={cities} margin={{ top: 10, right: 10, bottom: 40, left: 10 }}>
+                <CartesianGrid stroke="rgba(0,0,0,0.05)" strokeDasharray="4 4" vertical={false} />
+                <XAxis dataKey="city" angle={-35} textAnchor="end" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#6b7280', fontWeight: 500 }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#6b7280', fontWeight: 500 }} tickFormatter={(v) => `₹${Math.round(v / 100000)}L`} dx={-10} />
+                <Tooltip 
+                  contentStyle={{ background: 'rgba(255, 255, 255, 0.9)', border: '1px solid rgba(255,255,255,0.6)', borderRadius: '12px', backdropFilter: 'blur(8px)', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)', fontWeight: 600, fontSize: '12px' }}
+                  cursor={{ fill: 'rgba(0,0,0,0.04)' }}
+                  formatter={(value, name) => [name === 'revenue' ? inr(value) : Number(value).toLocaleString(), name === 'revenue' ? 'Recorded spend' : name]} 
+                />
+                <Bar dataKey="revenue" fill="#6366f1" radius={[6, 6, 0, 0]} maxBarSize={40} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </section>
 
-        <section className="rounded-2xl border border-neutral-200 bg-[#fcfaf5] p-5 shadow-sm">
-          <h3 className="font-semibold text-[#111827]">Lifecycle distribution</h3><p className="mt-1 text-xs text-neutral-500">Customers may have more than one behavioural tag.</p>
-          <div className="mt-4 h-[260px]"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={lifecycle} dataKey="customers" nameKey="segment" cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3}>{lifecycle.map((entry, index) => <Cell key={entry.segment} fill={COLORS[index % COLORS.length]} />)}</Pie><Tooltip formatter={(value) => [Number(value).toLocaleString(), 'Customers']} /></PieChart></ResponsiveContainer></div>
+        {/* Lifecycle */}
+        <section className="frosted-glass-wrapper rounded-3xl p-6 lg:p-8 shadow-sm">
+          <div className="mb-2">
+            <h3 className="text-foreground font-display text-2xl md:text-3xl mb-1">Lifecycle <span className="italic font-normal">Distribution</span></h3>
+            <p className="text-[12px] text-muted-foreground">Customers may have more than one behavioural tag.</p>
+          </div>
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie 
+                  data={lifecycle} 
+                  dataKey="customers" 
+                  nameKey="segment" 
+                  cx="50%" 
+                  cy="50%" 
+                  innerRadius={65} 
+                  outerRadius={100} 
+                  paddingAngle={4}
+                  stroke="none"
+                >
+                  {lifecycle.map((entry, index) => <Cell key={entry.segment} fill={COLORS[index % COLORS.length]} />)}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{ background: 'rgba(255, 255, 255, 0.9)', border: '1px solid rgba(255,255,255,0.6)', borderRadius: '12px', backdropFilter: 'blur(8px)', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)', fontWeight: 600, fontSize: '12px' }}
+                  formatter={(value) => [Number(value).toLocaleString(), 'Customers']} 
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
         </section>
 
-        <section className="rounded-2xl border border-neutral-200 bg-[#fcfaf5] p-5 shadow-sm lg:col-span-2">
-          <div className="mb-4"><h3 className="font-semibold text-[#111827]">Business recommendations</h3><p className="mt-1 text-xs text-neutral-500">Each recommendation is tied to a live aggregate and states its evidence boundary.</p></div>
-          <div className="grid gap-3 md:grid-cols-2">{recommendations.map((item) => <article key={item.title} className="rounded-xl border border-neutral-200 bg-white p-4"><h4 className="font-semibold text-[#111827]">{item.title}</h4><p className="mt-2 text-sm text-neutral-700">{item.finding}</p><p className="mt-3 text-sm"><span className="font-semibold text-[#ef4d23]">Recommended next step:</span> {item.action}</p><p className="mt-3 text-xs text-neutral-500">Evidence: {item.evidence}</p></article>)}</div>
+        {/* Recommendations */}
+        <section className="frosted-glass-wrapper rounded-3xl p-6 lg:p-8 shadow-sm lg:col-span-2">
+          <div className="mb-6">
+            <h3 className="text-foreground font-display text-2xl md:text-3xl mb-1">Business <span className="italic font-normal">Recommendations</span></h3>
+            <p className="text-[12px] text-muted-foreground">Each recommendation is tied to a live aggregate and states its evidence boundary.</p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {recommendations.map((item) => (
+              <article key={item.title} className="frosted-glass-card rounded-2xl p-5 md:p-6 transition-all hover:-translate-y-1 hover:shadow-md">
+                <h4 className="font-semibold text-foreground text-sm md:text-base">{item.title}</h4>
+                <p className="mt-2 text-sm text-muted-foreground">{item.finding}</p>
+                <div className="mt-4 pt-4 border-t border-border/40">
+                  <p className="text-sm">
+                    <span className="font-bold text-accent text-[11px] uppercase tracking-wider mr-2">Next step:</span> 
+                    <span className="font-medium text-foreground">{item.action}</span>
+                  </p>
+                  <p className="mt-3 text-[11px] font-medium text-muted-foreground bg-white/50 inline-block px-2.5 py-1 rounded-lg border border-white/60">
+                    Evidence: {item.evidence}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
         </section>
 
-        <section className="rounded-2xl border border-neutral-200 bg-[#fcfaf5] p-5 shadow-sm lg:col-span-2">
-          <div className="flex flex-wrap items-start justify-between gap-4"><div><h3 className="font-semibold text-[#111827]">SQL performance diagnostic</h3><p className="mt-1 max-w-2xl text-xs text-neutral-500">A fixed, parameterized audience query is executed server-side. The app exposes its real planner summary, never arbitrary browser-supplied SQL.</p></div><span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">Parameterized query</span></div>
-          <div className="mt-4 grid gap-3 md:grid-cols-3"><div className="rounded-xl bg-neutral-100 p-4"><p className="text-xs text-neutral-500">Current execution</p><p className="mt-1 text-2xl font-semibold">{queryHealth.elapsed_ms} ms</p><p className="mt-1 text-xs text-neutral-500">{queryHealth.returned_rows} rows returned</p></div><div className="rounded-xl bg-neutral-100 p-4"><p className="text-xs text-neutral-500">Planner strategy</p><p className="mt-1 text-sm font-semibold text-[#111827]">{queryHealth.strategy}</p><p className="mt-1 text-xs text-neutral-500">Estimated rows: {queryHealth.estimated_rows ?? 'n/a'}</p></div><div className="rounded-xl bg-neutral-100 p-4"><p className="text-xs text-neutral-500">Index evidence</p><p className="mt-1 text-sm font-semibold text-[#111827]">{queryHealth.indexes_used?.length ? queryHealth.indexes_used.join(', ') : 'No index selected at this table size'}</p><p className="mt-1 text-xs text-neutral-500">Indexes are defined for this filter path and plan choice remains data-dependent.</p></div></div>
+        {/* SQL Diagnostic */}
+        <section className="frosted-glass-wrapper rounded-3xl p-6 lg:p-8 shadow-sm lg:col-span-2">
+          <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
+            <div>
+              <h3 className="text-foreground font-display text-2xl md:text-3xl mb-1">SQL <span className="italic font-normal">Performance</span></h3>
+              <p className="max-w-2xl text-[12px] text-muted-foreground">A fixed, parameterized audience query is executed server-side. The app exposes its real planner summary, never arbitrary browser-supplied SQL.</p>
+            </div>
+            <span className="rounded-lg bg-emerald-500/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-600 border border-emerald-500/20">
+              Parameterized query
+            </span>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="frosted-glass-card rounded-2xl p-5">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Current execution</p>
+              <p className="mt-2 text-3xl font-display font-medium text-foreground">{queryHealth.elapsed_ms} <span className="text-lg text-muted-foreground">ms</span></p>
+              <p className="mt-2 text-[11px] text-muted-foreground">{Number(queryHealth.returned_rows).toLocaleString()} rows returned</p>
+            </div>
+            <div className="frosted-glass-card rounded-2xl p-5">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Planner strategy</p>
+              <p className="mt-2 text-sm font-semibold text-foreground bg-white/60 px-3 py-1.5 rounded-lg border border-white/80 inline-block">{queryHealth.strategy}</p>
+              <p className="mt-2 text-[11px] text-muted-foreground">Estimated rows: {queryHealth.estimated_rows ? Number(queryHealth.estimated_rows).toLocaleString() : 'n/a'}</p>
+            </div>
+            <div className="frosted-glass-card rounded-2xl p-5">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Index evidence</p>
+              <p className="mt-2 text-[13px] font-mono text-foreground bg-white/60 px-3 py-1.5 rounded-lg border border-white/80 block break-all">
+                {queryHealth.indexes_used?.length ? queryHealth.indexes_used.join(', ') : 'No index selected'}
+              </p>
+              <p className="mt-2 text-[11px] text-muted-foreground">Indexes are defined for this filter path; plan choice is data-dependent.</p>
+            </div>
+          </div>
         </section>
 
-        <section className="rounded-2xl border border-neutral-200 bg-[#fcfaf5] p-5 shadow-sm lg:col-span-2"><h3 className="font-semibold text-[#111827]">Data-quality notes</h3><div className="mt-3 flex flex-wrap gap-3 text-sm text-neutral-700"><span className="rounded-full bg-neutral-100 px-3 py-2">{quality.customer_email_uniqueness}</span><span className="rounded-full bg-neutral-100 px-3 py-2">{Number(quality.customers_without_completed_orders).toLocaleString()} customers without completed orders</span><span className="rounded-full bg-neutral-100 px-3 py-2">Scope: {quality.dataset_scope}</span></div></section>
+        {/* Data Quality */}
+        <section className="frosted-glass-wrapper rounded-3xl p-6 lg:p-8 shadow-sm lg:col-span-2">
+          <h3 className="text-foreground font-display text-2xl md:text-3xl mb-4">Data Quality <span className="italic font-normal">Notes</span></h3>
+          <div className="flex flex-wrap gap-3">
+            <span className="rounded-xl border border-white/80 bg-white/60 px-4 py-2 text-sm font-medium text-foreground shadow-sm">
+              {quality.customer_email_uniqueness}
+            </span>
+            <span className="rounded-xl border border-white/80 bg-white/60 px-4 py-2 text-sm font-medium text-foreground shadow-sm">
+              {Number(quality.customers_without_completed_orders).toLocaleString()} customers without completed orders
+            </span>
+            <span className="rounded-xl border border-white/80 bg-white/60 px-4 py-2 text-sm font-medium text-foreground shadow-sm">
+              <span className="text-muted-foreground text-[11px] font-bold uppercase tracking-wider mr-2">Scope:</span>
+              {quality.dataset_scope}
+            </span>
+          </div>
+        </section>
+        
       </div>
     </div>
   );
