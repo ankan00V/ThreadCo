@@ -420,7 +420,7 @@ export default function Dashboard() {
                         </div>
                         <div className="flex justify-between text-[10px]">
                           <div><div className="text-muted-foreground mb-0.5">Sent</div><div className="font-semibold text-foreground"><AnimatedNumber value={c.total_sent || 0} /></div></div>
-                          <div className="text-right"><div className="text-muted-foreground mb-0.5">Conv. Rate</div><div className="font-semibold text-emerald-600">{(c.conversion_rate || 0)}%</div></div>
+                          <div className="text-right"><div className="text-muted-foreground mb-0.5">Conv. Rate</div><div className="font-semibold text-emerald-600">{(c.total_sent > 0 ? ((c.total_clicked / c.total_sent) * 100).toFixed(1) : 0)}%</div></div>
                         </div>
                       </div>
                     ))}
