@@ -86,15 +86,9 @@ export default function Dashboard() {
           onClick={() => navigate('/campaigns/new')}
           className="rounded-full px-6 py-5 text-sm font-medium font-body bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md active:scale-95"
         >
-          Book a demo
+          Start Automating
         </button>
-        <button
-          onClick={() => setActiveTab('analytics')}
-          className="h-11 w-11 rounded-full border-0 bg-background shadow-[0_2px_12px_rgba(0,0,0,0.08)] hover:bg-background/80 flex items-center justify-center transition-all group active:scale-95"
-          title="Watch Overview"
-        >
-          <Play className="h-4 w-4 fill-foreground text-foreground group-hover:scale-110 transition-transform ml-0.5" />
-        </button>
+        
       </motion.div>
 
       {/* 5. Dashboard Preview (custom coded, NOT an image) - Framer Motion: fade up from y:30, duration 0.8s, delay 0.5s */}
