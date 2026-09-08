@@ -136,9 +136,7 @@ export default function Dashboard() {
               <button 
                 onClick={() => navigate('/campaigns/new')}
                 className="bg-accent hover:bg-accent/90 text-accent-foreground font-medium rounded-full px-3 py-1 text-[11px] shadow-sm transition-all"
-              >
-                Move Money
-              </button>
+              >New Campaign</button>
               <div className="relative p-1 rounded-full text-foreground hover:bg-white/40 transition-colors cursor-pointer">
                 <Bell className="w-4 h-4 text-foreground/80" />
                 <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-accent rounded-full ring-2 ring-white"></span>
@@ -225,12 +223,7 @@ export default function Dashboard() {
                 >
                   Customers
                 </button>
-                <button 
-                  onClick={() => setActiveTab('segments')}
-                  className={`rounded-full px-3 py-1 font-medium text-[10px] shadow-sm transition-all ${activeTab === 'segments' ? 'bg-accent text-accent-foreground' : 'bg-white/70 border border-white/80 text-foreground hover:bg-white'}`}
-                >
-                  Segments
-                </button>
+                
                 <button 
                   onClick={() => setActiveTab('campaigns')}
                   className={`rounded-full px-3 py-1 font-medium text-[10px] shadow-sm transition-all ${activeTab === 'campaigns' ? 'bg-accent text-accent-foreground' : 'bg-white/70 border border-white/80 text-foreground hover:bg-white'}`}
