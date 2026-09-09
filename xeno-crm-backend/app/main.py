@@ -20,7 +20,7 @@ from app.database import engine, Base, ensure_performance_indexes, get_db
 from app import models  # noqa: F401
 
 # Import routers
-from app.routers import analytics, customers, segments, campaigns, webhooks, channel_stub
+from app.routers import analytics, customers, segments, campaigns, webhooks, channel_stub, workbench_router
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -100,6 +100,7 @@ app.include_router(segments.router)
 app.include_router(campaigns.router)
 app.include_router(webhooks.router)
 app.include_router(channel_stub.router)
+app.include_router(workbench_router.router, prefix="/workbench")
 
 # ---------------------------------------------------------------------------
 # Health check
