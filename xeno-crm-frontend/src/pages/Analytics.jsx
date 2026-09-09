@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Loading from '../components/Loading';
 import {
   Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart,
   ResponsiveContainer, Tooltip, XAxis, YAxis,
@@ -29,7 +30,7 @@ export default function Analytics() {
   }, []);
 
   if (!data && !error) {
-    return <div className="flex min-h-[500px] items-center justify-center font-body"><div className="h-8 w-8 animate-spin rounded-full border-b-2 border-accent" /></div>;
+    return <Loading label="Loading analytics" />;
   }
 
   if (error) {

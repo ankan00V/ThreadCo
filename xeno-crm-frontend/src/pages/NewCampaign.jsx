@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Loader from '../components/Loader';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { ArrowLeft, Send, Sparkles, Loader2, MessageSquare, Target, Smartphone } from 'lucide-react';
 import { getSegments, createCampaign, sendCampaign, generateMessage } from '../api';
@@ -225,7 +226,7 @@ const NewCampaign = () => {
                     disabled={isGenerating || !segmentId || !campaignGoal}
                     className="px-4 py-2 bg-accent hover:bg-accent/90 text-accent-foreground font-medium rounded-full text-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 shrink-0 shadow-sm"
                   >
-                    {isGenerating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                    {isGenerating ? <Loader size="sm" onDark className="!w-8" label="Generating" /> : <Sparkles className="w-3.5 h-3.5" />}
                     <span>Generate</span>
                   </button>
                 </div>
@@ -270,7 +271,7 @@ const NewCampaign = () => {
               disabled={isLoading}
               className="flex-[2] py-3 bg-accent text-accent-foreground font-medium text-xs rounded-full hover:bg-accent/90 shadow-md flex justify-center items-center gap-2 disabled:opacity-50 transition-all active:scale-[0.98]"
             >
-              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              {isLoading ? <Loader size="sm" onDark className="!w-8" label="Sending" /> : <Send className="w-4 h-4" />}
               <span>Dispatch Campaign</span>
             </button>
           </div>

@@ -65,8 +65,8 @@ export default function Dashboard() {
         className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-4 py-1.5 text-sm text-muted-foreground font-body mb-6 cursor-default hover:border-accent/40 transition-colors"
       >
         <span>
-          {stats.total_customers
-            ? `${Number(stats.total_customers).toLocaleString()} customers · live Postgres`
+          {analytics?.summary?.completed_orders && stats.total_customers
+            ? `${Number(analytics.summary.completed_orders).toLocaleString()} completed orders · ${Number(stats.total_customers).toLocaleString()} customers · live Postgres`
             : 'Live Postgres dataset'}
         </span>
       </motion.div>
@@ -78,7 +78,7 @@ export default function Dashboard() {
         transition={{ duration: 0.6, delay: 0.1, ease: 'easeOut' }}
         className="text-center font-display text-5xl md:text-6xl lg:text-[5rem] leading-[0.95] tracking-tight text-foreground max-w-xl"
       >
-        Customer questions, answered from <span className="font-display italic font-normal text-accent">real</span> data
+        Built to survive the <span className="font-display italic font-normal text-accent">second</span> question
       </motion.h1>
 
       {/* 3. Subheadline - Framer Motion: fade up from y:16, duration 0.6s, delay 0.2s */}
@@ -88,7 +88,7 @@ export default function Dashboard() {
         transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
         className="mt-4 text-center text-base md:text-lg text-muted-foreground max-w-[650px] leading-relaxed font-body"
       >
-        A retail CRM built on a million-row Postgres dataset, with the query-performance work, metric definitions, and data-quality audit shown rather than hidden.
+        Every metric carries its definition. Every slow query shows its plan. The data-quality checks that failed are still on the page — because “where did that number come from?” is always what gets asked next.
       </motion.p>
 
       {/* 4. CTA Buttons - Framer Motion: fade up from y:16, duration 0.6s, delay 0.3s */}
@@ -99,10 +99,16 @@ export default function Dashboard() {
         className="mt-5 flex items-center gap-3"
       >
         <button
-          onClick={() => navigate('/campaigns/new')}
+          onClick={() => navigate('/workbench')}
           className="rounded-full px-6 py-5 text-sm font-medium font-body bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md active:scale-95"
         >
-          Start Automating
+          See the query work
+        </button>
+        <button
+          onClick={() => navigate('/analysis')}
+          className="rounded-full px-6 py-5 text-sm font-medium font-body border border-border bg-background/80 backdrop-blur-md text-foreground hover:border-accent/40 transition-all active:scale-95"
+        >
+          Read the analysis
         </button>
         
       </motion.div>

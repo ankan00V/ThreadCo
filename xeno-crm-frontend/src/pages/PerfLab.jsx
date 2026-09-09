@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Loader from '../components/Loader';
 import Loading from '../components/Loading';
 import { Database, Play, Zap, AlertTriangle, ShieldCheck, ChevronDown } from 'lucide-react';
 import { getPerfCases, runPerfCase, runSafeQuery } from '../api';
@@ -89,7 +90,7 @@ function Case({ study, dataset }) {
             className="bg-[#ef4d23] hover:bg-[#d9421b] disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 transition-colors"
           >
             {busy
-              ? <div className="animate-spin h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full" />
+              ? <Loader size="sm" onDark className="!w-8" label="Running" />
               : <Play size={13} fill="currentColor" />}
             {busy ? 'Running…' : result ? 'Re-run' : 'Run both'}
           </button>
@@ -157,7 +158,7 @@ function Console() {
           disabled={busy}
           className="bg-[#ef4d23] hover:bg-[#d9421b] disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2"
         >
-          {busy ? <div className="animate-spin h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full" /> : <Play size={13} fill="currentColor" />}
+          {busy ? <Loader size="sm" onDark className="!w-8" label="Running" /> : <Play size={13} fill="currentColor" />}
           Run
         </button>
       </div>

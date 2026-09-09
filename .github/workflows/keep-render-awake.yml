@@ -1,54 +1,51 @@
-name: Keep Render backend awake
+name: Warm the Render backend (manual)
 
-# WHY THIS IS SHAPED LIKE A LOOP AND NOT A "*/5" CRON
+# NOT on a schedule, deliberately.
 #
-# The obvious version of this file is `cron: "*/5 * * * *"` with a single curl.
-# It does not work. GitHub runs scheduled workflows on a best-effort queue and
-# heavily throttles short intervals; measured on this repository, a */5 schedule
-# actually fired every 121-277 minutes. Render's free tier sleeps after 15
-# minutes idle, so the service was asleep for the great majority of the time.
+# Render's free tier gives 750 instance-hours per month against a ~730-hour
+# month. Pinging continuously to prevent the ~15-minute idle sleep therefore
+# consumes essentially the entire monthly allowance, and once it runs out the
+# service stops answering altogether — a worse failure than a slow first load.
 #
-# So each run now HOLDS the runner and pings every 5 minutes for up to 5 hours.
-# One triggered run covers the largest observed gap between triggers. Actions
-# minutes are free on public repositories, so the only cost is Render instance
-# hours - see the note at the bottom of this file.
+# So the cold start is handled in the product instead: the frontend fires
+# /healthz as its bundle loads (see warmBackend() in src/api.js) and shows a
+# progress screen while the instance wakes.
+#
+# Run this by hand from the Actions tab a few minutes before sharing the link
+# with someone, so their first visit lands on an already-warm instance. It pings
+# for 30 minutes and then stops.
 
 on:
-  schedule:
-    # Hourly. The interval barely matters given the throttling above; what
-    # matters is that *a* run starts before the previous one finishes.
-    - cron: "0 * * * *"
   workflow_dispatch:
+    inputs:
+      minutes:
+        description: "How long to keep pinging (minutes)"
+        required: false
+        default: "30"
 
 permissions: {}
 
 concurrency:
-  # A fresh run replaces the running one rather than stacking up beside it.
-  group: keep-render-awake
+  group: warm-render
   cancel-in-progress: true
 
 jobs:
-  ping:
+  warm:
     runs-on: ubuntu-latest
-    # GitHub caps a job at 6 hours; stay under it.
-    timeout-minutes: 330
+    timeout-minutes: 70
     env:
       HEALTH_URL: https://threadco-api.onrender.com/healthz
-      DURATION_MINUTES: 300
-      INTERVAL_SECONDS: 300
+      MINUTES: ${{ inputs.minutes || '30' }}
     steps:
-      - name: Keep the service warm
+      - name: Ping until the window closes
         run: |
           set -uo pipefail
-          deadline=$(( SECONDS + DURATION_MINUTES * 60 ))
-          attempts=0
-          failures=0
+          deadline=$(( SECONDS + MINUTES * 60 ))
+          attempts=0; failures=0
 
           while [ "$SECONDS" -lt "$deadline" ]; do
             attempts=$(( attempts + 1 ))
-
-            # A cold start can take ~50s, so allow generously and retry. A single
-            # failed ping is not interesting; only a total blackout is.
+            # A cold instance can take ~50s to answer its first request.
             if curl --fail --silent --show-error --location \
                  --connect-timeout 20 --max-time 120 \
                  --retry 3 --retry-delay 10 --retry-all-errors \
@@ -56,26 +53,14 @@ jobs:
               echo "$(date -u +%H:%M:%S) ping $attempts ok"
             else
               failures=$(( failures + 1 ))
-              echo "$(date -u +%H:%M:%S) ping $attempts FAILED (${failures}/${attempts})"
+              echo "$(date -u +%H:%M:%S) ping $attempts FAILED"
             fi
-
             [ "$SECONDS" -ge "$deadline" ] && break
-            sleep "$INTERVAL_SECONDS"
+            sleep 300
           done
 
-          echo "---"
-          echo "attempts=$attempts failures=$failures"
-
-          # Fail the run only if every ping failed - that means the service is
-          # genuinely down, not merely slow to wake.
+          echo "--- attempts=$attempts failures=$failures"
           if [ "$attempts" -gt 0 ] && [ "$failures" -eq "$attempts" ]; then
             echo "::error::Every ping failed; the backend appears to be down."
             exit 1
           fi
-
-# COST NOTE
-# Render's free tier allows 750 instance-hours per month and a month is ~730
-# hours, so keeping ONE service continuously awake consumes essentially the
-# whole allowance. A second free service on the same account would exceed it and
-# get suspended. If this needs to be genuinely reliable rather than
-# best-effort, the $7/month Render instance removes the problem outright.

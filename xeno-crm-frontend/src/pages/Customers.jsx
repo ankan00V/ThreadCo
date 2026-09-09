@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Loader from '../components/Loader';
 import { Search, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import CustomerRow from '../components/CustomerRow';
 import { getCustomerDirectory, getCustomerStats } from '../api';
@@ -149,7 +150,7 @@ const Customers = () => {
                 <tr>
                   <td colSpan="5" className="px-6 py-12 text-center text-muted-foreground text-xs">
                     <div className="flex justify-center mb-3">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent"></div>
+                      <Loader size="sm" label="Loading customers" />
                     </div>
                     Loading customer directory...
                   </td>

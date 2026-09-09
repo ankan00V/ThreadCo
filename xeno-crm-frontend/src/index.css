@@ -489,3 +489,61 @@ body {
   .entrance-active .caption { animation-delay: calc(.40s + .64s) !important; }
   .entrance-active .learn-more { animation-delay: calc(.40s + .80s) !important; }
 }
+
+/* ---------------------------------------------------------------------------
+   Loading indicator
+   Four dots sliding across a rail. The two halves are drawn by ::before and
+   ::after with complementary clip-paths, so one pair reads in the foreground
+   colour and the other in the accent as they cross the centre divider.
+   Colours are variables rather than literals so the same markup works on the
+   light app chrome and on a dark surface (.loader--on-dark).
+--------------------------------------------------------------------------- */
+.loader {
+  --loader-rail: #222222;
+  --loader-dot: #222222;
+  --loader-dot-alt: #ef4d23;
+
+  width: 90px;
+  height: 14px;
+  box-shadow: 0 3px 0 var(--loader-rail);
+  background: linear-gradient(var(--loader-rail) 0 0) 50% / 2px 100% no-repeat;
+  display: grid;
+}
+
+.loader::before,
+.loader::after {
+  content: "";
+  grid-area: 1 / 1;
+  background: radial-gradient(circle closest-side, var(--c, var(--loader-dot)) 92%, #0000)
+    0 0 / calc(100% / 4) 100%;
+  clip-path: inset(0 50% 0 0);
+  animation: threadco-loader 1s infinite linear;
+}
+
+.loader::after {
+  --c: var(--loader-dot-alt);
+  clip-path: inset(0 0 0 50%);
+}
+
+@keyframes threadco-loader {
+  100% { background-position: calc(100% / 3) 0; }
+}
+
+/* For use on dark panels (e.g. the SQL editor surface). */
+.loader--on-dark {
+  --loader-rail: #ffffff;
+  --loader-dot: #ffffff;
+  --loader-dot-alt: #ef4d23;
+}
+
+/* Inline variant for buttons and table cells. */
+.loader--sm {
+  width: 54px;
+  height: 9px;
+  box-shadow: 0 2px 0 var(--loader-rail);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loader::before,
+  .loader::after { animation-duration: 3s; }
+}

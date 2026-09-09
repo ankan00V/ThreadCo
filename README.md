@@ -229,6 +229,83 @@ Delivery and engagement events are produced by the channel simulator. They are r
 transitions through the real webhook pipeline, but they are not real customer behaviour, and the app
 labels them as such rather than reporting them as campaign lift.
 
+### Cold starts on a free tier
+
+Render's free tier sleeps after ~15 minutes idle and takes ~50s to wake. The obvious fix — a GitHub
+Actions `*/5` cron — **does not work**, and this repo's run history shows why: GitHub throttles
+scheduled workflows onto a best-effort queue, and the 5-minute schedule actually fired every **121 to
+277 minutes**.
+
+Pinging continuously would work, and it is the wrong trade. Render allows 750 instance-hours a month
+against a ~730-hour month, so staying awake consumes essentially the whole allowance — and once it
+runs out the service stops answering entirely, which is a far worse failure than a slow first load.
+
+So the cold start is handled in the product rather than papered over:
+
+- **`warmBackend()`** (`src/api.js`) fires `/healthz` as the bundle loads, before React renders, so
+  the instance wakes while the visitor is still reading the page rather than after their first click.
+- **The loading state counts down** against Render's stated ~50s wake time, names the stage it is in,
+  and says so plainly if it overruns instead of spinning silently.
+- **`.github/workflows/keep-render-awake.yml`** is manual-only. Trigger it from the Actions tab a few
+  minutes before sharing the link and it pings for 30 minutes, so a scheduled demo lands warm.
+
+---
+
+## 6. Stack
+
+| Layer | Technology |
+|-------|------------|
+| Frontend | React 19, Vite, TailwindCSS, Framer Motion, Recharts |
+| Backend | Python 3.11, FastAPI, SQLAlchemy 2.0, Pydantic |
+| Database | Neon Serverless Postgres 18 (`pg_trgm`, materialized views) |
+| ML | scikit-learn (random forest, offline — see `requirements-ml.txt`) |
+| LLM | NVIDIA NIM, `nvidia/llama-3.1-nemotron-ultra-253b-v1` |
+| Deployment | Render (API), Vercel (frontend) |
+
+`requirements-ml.txt` is deliberately separate: the API never imports pandas or scikit-learn, and
+adding ~200 MB of scientific Python to every deploy would slow builds and cold starts for code that
+runs offline.
+
+---
+
+## 7. Running it locally
+
+```bash
+# Backend
+cd xeno-crm-backend
+python3 -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env        # fill in DATABASE_URL and DATABASE_URL_READONLY
+psql "$DATABASE_URL" -f SETUP_READONLY_ROLE.sql
+uvicorn app.main:app --reload
+
+# Frontend
+cd xeno-crm-frontend
+npm install
+echo "VITE_API_URL=http://localhost:8000" > .env
+npm run dev
+```
+
+Optional, against your own database:
+
+```bash
+python scripts_load_scale.py --orders 1000000 --customers 120000 --budget-mb 400
+python scripts_refresh_rollups.py
+pip install -r requirements-ml.txt && python -m app.ml_churn_prediction
+```
+
+---
+
+## 8. Scope
+
+Built: the analytics and query-performance layer, AI segment compilation, and the two-service
+delivery callback loop. **Not** built: authentication, billing, multi-tenant RBAC. Those are table
+stakes for a production CRM and would not have shown anything this project is trying to show.
+
+Delivery and engagement events are produced by the channel simulator. They are real state
+transitions through the real webhook pipeline, but they are not real customer behaviour, and the app
+labels them as such rather than reporting them as campaign lift.
+
 ### Keeping a free-tier backend awake
 
 Render's free tier sleeps after ~15 minutes idle and takes ~30-50s to wake. The obvious fix — a

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Loader from '../components/Loader';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from "framer-motion";
 import { getCampaignStats, checkCampaignCompletion } from '../api';
@@ -101,7 +102,7 @@ const CampaignDetail = () => {
   if (isLoading && !stats) {
     return (
       <div className="flex items-center justify-center h-64 text-muted-foreground font-medium font-body">
-        <RefreshCw className="w-6 h-6 animate-spin mr-2 text-accent" />
+        <Loader className="mr-3" label="Loading campaign" />
         Loading campaign details...
       </div>
     );

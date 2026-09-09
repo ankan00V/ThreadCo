@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Loader from '../components/Loader';
 import { useNavigate } from 'react-router-dom';
 import { getCampaigns, deleteCampaign } from '../api';
 import { Plus, Trash2, Sparkles, ArrowRight } from 'lucide-react';
@@ -60,7 +61,7 @@ export default function Campaigns() {
 
       {loading ? (
         <div className="text-center py-16 text-muted-foreground flex flex-col items-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mb-4"></div>
+          <Loader className="mb-4" label="Loading campaigns" />
           <span className="text-xs">Loading campaign registry...</span>
         </div>
       ) : campaigns.length === 0 ? (

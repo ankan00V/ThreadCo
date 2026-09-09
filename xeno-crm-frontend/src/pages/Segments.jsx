@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Loader from '../components/Loader';
 import { useNavigate } from 'react-router-dom';
 import { getSegments } from '../api';
 import AIComposer from '../components/AIComposer';
@@ -91,7 +92,7 @@ const Segments = () => {
 
         {isLoading ? (
           <div className="text-center py-12 text-muted-foreground text-xs flex flex-col items-center">
-             <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-accent mb-3"></div>
+             <Loader className="mb-3" label="Loading segments" />
              <span>Loading audience cohorts...</span>
           </div>
         ) : segments.length === 0 ? (
