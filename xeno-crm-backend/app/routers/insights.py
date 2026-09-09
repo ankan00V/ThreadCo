@@ -143,6 +143,11 @@ def data_quality_audit(db: Session = Depends(get_db)) -> dict[str, Any]:
     """)).mappings().all()
     aovs = [float(c["aov"]) for c in channel]
     aov_spread = round(abs(aovs[0] - aovs[1]) / max(aovs) * 100, 2) if len(aovs) == 2 else None
+    # Built outside the f-string below: nesting same-type quotes inside an
+    # f-string only parses on Python 3.12+ (PEP 701), and this deploys to 3.11.
+    channel_summary = ", ".join(
+        "{} ₹{:,}".format(c["channel"], int(c["aov"])) for c in channel
+    )
 
     top_decile = db.execute(text(f"SELECT pct_of_revenue FROM ({CONCENTRATION_SQL}) q "
                                  "WHERE decile = 1")).scalar()
@@ -175,8 +180,7 @@ def data_quality_audit(db: Session = Depends(get_db)) -> dict[str, Any]:
                 "name": "AOV differs by order channel",
                 "status": "fail",
                 "observed": f"Average order value is effectively identical across channels "
-                            f"({', '.join(f'{c['channel']} ₹{int(c['aov']):,}' for c in channel)}"
-                            f") — a {aov_spread}% spread.",
+                            f"({channel_summary}) — a {aov_spread}% spread.",
                 "expected": "In-store and online baskets differ materially in real retail.",
                 "diagnosis": "Channel is assigned by random.choice independently of amount, so "
                              "the two distributions are the same distribution.",
