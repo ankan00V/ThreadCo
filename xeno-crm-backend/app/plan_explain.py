@@ -83,11 +83,14 @@ def explain_plan(plan_json: Any) -> dict[str, Any]:
         # 4. Nested loop executing its inner side many times.
         if ntype == "Nested Loop" and loops == 1:
             inner = (node.get("Plans") or [None, None])[-1]
-            if inner and (inner.get("Actual Loops") or 1) > 1000:
+            # Bound outside the f-string: nesting same-type quotes inside one is
+            # PEP 701 syntax that only parses on Python 3.12+, and this runs on 3.11.
+            inner_loops = int(inner.get("Actual Loops") or 1) if inner else 0
+            if inner and inner_loops > 1000:
                 findings.append({
                     "severity": "high",
                     "title": "Nested loop running its inner side thousands of times",
-                    "detail": f"The inner node executed {int(inner.get("Actual Loops") or 1):,} times. A hash "
+                    "detail": f"The inner node executed {inner_loops:,} times. A hash "
                               f"join usually wins at this size. This often means the planner "
                               f"under-estimated the outer row count.",
                 })
