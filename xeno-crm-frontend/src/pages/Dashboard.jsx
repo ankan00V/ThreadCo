@@ -458,22 +458,36 @@ export default function Dashboard() {
                         <div className="text-sm font-bold text-foreground"><AnimatedNumber value={analytics?.click_through || 0} />%</div>
                       </div>
                       <div className="bg-white/50 p-2 rounded-lg border border-black/5 text-center shadow-sm">
-                        <div className="text-[9px] text-muted-foreground mb-1">Revenue / Msg</div>
-                        <div className="text-sm font-bold text-foreground">₹<AnimatedNumber value={analytics?.revenue_per_msg || 0} /></div>
+                        <div className="text-[9px] text-muted-foreground mb-1">Delivery Rate</div>
+                        <div className="text-sm font-bold text-foreground"><AnimatedNumber value={analytics?.delivery_rate || 0} />%</div>
                       </div>
                     </div>
                     <div className="bg-white/50 p-3 rounded-lg border border-black/5 shadow-sm">
                       <div className="text-[10px] font-medium text-foreground mb-2">Channel Performance</div>
                       <div className="space-y-2">
-                        {[{label: 'WhatsApp', pct: analytics?.channel_wa || 0, color: 'bg-emerald-500'}, {label: 'Email', pct: analytics?.channel_email || 0, color: 'bg-blue-500'}, {label: 'SMS', pct: analytics?.channel_sms || 0, color: 'bg-indigo-500'}].map((ch, i) => (
-                          <div key={i} className="flex items-center gap-2 text-[9px]">
-                            <span className="w-12 text-muted-foreground">{ch.label}</span>
-                            <div className="flex-1 h-1.5 bg-black/5 rounded-full overflow-hidden">
-                              <motion.div initial={{width: 0}} animate={{width: `${ch.pct}%`}} transition={{duration: 1, delay: i*0.1}} className={`h-full ${ch.color}`}></motion.div>
+                        {(analytics?.channel_performance || []).map((ch, i) => {
+                          const colors = { whatsapp: 'bg-emerald-500', email: 'bg-blue-500', sms: 'bg-indigo-500', rcs: 'bg-amber-500' };
+                          return (
+                            <div key={ch.channel} className="flex items-center gap-2 text-[9px]">
+                              <span className="w-12 text-muted-foreground capitalize">{ch.channel}</span>
+                              <div className="flex-1 h-1.5 bg-black/5 rounded-full overflow-hidden">
+                                <motion.div initial={{width: 0}} animate={{width: `${ch.share_of_sends}%`}} transition={{duration: 1, delay: i*0.1}} className={`h-full ${colors[ch.channel] || 'bg-neutral-400'}`}></motion.div>
+                              </div>
+                              {/* A channel with no sends is not a channel performing at 0%. */}
+                              <span className={`w-20 text-right tabular-nums ${ch.has_data ? 'text-foreground font-medium' : 'text-muted-foreground/60 italic'}`}>
+                                {ch.has_data ? `${ch.sent.toLocaleString()} sent` : 'no sends yet'}
+                              </span>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
+                        {!analytics?.channel_performance?.length && (
+                          <div className="text-[9px] text-muted-foreground italic">No delivery data yet.</div>
+                        )}
                       </div>
+                      <p className="mt-2 text-[8.5px] text-muted-foreground/70 leading-snug">
+                        Bar shows share of all messages sent. Rates are computed from delivery events,
+                        not from campaign counters.
+                      </p>
                     </div>
                   </div>
                   <button onClick={() => navigate('/campaigns')} className="mt-3 w-full py-2 bg-secondary/80 hover:bg-secondary text-foreground text-[10px] font-medium rounded-lg transition-colors flex items-center justify-center gap-1">

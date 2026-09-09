@@ -217,6 +217,13 @@ def analytics_overview(db: Session = Depends(get_db)):
         "metrics": shared["metrics"],
         "avg_open_rate": metric_values["open_rate"],
         "click_through": metric_values["click_rate"],
+        "delivery_rate": metric_values["delivery_rate"],
+        "conversion_rate": metric_values["conversion_rate"],
+        "messages_sent": metric_values["messages_sent"],
+        # Real per-channel funnel from the communications table. Replaces the
+        # channel_wa / channel_email / channel_sms fields, which hardcoded three
+        # channels and were removed along with revenue_per_msg.
+        "channel_performance": shared["channel_performance"],
         "net_revenue": metric_values["net_revenue"],
         "gross_revenue": metric_values["gross_revenue"],
         "query_health": _audience_query_health(db),

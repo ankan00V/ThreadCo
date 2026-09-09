@@ -175,6 +175,8 @@ def get_global_dashboard_stats(db: Session = Depends(get_db)):
         "avg_order_value": values["aov"],
         "open_rate": values["open_rate"],
         "click_rate": values["click_rate"],
+        "delivery_rate": values["delivery_rate"],
+        "channel_performance": shared["channel_performance"],
         # Definitions travel with the values so the UI can explain each number.
         "metrics": shared["metrics"],
     }

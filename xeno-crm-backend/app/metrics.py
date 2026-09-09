@@ -174,9 +174,66 @@ def delivery_metrics(db: Session) -> list[Metric]:
     ]
 
 
+# Every channel the product can dispatch on. Listed explicitly so the UI can
+# distinguish "this channel performs badly" from "this channel has never been
+# used" — a zero-width bar looks like failure when it actually means no sends.
+SUPPORTED_CHANNELS = ("whatsapp", "sms", "email", "rcs")
+
+
+def channel_performance(db: Session) -> list[dict[str, Any]]:
+    """Per-channel delivery funnel, computed from the communications event table.
+
+    Same source and same monotonic-state handling as delivery_metrics, so the
+    per-channel numbers roll up to the totals shown elsewhere.
+    """
+    rows = db.execute(text(f"""
+        SELECT channel,
+               count(*)                                                         AS sent,
+               count(*) FILTER (WHERE status IN ({_in_list(_DELIVERED_STATES)})) AS delivered,
+               count(*) FILTER (WHERE status IN ({_in_list(_OPENED_STATES)}))    AS opened,
+               count(*) FILTER (WHERE status IN ({_in_list(_CLICKED_STATES)}))   AS clicked,
+               count(*) FILTER (WHERE status = 'failed')                         AS failed
+        FROM communications
+        GROUP BY channel
+    """)).mappings().all()
+
+    by_channel = {row["channel"]: row for row in rows}
+    total_sent = sum(int(row["sent"]) for row in rows)
+
+    def rate(num: int, den: int) -> float:
+        return round(num / den * 100, 1) if den else 0.0
+
+    performance = []
+    for channel in SUPPORTED_CHANNELS:
+        row = by_channel.get(channel)
+        sent = int(row["sent"]) if row else 0
+        delivered = int(row["delivered"]) if row else 0
+        opened = int(row["opened"]) if row else 0
+        clicked = int(row["clicked"]) if row else 0
+        failed = int(row["failed"]) if row else 0
+
+        performance.append({
+            "channel": channel,
+            "sent": sent,
+            "delivered": delivered,
+            "opened": opened,
+            "clicked": clicked,
+            "failed": failed,
+            "share_of_sends": rate(sent, total_sent),
+            "delivery_rate": rate(delivered, sent),
+            "open_rate": rate(opened, delivered),
+            "click_rate": rate(clicked, opened),
+            # Distinguishes "no data" from "0%" for the UI.
+            "has_data": sent > 0,
+        })
+
+    return performance
+
+
 def all_metrics(db: Session) -> dict[str, Any]:
     metrics = revenue_metrics(db) + customer_metrics(db) + delivery_metrics(db)
     return {
         "metrics": {m.key: m.as_dict() for m in metrics},
         "order": [m.key for m in metrics],
+        "channel_performance": channel_performance(db),
     }
