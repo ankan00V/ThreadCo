@@ -235,9 +235,9 @@ const LandingPage = () => {
               color: 'white'
             }}
           >
-            <span className="block">Anyone can build a dashboard.</span>
+            <span className="block">Dashboards are easy.</span>
             <span className="block">
-              <span style={{ color: '#ef4d23' }}>Trusting it</span> is the hard part.
+              <span style={{ color: '#ef4d23' }}>Trust</span> is the hard part.
             </span>
           </motion.h1>
 
@@ -255,10 +255,8 @@ const LandingPage = () => {
               lineHeight: 1.65
             }}
           >
-            So this one shows its working. Every metric carries its own definition, every slow
-            query shows its plan, and the data-quality checks that failed are still on the page
-            instead of quietly removed. Built on {dataset ? fmt(dataset.orders) : 'a million'} real
-            orders — large enough that the query plans actually diverge.
+            Every metric shows its definition. Every slow query shows its plan.
+            On {dataset ? fmt(dataset.orders) : 'a million'} real orders.
           </motion.p>
 
           {/* One next action. The dashboard is the entry point; the Performance Lab
