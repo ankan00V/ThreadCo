@@ -68,3 +68,4 @@ out/
 .vscode/
 *.swp
 *.swo
+purge-secrets.sh
