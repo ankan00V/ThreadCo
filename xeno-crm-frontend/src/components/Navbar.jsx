@@ -60,7 +60,7 @@ export default function Navbar() {
 
   return (
     <div className="product-navbar flex justify-center pt-4 sm:pt-6 px-3 sm:px-4 w-full relative z-50 font-['Inter']">
-      <div className="bg-[#fcfaf5] rounded-full shadow-sm border border-neutral-200 p-2 w-max sm:w-full sm:pl-2 sm:pr-2 sm:py-2 max-w-[920px] relative flex items-center mx-auto sm:mx-0">
+      <div className="bg-[#fcfaf5] rounded-full shadow-sm border border-neutral-200 w-max max-w-full pl-2 pr-2 py-1.5 relative flex items-center mx-auto">
 
         {/* Logo */}
         <div className="shrink-0 cursor-pointer flex items-center gap-2 pr-2 sm:pr-0" onClick={() => navigate('/dashboard')}>
@@ -69,18 +69,18 @@ export default function Navbar() {
         </div>
 
         {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-5 lg:gap-7 ml-5 lg:ml-8">
+        <div className="hidden md:flex items-center gap-4 lg:gap-6 ml-5 lg:ml-7">
           {LINKS.map((link) => (
             <div key={link.label} className="relative group">
               <button
                 onClick={() => !link.children && navigate(link.path)}
-                className={`text-[14px] font-medium transition-colors relative flex items-center gap-1 py-4 whitespace-nowrap ${
+                className={`text-[14px] font-medium transition-colors relative flex items-center gap-1 py-2.5 whitespace-nowrap ${
                   isActive(link) ? 'text-[#ef4d23]' : 'text-neutral-800 hover:text-[#ef4d23]'
                 }`}
               >
                 {link.label}
                 {isActive(link) && (
-                  <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-[3px] h-[3px] bg-[#ef4d23] rounded-full" />
+                  <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-[3px] h-[3px] bg-[#ef4d23] rounded-full" />
                 )}
                 {link.children && (
                   <ChevronDown size={14} color="#ef4d23" strokeWidth={3} className="ml-0.5 group-hover:rotate-180 transition-transform duration-200" />
@@ -124,7 +124,7 @@ export default function Navbar() {
         </div>
 
         {/* Right cluster */}
-        <div className="sm:ml-auto flex items-center gap-2 sm:gap-3">
+        <div className="ml-4 sm:ml-6 flex items-center gap-2">
           <button onClick={() => navigate('/campaigns/new')} className="hidden sm:flex bg-[#ef4d23] hover:bg-[#d9421b] transition-colors rounded-full items-center gap-2 pl-4 pr-1.5 py-1.5 text-white shrink-0">
             <span className="text-[13px] font-medium whitespace-nowrap">New campaign</span>
             <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0">
