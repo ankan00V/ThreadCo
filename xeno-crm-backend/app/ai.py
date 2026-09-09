@@ -345,9 +345,14 @@ Return ONLY valid JSON in this exact structure:
 # is how a 160-character SMS ended up carrying "Warm regards, Team ThreadCo" and
 # a P.S. This trims the output deterministically so the channel contract holds
 # whatever the model returns.
+# Anchored to a line start or sentence boundary on purpose. An unanchored
+# "P\.?S\.?" matches the "Ps." inside "VIPs. Sale ends soon", which silently ate
+# the rest of the message.
 _EMAIL_ONLY_PATTERNS = [
-    r"\n?\s*P\.?S\.?[:.]?\s.*$",                       # trailing P.S. block
-    r"\n?\s*(warm regards|best regards|kind regards|sincerely|regards)\s*,?.*$",
+    # A P.S. block: its own line, or after a sentence end, and the dots matter.
+    r"(?:\n\s*|(?<=[.!?])\s+)P\.\s?S\.[:.\-]?\s.*$",
+    # A sign-off: its own line, or after a sentence end.
+    r"(?:\n\s*|(?<=[.!?])\s+)(warm regards|best regards|kind regards|sincerely|regards|cheers)\b\s*,?.*$",
 ]
 
 _CHANNEL_BODY_LIMIT = {"sms": 160, "whatsapp": 1024, "rcs": 2000, "email": 5000}
@@ -417,13 +422,24 @@ async def draft_message(
         f"Sample customers:\n{sample_info}"
     )
 
-    raw = await asyncio.to_thread(_call_llm, formatted_prompt, user_payload)
-    logger.info(f"AI message response: {raw[:300]}")
+    # The model occasionally emits JSON with an unescaped quote or newline inside
+    # the body string. One retry recovers it; dropping straight to the generic
+    # fallback would quietly hand the marketer copy nobody wrote.
+    parsed = None
+    for attempt in range(2):
+        raw = await asyncio.to_thread(_call_llm, formatted_prompt, user_payload)
+        logger.info("AI message response (attempt %d): %s", attempt + 1, raw[:300])
+        try:
+            parsed = _extract_json(raw)
+            break
+        except (json.JSONDecodeError, ValueError):
+            logger.warning("Unparseable LLM JSON on attempt %d", attempt + 1)
 
     try:
-        parsed = _extract_json(raw)
+        if parsed is None:
+            raise ValueError("no parseable response")
         return _enforce_channel_shape(parsed, channel_key)
-    except (json.JSONDecodeError, ValueError):
+    except (json.JSONDecodeError, ValueError, KeyError, TypeError):
         # Fallback if AI returns bad JSON
         fallback_bodies = {
             "sms": "Hi {{name}}, your ThreadCo reward is live. Shop now: [link]",
