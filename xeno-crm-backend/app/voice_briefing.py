@@ -141,3 +141,55 @@ async def synthesise(script: str, dataset_id: str) -> bytes:
         _cache.pop(next(iter(_cache)))
     _cache[fingerprint] = audio
     return audio
+
+
+def build_project_script(audit: dict, recommendation: dict, dataset: dict) -> str:
+    """Briefing for the built-in dataset, spoken on the Analysis page.
+
+    Separate from build_script() because it tells a different story: not "here is
+    your data" but "here is what these checks caught, and what changed". It is
+    reachable without uploading anything, which is the point — the voice work
+    should not be hidden behind a file picker.
+    """
+    passing = audit.get("passing", 0)
+    total = audit.get("total", 0)
+    provenance = audit.get("provenance") or {}
+    finding = recommendation.get("finding") or {}
+
+    parts: list[str] = []
+
+    parts.append(
+        f"This is the analysis briefing for the built-in dataset — "
+        f"{dataset.get('orders', 0):,} orders from {dataset.get('customers', 0):,} customers "
+        f"on live Postgres."
+    )
+
+    parts.append(
+        f"Three data quality checks run against it, and {passing} of {total} pass today."
+    )
+
+    if provenance:
+        parts.append(
+            "That is not the interesting part. Two of them failed on the first version of this "
+            "dataset. Retention sat flat in every cohort month, which is not a behaviour real "
+            "customers show — it was the signature of a generator assigning order dates at random. "
+            "A churn model built on that data scored point five zero two, which is chance, and "
+            "confirmed it independently. The generator was rewritten to model actual purchase "
+            "behaviour, and the same model now scores point nine four four, with recency the "
+            "strongest feature, exactly as RFM theory predicts."
+        )
+
+    if finding.get("customers"):
+        parts.append(
+            f"On the current data, the segment worth acting on is "
+            f"{int(finding['customers']):,} high value customers who have not ordered in "
+            f"forty five days, holding {_inr(finding.get('historical_spend', 0))} of historical spend."
+        )
+
+    parts.append(
+        "The caveat worth keeping: this dataset is generated, so it proves the method rather than "
+        "the market. Upload your own export on the Your Data page to run the same analysis on real "
+        "numbers."
+    )
+
+    return " ".join(parts)[:MAX_CHARS]

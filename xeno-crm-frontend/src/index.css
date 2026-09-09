@@ -547,3 +547,35 @@ body {
   .loader::before,
   .loader::after { animation-duration: 3s; }
 }
+
+/* ---------------------------------------------------------------------------
+   Form controls inside the product shell.
+
+   <body> carries `text-white` for the dark public landing page, and that colour
+   inherits into form controls. Inside .product-stage the surfaces are white, so
+   any control that sets a background but not a colour renders white-on-white —
+   which is exactly how the CSV column-mapping selects ended up invisible while
+   holding correct values.
+
+   Setting it here rather than per-control means a control added later cannot
+   reintroduce the bug.
+--------------------------------------------------------------------------- */
+.product-stage :is(input, select, textarea) {
+  color: #1f2937;
+}
+
+/* Native dropdown lists are painted by the OS and inherit separately. */
+.product-stage select option {
+  color: #1f2937;
+  background-color: #ffffff;
+}
+
+.product-stage :is(input, textarea)::placeholder {
+  color: #9ca3af;
+}
+
+/* The SQL editors are deliberately dark surfaces; keep their light-on-dark text. */
+.product-stage textarea.font-mono,
+.product-stage textarea[class*="bg-[#0d1117]"] {
+  color: #c9d1d9;
+}

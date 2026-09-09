@@ -2,7 +2,11 @@ import React, { useEffect, useState } from 'react';
 import Loading from '../components/Loading';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { CheckCircle2, XCircle, FileText, Target } from 'lucide-react';
-import { getDataAudit, getRetention, getConcentration, getRecommendation } from '../api';
+import { Volume2 } from 'lucide-react';
+import {
+  getDataAudit, getRetention, getConcentration, getRecommendation,
+  getAnalysisBriefing, analysisBriefingAudioUrl,
+} from '../api';
 
 const inr = (v) => `₹${Number(v || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
 
@@ -72,10 +76,12 @@ export default function Analysis() {
   const [conc, setConc] = useState(null);
   const [rec, setRec] = useState(null);
   const [error, setError] = useState(null);
+  const [briefing, setBriefing] = useState(null);
 
   useEffect(() => {
     Promise.all([getDataAudit(), getRetention(), getConcentration(), getRecommendation()])
       .then(([a, r, c, x]) => { setAudit(a); setRetention(r); setConc(c); setRec(x); })
+      .then(() => getAnalysisBriefing().then(setBriefing).catch(() => {}))
       .catch(() => setError('Could not reach the analysis API.'));
   }, []);
 
@@ -100,6 +106,23 @@ export default function Analysis() {
           the failures are the finding.
         </p>
       </div>
+
+      {briefing?.audio_available && (
+        <div className="mb-10 rounded-2xl border border-neutral-200 bg-white/70 backdrop-blur-md p-5">
+          <div className="flex items-center gap-2 mb-2">
+            <Volume2 size={16} className="text-[#ef4d23]" />
+            <span className="text-[13px] font-semibold text-neutral-900">Listen to this analysis</span>
+            <span className="text-[11px] text-neutral-500">· 60 seconds</span>
+          </div>
+          <audio controls preload="none" src={analysisBriefingAudioUrl()} className="w-full h-9" />
+          {briefing.script && (
+            <details className="mt-2">
+              <summary className="cursor-pointer text-[11px] uppercase tracking-wider text-neutral-500">Transcript</summary>
+              <p className="mt-1.5 text-[12.5px] text-neutral-700 leading-relaxed">{briefing.script}</p>
+            </details>
+          )}
+        </div>
+      )}
 
       {/* Audit */}
       <section className="mb-12">

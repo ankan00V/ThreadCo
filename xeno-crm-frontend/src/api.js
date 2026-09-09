@@ -213,3 +213,11 @@ export const deleteDataset = async (id) => {
   const response = await api.delete(`/api/datasets/${id}`);
   return response.data;
 };
+
+// ── Voice briefing for the built-in analysis ─────────────────────────────
+export const getAnalysisBriefing = async () => {
+  const response = await api.get('/api/insights/briefing');
+  return response.data;
+};
+
+export const analysisBriefingAudioUrl = () => `${BASE}/api/insights/briefing.mp3`;

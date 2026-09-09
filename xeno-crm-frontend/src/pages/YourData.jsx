@@ -143,7 +143,7 @@ export default function YourData() {
                 <select
                   value={mapping?.[f.key] || ''}
                   onChange={(e) => setMapping({ ...mapping, [f.key]: e.target.value || null })}
-                  className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-xl text-[13px] focus:outline-none focus:ring-1 focus:ring-[#ef4d23]"
+                  className="w-full px-3 py-2 bg-white text-neutral-900 border border-neutral-300 rounded-xl text-[13px] focus:outline-none focus:ring-1 focus:ring-[#ef4d23]"
                 >
                   <option value="">— not mapped —</option>
                   {preview.headers.map((h) => <option key={h} value={h}>{h}</option>)}

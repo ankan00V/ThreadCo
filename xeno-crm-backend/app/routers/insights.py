@@ -17,10 +17,11 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app import voice_briefing
 from app.database import get_db
 
 router = APIRouter(prefix="/api/insights", tags=["insights"])
@@ -277,3 +278,48 @@ def recommendation(db: Session = Depends(get_db)) -> dict[str, Any]:
                   "timing is uniformly distributed. On production data, derive the window from "
                   "the observed survival curve before committing to it.",
     }
+
+
+# ---------------------------------------------------------------------------
+# Voice briefing for the built-in analysis
+# ---------------------------------------------------------------------------
+
+def _project_script(db: Session) -> str:
+    audit = data_quality_audit(db)
+    rec = recommendation(db)
+    summary = db.execute(text("""
+        SELECT (SELECT count(*) FROM orders)    AS orders,
+               (SELECT count(*) FROM customers) AS customers
+    """)).mappings().one()
+    return voice_briefing.build_project_script(audit, rec, dict(summary))
+
+
+@router.get("/briefing")
+def briefing_script(db: Session = Depends(get_db)) -> dict[str, Any]:
+    """The spoken briefing as text, so it can be read as well as heard."""
+    return {
+        "script": _project_script(db),
+        "audio_available": voice_briefing.available(),
+    }
+
+
+@router.get("/briefing.mp3")
+async def briefing_audio(db: Session = Depends(get_db)):
+    """Synthesise the built-in analysis briefing.
+
+    As with the upload briefing, the text is composed server-side from the live
+    analysis — there is no endpoint that speaks caller-supplied text.
+    """
+    if not voice_briefing.available():
+        raise HTTPException(
+            status_code=503,
+            detail="Voice briefing is not configured (ELEVENLABS_API_KEY unset).",
+        )
+    script = _project_script(db)
+    try:
+        audio = await voice_briefing.synthesise(script, "project-analysis")
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Voice synthesis failed: {exc}") from exc
+
+    return Response(content=audio, media_type="audio/mpeg",
+                    headers={"Cache-Control": "private, max-age=3600"})
