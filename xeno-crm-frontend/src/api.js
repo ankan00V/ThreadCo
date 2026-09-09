@@ -96,3 +96,8 @@ export const getDashboardStats = async () => {
 };
 
 export default api;
+
+export const executeWorkbenchQuery = async (query) => {
+  const response = await api.post('/workbench/query', { query });
+  return response.data;
+};
