@@ -13,12 +13,13 @@ export default function Navbar() {
     { label: "Dashboard", path: "/dashboard" },
     { label: "Customers", path: "/customers" },
     { label: "Segments", path: "/segments" },
-    { label: "Marketing", path: "/campaigns", dropdown: true }
+    { label: "Marketing", path: "/campaigns", dropdown: true },
+    { label: "Workbench", path: "/workbench/summary" }
   ];
 
   return (
     <div className="product-navbar flex justify-center pt-4 sm:pt-6 px-3 sm:px-4 w-full relative z-50 font-['Inter']">
-      <div className="bg-[#fcfaf5] rounded-full shadow-sm border border-neutral-200 p-2 w-max sm:w-full sm:pl-2 sm:pr-2 sm:py-2 max-w-[760px] relative flex items-center mx-auto sm:mx-0">
+      <div className="bg-[#fcfaf5] rounded-full shadow-sm border border-neutral-200 p-2 w-max sm:w-full sm:pl-2 sm:pr-2 sm:py-2 max-w-[880px] relative flex items-center mx-auto sm:mx-0">
         
         {/* Logo */}
         <div className="shrink-0 cursor-pointer flex items-center gap-2 pr-2 sm:pr-0" onClick={() => navigate('/dashboard')}>
@@ -27,7 +28,7 @@ export default function Navbar() {
         </div>
 
         {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-6 ml-8">
+        <div className="hidden md:flex items-center gap-4 lg:gap-6 ml-4 lg:ml-8">
           {links.map((link) => (
             <div key={link.label} className="relative group">
               <button 

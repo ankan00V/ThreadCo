@@ -10,6 +10,7 @@ import NewCampaign from './pages/NewCampaign';
 import CampaignDetail from './pages/CampaignDetail';
 import Analytics from './pages/Analytics';
 
+import Workbench from './pages/Workbench';
 import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
         <Route path="/customers" element={<Layout title="Customers"><Customers /></Layout>} />
         <Route path="/segments" element={<Layout title="Audience Segments"><Segments /></Layout>} />
         <Route path="/campaigns" element={<Layout title="Campaigns"><Campaigns /></Layout>} />
+        <Route path="/workbench/summary" element={<Layout title="Workbench"><Workbench /></Layout>} />
         <Route path="/analytics" element={<Layout title="Analytics"><Analytics /></Layout>} />
         <Route path="/campaigns/new" element={<Layout title="Launch Campaign"><NewCampaign /></Layout>} />
         <Route path="/campaigns/:id" element={<Layout title="Campaign Details"><CampaignDetail /></Layout>} />

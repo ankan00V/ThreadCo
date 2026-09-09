@@ -85,6 +85,11 @@ export const deleteCampaign = async (id) => {
 };
 
 // Dashboard
+export const getWorkbenchSummary = async () => {
+  const response = await api.get('/workbench/summary');
+  return response.data;
+};
+
 export const getDashboardStats = async () => {
   const response = await api.get('/api/campaigns/dashboard/stats');
   return response.data;
