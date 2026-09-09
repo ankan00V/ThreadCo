@@ -52,6 +52,9 @@ export default function Navbar() {
                     <button onClick={() => navigate('/campaigns')} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-neutral-700 hover:text-[#ef4d23] hover:bg-neutral-50 transition-colors">
                       Campaigns
                     </button>
+                    <button onClick={() => navigate('/campaigns/new')} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-neutral-700 hover:text-[#ef4d23] hover:bg-neutral-50 transition-colors">
+                      New campaign
+                    </button>
                     <button onClick={() => navigate('/analytics')} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-neutral-700 hover:text-[#ef4d23] hover:bg-neutral-50 transition-colors">
                       Analytics Charts
                     </button>
@@ -65,7 +68,7 @@ export default function Navbar() {
         {/* Mobile Center Button (In flow for shrink-wrap) */}
         <div className="sm:hidden flex items-center mx-2">
           <button onClick={() => navigate('/campaigns/new')} className="flex bg-[#ef4d23] hover:bg-[#d9421b] transition-colors rounded-full items-center gap-1.5 pl-3 pr-1 py-1 text-white shadow-sm">
-            <span className="text-[12px] font-medium whitespace-nowrap">Early access</span>
+            <span className="text-[12px] font-medium whitespace-nowrap">New campaign</span>
             <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center shrink-0">
               <ChevronRight size={12} strokeWidth={3} />
             </div>
@@ -76,8 +79,8 @@ export default function Navbar() {
         <div className="sm:ml-auto flex items-center gap-2 sm:gap-4">
           
           <button onClick={() => navigate('/campaigns/new')} className="hidden sm:flex bg-[#ef4d23] hover:bg-[#d9421b] transition-colors rounded-full items-center gap-2 pl-4 pr-1.5 py-1.5 text-white">
-            <span className="text-[13px] font-medium hidden sm:inline">Get early access</span>
-            <span className="text-[13px] font-medium sm:hidden">Early access</span>
+            <span className="text-[13px] font-medium hidden sm:inline">Launch campaign</span>
+            <span className="text-[13px] font-medium sm:hidden">Campaign</span>
             <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
               <ChevronRight size={14} strokeWidth={3} />
             </div>
@@ -125,6 +128,9 @@ export default function Navbar() {
                     >
                       <button onClick={() => { setOpen(false); navigate('/campaigns'); }} className="text-left text-[14px] text-neutral-600 font-medium hover:text-[#ef4d23] transition-colors">
                         Campaigns
+                      </button>
+                      <button onClick={() => { setOpen(false); navigate('/campaigns/new'); }} className="text-left text-[14px] text-neutral-600 font-medium hover:text-[#ef4d23] transition-colors">
+                        New campaign
                       </button>
                       <button onClick={() => { setOpen(false); navigate('/analytics'); }} className="text-left text-[14px] text-neutral-600 font-medium hover:text-[#ef4d23] transition-colors">
                         Analytics Charts

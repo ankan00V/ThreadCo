@@ -36,7 +36,7 @@ _client = OpenAI(
     base_url=os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1"),
     api_key=os.getenv("NVIDIA_API_KEY", ""),
 )
-_model = os.getenv("NVIDIA_MODEL", "nvidia/llama-3.1-nemotron-ultra-253b-v1")
+_model = os.getenv("NVIDIA_MODEL", "nvidia/nemotron-3-super-120b-a12b")
 
 
 def _call_llm(system_prompt: str, user_message: str) -> str:
@@ -255,20 +255,71 @@ async def generate_segment(query: str, db: Session) -> dict:
 # 2. draft_message
 # ---------------------------------------------------------------------------
 
+# Per-channel constraints are injected as a single block rather than listed as
+# four alternatives. Giving the model all four sets of rules at once produced
+# email-shaped copy on every channel — long, with a formal sign-off and a P.S.
+# even when the target was a 160-character SMS.
+CHANNEL_RULES = {
+    "whatsapp": """CHANNEL: WhatsApp
+- HARD LIMIT: 1024 characters. Aim for under 400.
+- NO subject line. Set "subject" to null.
+- 2-3 short sentences. Conversational, like a message from a person.
+- At most 2 emoji, and only if they carry meaning.
+- Do NOT write a call-to-action line like "Shop now" — WhatsApp renders that as
+  a separate button, so putting it in the body duplicates it.
+- Casual sign-off ("Team ThreadCo") or none at all. NEVER "Warm regards".
+- NEVER include a P.S.""",
+
+    "sms": """CHANNEL: SMS
+- HARD LIMIT: 160 characters TOTAL, including the {{name}} placeholder. This is
+  the single most important constraint. Count before you answer.
+- NO subject line. Set "subject" to null.
+- NO emoji, ever. Emoji force UCS-2 encoding and cut the limit from 160 to 70.
+- NO greeting line and NO sign-off. There is no room for either.
+- NO "Warm regards", NO "Team ThreadCo", NO P.S. These will not fit.
+- Use [link] as the URL placeholder.
+- ALL CAPS is acceptable for one or two key words (SALE, LAST CHANCE).
+- Write it as one dense line. Urgency over warmth.""",
+
+    "email": """CHANNEL: Email
+- Subject line REQUIRED, 40-60 characters. Put it in "subject".
+- Greeting on its own line: "Hi {{name}},"
+- Body: 2-3 short paragraphs separated by blank lines.
+- Do NOT write the CTA as a sentence — the template renders a button, so end the
+  body before it.
+- Professional sign-off ("Warm regards, Team ThreadCo").
+- A P.S. line is allowed here, and only here.""",
+
+    "rcs": """CHANNEL: RCS
+- HARD LIMIT: 2000 characters. Aim for under 500.
+- NO subject line. Set "subject" to null.
+- The card renders an image above the text, so reference it naturally
+  ("Swipe to see the new drop") without describing it in detail.
+- Do NOT write CTA text — suggested-reply chips are rendered separately.
+- Premium, polished tone. Emoji sparingly.
+- Must still make sense as plain text, because handsets without RCS get the
+  SMS fallback.
+- NO formal sign-off, NO P.S.""",
+}
+
+
 MESSAGE_SYSTEM_PROMPT = """You are an expert marketing copywriter for a D2C CRM platform.
 
 USER INTENT: {user_prompt}
-SELECTED CHANNEL: {channel} (must be one of: whatsapp, sms, email, rcs)
 
-CRITICAL RULES:
-1. BRAND NAME: Analyze the USER INTENT carefully. If the user explicitly mentions a brand name (e.g., "My brand is X"), you MUST use that exact name. If NO brand name is explicitly mentioned in the intent, you MUST default to using "ThreadCo" as the brand name in the sign-off and message body. Do not invent a brand name.
-2. CHANNEL FORMAT STRICT RULES:
-   - WHATSAPP (Conversational, Emoji-Lite): No subject line. 2-3 short sentences max. 1-2 relevant emojis. First-name personalization. Single clear CTA (button or link). Sign-off is casual ("Team [Brand]" or just the brand name).
-   - EMAIL (Formal, Structured): Compelling subject line (40-50 chars, urgency or curiosity). Formal greeting ("Hi {{{{name}}}},"). Body: 2-3 paragraphs, scannable. Clear CTA button text. Professional sign-off with brand name. P.S. line for extra hook (optional).
-   - SMS (Punchy, Urgent, <160 chars): Hard limit: 160 characters (1 SMS segment). ALL CAPS for key words (SALE, LAST CHANCE, FREE). No formal greeting or sign-off. Short link placeholder [link]. Urgency-driven. NO EMOJIS (can break encoding or eat character budget).
-   - RCS (Rich, Interactive, Visual-Forward): Slightly longer than SMS (keep scannable). Conversational but polished. References images/carousels/suggested replies. Mentions interactive elements ("Tap to browse," "Swipe to see"). Brand voice is premium but accessible.
-3. PERSONALIZATION: Always use {{{{name}}}} for the recipient's first name.
-4. TONE: Match the user's campaign goal (re-engagement = warm, sale = urgent, announcement = excited).
+{channel_rules}
+
+The channel rules above are not suggestions. Copy written for the wrong channel
+gets truncated by the carrier, billed as multiple segments, or rejected outright.
+If the rules conflict with the user intent, follow the rules and compress the intent.
+
+OTHER RULES:
+1. BRAND NAME: If the USER INTENT names a brand, use that exact name. Otherwise use
+   "ThreadCo". Do not invent a brand name.
+2. PERSONALIZATION: Use {{{{name}}}} for the recipient's first name.
+3. TONE: Match the campaign goal (re-engagement = warm, sale = urgent).
+4. Before answering, count the characters in your body against the channel's hard
+   limit. If it is over, rewrite it shorter.
 
 Return ONLY valid JSON in this exact structure:
 {{
@@ -289,6 +340,58 @@ Return ONLY valid JSON in this exact structure:
 
 
 
+
+# Prompt rules alone are not enough — the model drifts back to email shape, which
+# is how a 160-character SMS ended up carrying "Warm regards, Team ThreadCo" and
+# a P.S. This trims the output deterministically so the channel contract holds
+# whatever the model returns.
+_EMAIL_ONLY_PATTERNS = [
+    r"\n?\s*P\.?S\.?[:.]?\s.*$",                       # trailing P.S. block
+    r"\n?\s*(warm regards|best regards|kind regards|sincerely|regards)\s*,?.*$",
+]
+
+_CHANNEL_BODY_LIMIT = {"sms": 160, "whatsapp": 1024, "rcs": 2000, "email": 5000}
+
+
+def _enforce_channel_shape(parsed: dict, channel: str) -> dict:
+    """Strip cross-channel artifacts and enforce the hard length budget."""
+    message = parsed.get("message") or {}
+    body = (message.get("body") or "").strip()
+
+    if channel != "email":
+        # No subject exists on these channels; carrying one confuses the UI.
+        message["subject"] = None
+        for pattern in _EMAIL_ONLY_PATTERNS:
+            body = re.sub(pattern, "", body, flags=re.IGNORECASE | re.DOTALL).strip()
+
+    if channel == "sms":
+        # The GSM-7 alphabet SMS uses has no rupee sign, no curly quotes and no
+        # emoji. Any one of them flips the whole message to UCS-2 and cuts the
+        # per-segment budget from 160 to 70 characters, doubling the send cost.
+        # Transliterate what has a sensible equivalent, drop the rest — dropping
+        # the currency symbol outright would leave "over 1,00,000" reading wrong.
+        for source, replacement in (
+            ("\u20b9", "Rs."), ("\u2019", "'"), ("\u2018", "'"),
+            ("\u201c", '"'), ("\u201d", '"'),
+            ("\u2014", "-"), ("\u2013", "-"), ("\u2026", "..."),
+        ):
+            body = body.replace(source, replacement)
+        body = body.encode("ascii", "ignore").decode("ascii")
+        body = re.sub(r"[ \t]+", " ", body.replace("\n", " ")).strip()
+
+    limit = _CHANNEL_BODY_LIMIT.get(channel, 1024)
+    if len(body) > limit:
+        # Cut on a sentence boundary where possible rather than mid-word.
+        truncated = body[:limit]
+        cut = max(truncated.rfind(". "), truncated.rfind("! "), truncated.rfind("? "))
+        body = (truncated[: cut + 1] if cut > limit * 0.6 else truncated.rstrip()).strip()
+        logger.warning("Trimmed %s body from over-limit output to %d chars", channel, len(body))
+
+    message["body"] = body
+    parsed["message"] = message
+    return parsed
+
+
 async def draft_message(
     segment_name: str,
     segment_description: str,
@@ -303,9 +406,10 @@ async def draft_message(
         for c in sample_customers[:3]
     )
 
+    channel_key = (channel or "whatsapp").lower()
     formatted_prompt = MESSAGE_SYSTEM_PROMPT.format(
         user_prompt=campaign_goal,
-        channel=channel
+        channel_rules=CHANNEL_RULES.get(channel_key, CHANNEL_RULES["whatsapp"]),
     )
 
     user_payload = (
@@ -317,13 +421,20 @@ async def draft_message(
     logger.info(f"AI message response: {raw[:300]}")
 
     try:
-        return _extract_json(raw)
+        parsed = _extract_json(raw)
+        return _enforce_channel_shape(parsed, channel_key)
     except (json.JSONDecodeError, ValueError):
         # Fallback if AI returns bad JSON
+        fallback_bodies = {
+            "sms": "Hi {{name}}, your ThreadCo reward is live. Shop now: [link]",
+            "email": "Hi {{name}},\n\nWe have something new for you at ThreadCo.\n\nWarm regards,\nTeam ThreadCo",
+            "rcs": "Hi {{name}}, the new ThreadCo drop just landed. Tap to browse.",
+            "whatsapp": "Hi {{name}}, we've got something new for you at ThreadCo \ud83d\uded2",
+        }
         return {
             "message": {
-                "subject": "Something special for you" if channel == "email" else None,
-                "body": f"Hey {{{{name}}}}, we've got something special for you at ThreadCo! Check it out 🛍️"
+                "subject": "Something new for you" if channel_key == "email" else None,
+                "body": fallback_bodies.get(channel_key, fallback_bodies["whatsapp"]),
             },
             "channel_recommendation": f"{channel} is a good fit for this audience",
         }

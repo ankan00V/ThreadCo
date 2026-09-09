@@ -3,6 +3,7 @@ import Loader from '../components/Loader';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { ArrowLeft, Send, Sparkles, Loader2, MessageSquare, Target, Smartphone } from 'lucide-react';
 import { getSegments, createCampaign, sendCampaign, generateMessage } from '../api';
+import ChannelPreview, { smsStats, CHANNEL_LIMITS } from '../components/ChannelPreview';
 
 const NewCampaign = () => {
   const navigate = useNavigate();
@@ -21,6 +22,10 @@ const NewCampaign = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  // The channel the current copy was generated for. Switching channels does not
+  // rewrite the copy, so this is what lets the UI say the draft is now stale
+  // instead of rendering email prose inside an SMS bubble.
+  const [copyWrittenFor, setCopyWrittenFor] = useState(null);
 
   const selectedSegmentObj = segments.find(s => s.id === segmentId);
 
@@ -55,6 +60,7 @@ const NewCampaign = () => {
         campaign_goal: campaignGoal
       });
       setMessageTemplate(data.message.body || data.message);
+      setCopyWrittenFor(channel);
       if (data.message.subject && channel === 'email') {
         setEmailSubject(data.message.subject);
       }
@@ -66,10 +72,34 @@ const NewCampaign = () => {
     }
   };
 
+  /** Channel rules that must hold before dispatch, not just be shown in the preview. */
+  const channelIssue = () => {
+    if (channel === 'email' && !emailSubject.trim()) {
+      return 'Email needs a subject line. Recipients see it before anything else, and most clients show the first line of the body if it is missing.';
+    }
+    if (channel === 'sms') {
+      const st = smsStats(messageTemplate);
+      if (st.segments > 3) {
+        return `This SMS is ${st.length} characters — ${st.segments} billed segments per recipient. Shorten it or send on a channel without a 160-character budget.`;
+      }
+    }
+    const limit = CHANNEL_LIMITS[channel].body;
+    if (messageTemplate.length > limit) {
+      return `${CHANNEL_LIMITS[channel].label} is capped at ${limit} characters; this copy is ${messageTemplate.length}.`;
+    }
+    return null;
+  };
+
   const handleLaunchInit = (draftOnly = false) => {
     if (!name || !segmentId || !messageTemplate) {
       setError("Please fill in all required fields (Name, Segment, Message).");
       return;
+    }
+
+    // Draft can hold anything; a live dispatch cannot.
+    if (!draftOnly) {
+      const issue = channelIssue();
+      if (issue) { setError(issue); return; }
     }
     
     if (draftOnly) {
@@ -90,7 +120,9 @@ const NewCampaign = () => {
         name,
         segment_id: segmentId,
         channel,
-        message_template: messageTemplate
+        message_template: channel === 'email' && emailSubject
+          ? `Subject: ${emailSubject}\n\n${messageTemplate}`
+          : messageTemplate
       });
     } catch (err) {
       setError(err.message || "Failed to create campaign.");
@@ -233,6 +265,36 @@ const NewCampaign = () => {
                 <p className="text-[11px] text-muted-foreground">AI will analyze your selected audience and automatically tailor the message voice.</p>
               </div>
 
+              {copyWrittenFor && copyWrittenFor !== channel && (
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-[11px] leading-relaxed flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 mt-1.5" />
+                  <span>
+                    This copy was written for <strong className="uppercase">{copyWrittenFor}</strong>, and{' '}
+                    <strong className="uppercase">{channel}</strong> has different length limits and formatting
+                    rules. Regenerate so the AI writes for the channel you are actually sending on.
+                  </span>
+                </div>
+              )}
+
+              {channel === 'email' && (
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1.5">
+                    Subject Line <span className="text-muted-foreground font-normal">— required for email</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Your 55% loyalty reward is waiting"
+                    className="w-full px-3.5 py-2.5 bg-white/70 border border-white/80 rounded-xl text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent shadow-inner"
+                    value={emailSubject}
+                    onChange={e => setEmailSubject(e.target.value)}
+                  />
+                  <p className={`text-[11px] mt-1.5 ${emailSubject.length > 60 ? 'text-amber-700' : 'text-muted-foreground'}`}>
+                    {emailSubject.length} characters
+                    {emailSubject.length > 60 && ' — most inbox clients truncate past ~60.'}
+                  </p>
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs font-medium text-foreground mb-1.5">Final Message Copy</label>
                 <textarea 
@@ -242,9 +304,30 @@ const NewCampaign = () => {
                   value={messageTemplate}
                   onChange={e => setMessageTemplate(e.target.value)}
                 />
-                <p className="text-[11px] text-muted-foreground mt-2 font-medium">
-                  Use <span className="font-mono bg-white/80 px-1.5 py-0.5 rounded text-accent border border-border/50">{"{{name}}"}</span> to inject the customer's first name dynamically.
-                </p>
+                <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-[11px] text-muted-foreground font-medium">
+                    Use <span className="font-mono bg-white/80 px-1.5 py-0.5 rounded text-accent border border-border/50">{"{{name}}"}</span> to inject the customer's first name.
+                  </p>
+                  {(() => {
+                    const limit = CHANNEL_LIMITS[channel].body;
+                    const len = messageTemplate.length;
+                    const over = len > limit;
+                    if (channel === 'sms') {
+                      const st = smsStats(messageTemplate);
+                      return (
+                        <span className={`text-[11px] font-mono ${st.segments > 1 ? 'text-amber-700' : 'text-muted-foreground'}`}>
+                          {st.length} chars · {st.segments || 0} segment{st.segments === 1 ? '' : 's'}
+                          {st.unicode && ' · UCS-2'}
+                        </span>
+                      );
+                    }
+                    return (
+                      <span className={`text-[11px] font-mono ${over ? 'text-rose-600' : 'text-muted-foreground'}`}>
+                        {len} / {limit}
+                      </span>
+                    );
+                  })()}
+                </div>
               </div>
             </div>
             
@@ -298,31 +381,14 @@ const NewCampaign = () => {
               </span>
             </div>
             
-            {/* Phone Screen Mockup */}
-            <div className="w-full max-w-[290px] bg-white/90 backdrop-blur rounded-2xl p-4 shadow-lg border border-border/60 relative overflow-hidden min-h-[380px] flex flex-col">
-              {/* Header */}
-              <div className="flex items-center gap-2.5 mb-4 pb-3 border-b border-border/40">
-                <div className="w-8 h-8 rounded-full bg-accent/15 text-accent font-bold flex items-center justify-center text-xs shadow-inner">
-                  T
-                </div>
-                <div>
-                  <div className="font-semibold text-foreground text-xs">ThreadCo</div>
-                  <div className="text-[9px] text-muted-foreground font-medium uppercase tracking-wider">Verified Business</div>
-                </div>
-              </div>
-              
-              {/* Message Bubble */}
-              {messageTemplate ? (
-                <div className="bg-secondary/60 text-foreground border border-border/60 p-3.5 rounded-2xl rounded-tl-sm text-xs leading-relaxed w-full font-medium">
-                  {messageTemplate.replace(/\{\{name\}\}/g, 'Alex')}
-                </div>
-              ) : (
-                <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground gap-2">
-                  <MessageSquare className="w-8 h-8 opacity-40" />
-                  <p className="text-[11px] text-center px-4">Your personalized message will render here in real time.</p>
-                </div>
-              )}
-            </div>
+            <ChannelPreview channel={channel} body={messageTemplate} subject={emailSubject} />
+
+            <p className="mt-4 text-[10px] leading-relaxed text-muted-foreground text-center max-w-[300px]">
+              {channel === 'sms' && 'Plain text only. No buttons, no formatting, no read receipts. Billed per 160-character segment.'}
+              {channel === 'whatsapp' && 'Business-initiated messages must match an approved template. Quick-reply buttons are rendered by WhatsApp, not by the message body.'}
+              {channel === 'email' && 'The only channel with a subject line, and the only one legally required to carry an unsubscribe link.'}
+              {channel === 'rcs' && 'Rich cards render only on RCS-capable handsets. Everyone else receives the SMS fallback, so the body must still read on its own.'}
+            </p>
           </div>
         </div>
       </div>
