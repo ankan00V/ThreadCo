@@ -22,7 +22,7 @@ from app import models  # noqa: F401
 # Import routers
 from app.routers import (
     analytics, customers, segments, campaigns, webhooks, channel_stub,
-    perf_lab, insights,
+    perf_lab, insights, datasets,
 )
 
 logger = logging.getLogger("uvicorn.error")
@@ -105,6 +105,7 @@ app.include_router(webhooks.router)
 app.include_router(channel_stub.router)
 app.include_router(perf_lab.router)
 app.include_router(insights.router)
+app.include_router(datasets.router)
 
 # ---------------------------------------------------------------------------
 # Health check

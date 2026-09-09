@@ -12,6 +12,7 @@ import Analytics from './pages/Analytics';
 
 import PerfLab from './pages/PerfLab';
 import Analysis from './pages/Analysis';
+import YourData from './pages/YourData';
 import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
         <Route path="/campaigns" element={<Layout title="Campaigns"><Campaigns /></Layout>} />
         <Route path="/workbench" element={<Layout title="Query Performance Lab"><PerfLab /></Layout>} />
         <Route path="/workbench/summary" element={<Layout title="Query Performance Lab"><PerfLab /></Layout>} />
+        <Route path="/your-data" element={<Layout title="Your Data"><YourData /></Layout>} />
         <Route path="/analysis" element={<Layout title="Analysis"><Analysis /></Layout>} />
         <Route path="/analytics" element={<Layout title="Analytics"><Analytics /></Layout>} />
         <Route path="/campaigns/new" element={<Layout title="Launch Campaign"><NewCampaign /></Layout>} />

@@ -177,3 +177,39 @@ export const attemptChallenge = async (challengeId, query) => {
   const response = await api.post(`/api/perf/challenges/${challengeId}/attempt`, { query });
   return response.data;
 };
+
+// ── Bring your own data ──────────────────────────────────────────────────
+export const previewDataset = async (file) => {
+  const form = new FormData();
+  form.append('file', file);
+  const response = await api.post('/api/datasets/preview', form);
+  return response.data;
+};
+
+export const createDataset = async (file, mapping) => {
+  const form = new FormData();
+  form.append('file', file);
+  form.append('customer_id', mapping.customer_id);
+  form.append('order_date', mapping.order_date);
+  form.append('amount', mapping.amount);
+  if (mapping.status) form.append('status', mapping.status);
+  const response = await api.post('/api/datasets', form);
+  return response.data;
+};
+
+export const getDatasetAnalysis = async (id) => {
+  const response = await api.get(`/api/datasets/${id}/analysis`);
+  return response.data;
+};
+
+export const getBriefing = async (id) => {
+  const response = await api.get(`/api/datasets/${id}/briefing`);
+  return response.data;
+};
+
+export const briefingAudioUrl = (id) => `${BASE}/api/datasets/${id}/briefing.mp3`;
+
+export const deleteDataset = async (id) => {
+  const response = await api.delete(`/api/datasets/${id}`);
+  return response.data;
+};
