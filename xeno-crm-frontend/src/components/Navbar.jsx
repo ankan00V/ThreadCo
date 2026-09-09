@@ -14,7 +14,8 @@ export default function Navbar() {
     { label: "Customers", path: "/customers" },
     { label: "Segments", path: "/segments" },
     { label: "Marketing", path: "/campaigns", dropdown: true },
-    { label: "Workbench", path: "/workbench/summary" }
+    { label: "Analysis", path: "/analysis" },
+    { label: "Perf Lab", path: "/workbench" }
   ];
 
   return (

@@ -12,6 +12,7 @@ from sqlalchemy import func, text
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.metrics import all_metrics
 from app.models import Campaign, Communication, Customer, Order
 
 router = APIRouter(prefix="/api/analytics", tags=["analytics"])
@@ -93,55 +94,47 @@ def analytics_overview(db: Session = Depends(get_db)):
     twelve_months_ago = now - timedelta(days=365)
     lapsed_cutoff = now - timedelta(days=45)
 
-    monthly_rows = (
-        db.query(
-            func.date_trunc("month", Order.created_at).label("month"),
-            func.sum(Order.amount).label("revenue"),
-            func.count(Order.id).label("orders"),
-            func.count(func.distinct(Order.customer_id)).label("buyers"),
-        )
-        .filter(Order.status == "completed", Order.created_at >= twelve_months_ago)
-        .group_by("month")
-        .order_by("month")
-        .all()
-    )
+    # Served from mv_revenue_monthly rather than aggregating orders per request.
+    # See the 'monthly-rollup' case study for the measured difference.
+    monthly_rows = db.execute(text("""
+        SELECT month, revenue, orders, buyers FROM mv_revenue_monthly
+        WHERE month >= :cutoff ORDER BY month
+    """), {"cutoff": twelve_months_ago}).mappings().all()
     revenue_by_month = [
         {
-            "month": row.month.strftime("%b %Y"),
-            "revenue": round(float(row.revenue or 0), 2),
-            "orders": int(row.orders or 0),
-            "buyers": int(row.buyers or 0),
+            "month": row["month"].strftime("%b %Y"),
+            "revenue": round(float(row["revenue"] or 0), 2),
+            "orders": int(row["orders"] or 0),
+            "buyers": int(row["buyers"] or 0),
         }
         for row in monthly_rows
     ]
 
-    city_rows = (
-        db.query(
-            Customer.city.label("city"),
-            func.count(Customer.id).label("customers"),
-            func.sum(Customer.total_spent).label("revenue"),
-        )
-        .filter(Customer.is_active == True)  # noqa: E712
-        .group_by(Customer.city)
-        .order_by(func.sum(Customer.total_spent).desc())
-        .all()
-    )
+    # Served from mv_city_revenue: live aggregation over the full orders table
+    # became a one-row-per-city read. Refreshed by scripts_refresh_rollups.py.
+    city_rows = db.execute(text("""
+        SELECT city, buyers AS customers, revenue
+        FROM mv_city_revenue ORDER BY revenue DESC
+    """)).mappings().all()
     city_performance = [
         {
-            "city": row.city or "Unknown",
-            "customers": int(row.customers or 0),
-            "revenue": round(float(row.revenue or 0), 2),
+            "city": row["city"] or "Unknown",
+            "customers": int(row["customers"] or 0),
+            "revenue": round(float(row["revenue"] or 0), 2),
         }
         for row in city_rows
     ]
 
-    tag_counts: dict[str, int] = {}
-    for (tags,) in db.query(Customer.tags).filter(Customer.is_active == True).all():  # noqa: E712
-        for tag in tags or []:
-            tag_counts[tag] = tag_counts.get(tag, 0) + 1
+    # Aggregated in SQL rather than by pulling every customer's tag array into
+    # Python. The old version shipped one row per active customer across the wire
+    # to produce four numbers. See the "app-side-aggregation" case study.
     lifecycle_distribution = [
-        {"segment": tag, "customers": count}
-        for tag, count in sorted(tag_counts.items(), key=lambda item: item[1], reverse=True)
+        {"segment": row.tag, "customers": int(row.customers)}
+        for row in db.execute(text("""
+            SELECT unnest(tags) AS tag, count(*) AS customers
+            FROM customers WHERE is_active = true
+            GROUP BY 1 ORDER BY customers DESC
+        """))
     ]
 
     total_customers = db.query(func.count(Customer.id)).scalar() or 0
@@ -155,34 +148,13 @@ def analytics_overview(db: Session = Depends(get_db)):
     )
     communications = db.query(func.count(Communication.id)).scalar() or 0
 
-    
-    # --- Marketing Metrics ---
-    campaign_stats = db.query(
-        func.sum(Campaign.total_sent).label('total_sent'),
-        func.sum(Campaign.total_opened).label('total_opened'),
-        func.sum(Campaign.total_clicked).label('total_clicked')
-    ).one()
-    
-    total_sent = campaign_stats.total_sent or 0
-    total_opened = campaign_stats.total_opened or 0
-    total_clicked = campaign_stats.total_clicked or 0
-    
-    avg_open_rate = (total_opened / total_sent * 100) if total_sent > 0 else 0
-    click_through = (total_clicked / total_opened * 100) if total_opened > 0 else 0
-    
-    total_revenue = db.query(func.sum(Order.amount)).filter(Order.status == "completed").scalar() or 0
-    revenue_per_msg = (total_revenue / total_sent) if total_sent > 0 else 0
 
-    channel_stats = db.query(
-        Campaign.channel,
-        func.sum(Campaign.total_sent).label('sent')
-    ).group_by(Campaign.channel).all()
-    
-    channel_counts = {row.channel: (row.sent or 0) for row in channel_stats}
-    channel_wa = (channel_counts.get('whatsapp', 0) / total_sent * 100) if total_sent > 0 else 0
-    channel_email = (channel_counts.get('email', 0) / total_sent * 100) if total_sent > 0 else 0
-    channel_sms = (channel_counts.get('sms', 0) / total_sent * 100) if total_sent > 0 else 0
-    # -------------------------
+    # Delivery and revenue figures come from app/metrics.py so that every screen
+    # in the product uses one definition per metric. These used to be computed
+    # inline here with a different definition from the dashboard's, which is how
+    # three different revenue numbers ended up on three different pages.
+    shared = all_metrics(db)
+    metric_values = {k: m["value"] for k, m in shared["metrics"].items()}
 
     lapsed_high_value = (
         db.query(
@@ -240,12 +212,13 @@ def analytics_overview(db: Session = Depends(get_db)):
         },
         "recommendations": recommendations,
         
-        "avg_open_rate": round(avg_open_rate, 1),
-        "click_through": round(click_through, 1),
-        "revenue_per_msg": round(revenue_per_msg, 2),
-        "channel_wa": round(channel_wa, 1),
-        "channel_email": round(channel_email, 1),
-        "channel_sms": round(channel_sms, 1),
+        # Metric definitions travel with the values so the UI can show a reader
+        # exactly what each number means.
+        "metrics": shared["metrics"],
+        "avg_open_rate": metric_values["open_rate"],
+        "click_through": metric_values["click_rate"],
+        "net_revenue": metric_values["net_revenue"],
+        "gross_revenue": metric_values["gross_revenue"],
         "query_health": _audience_query_health(db),
 
     }

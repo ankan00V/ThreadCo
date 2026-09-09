@@ -64,7 +64,11 @@ export default function Dashboard() {
         transition={{ duration: 0.5, ease: 'easeOut' }}
         className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-4 py-1.5 text-sm text-muted-foreground font-body mb-6 cursor-default hover:border-accent/40 transition-colors"
       >
-        <span>Now with GPT-5 support ✨</span>
+        <span>
+          {stats.total_customers
+            ? `${Number(stats.total_customers).toLocaleString()} customers · live Postgres`
+            : 'Live Postgres dataset'}
+        </span>
       </motion.div>
 
       {/* 2. Headline - Framer Motion: fade up from y:16, duration 0.6s, delay 0.1s */}
@@ -74,7 +78,7 @@ export default function Dashboard() {
         transition={{ duration: 0.6, delay: 0.1, ease: 'easeOut' }}
         className="text-center font-display text-5xl md:text-6xl lg:text-[5rem] leading-[0.95] tracking-tight text-foreground max-w-xl"
       >
-        The Future of <span className="font-display italic font-normal text-accent">Smarter</span> Automation
+        Customer questions, answered from <span className="font-display italic font-normal text-accent">real</span> data
       </motion.h1>
 
       {/* 3. Subheadline - Framer Motion: fade up from y:16, duration 0.6s, delay 0.2s */}
@@ -84,7 +88,7 @@ export default function Dashboard() {
         transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
         className="mt-4 text-center text-base md:text-lg text-muted-foreground max-w-[650px] leading-relaxed font-body"
       >
-        Automate your busywork with intelligent agents that learn, adapt, and execute—so your team can focus on what matters most.
+        A retail CRM built on a million-row Postgres dataset, with the query-performance work, metric definitions, and data-quality audit shown rather than hidden.
       </motion.p>
 
       {/* 4. CTA Buttons - Framer Motion: fade up from y:16, duration 0.6s, delay 0.3s */}

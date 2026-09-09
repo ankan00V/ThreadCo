@@ -1,0 +1,11 @@
+# Dependencies for app/ml_churn_prediction.py only.
+#
+# Deliberately NOT in requirements.txt: the FastAPI service never imports these,
+# and adding ~200MB of scientific Python to every deploy would slow the build and
+# cold starts for code that runs offline.
+#
+#   pip install -r requirements-ml.txt
+#   python -m app.ml_churn_prediction
+pandas==3.0.2
+scikit-learn==1.8.0
+numpy==2.4.4

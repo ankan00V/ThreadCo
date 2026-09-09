@@ -101,3 +101,40 @@ export const executeWorkbenchQuery = async (query) => {
   const response = await api.post('/workbench/query', { query });
   return response.data;
 };
+
+// ── Query Performance Lab ────────────────────────────────────────────────
+export const getPerfCases = async () => {
+  const response = await api.get('/api/perf/cases');
+  return response.data;
+};
+
+export const runPerfCase = async (caseId) => {
+  const response = await api.post(`/api/perf/cases/${caseId}/run`);
+  return response.data;
+};
+
+export const runSafeQuery = async (query) => {
+  const response = await api.post('/api/perf/query', { query });
+  return response.data;
+};
+
+// ── Analysis ─────────────────────────────────────────────────────────────
+export const getDataAudit = async () => {
+  const response = await api.get('/api/insights/audit');
+  return response.data;
+};
+
+export const getRetention = async () => {
+  const response = await api.get('/api/insights/retention');
+  return response.data;
+};
+
+export const getConcentration = async () => {
+  const response = await api.get('/api/insights/concentration');
+  return response.data;
+};
+
+export const getRecommendation = async () => {
+  const response = await api.get('/api/insights/recommendation');
+  return response.data;
+};

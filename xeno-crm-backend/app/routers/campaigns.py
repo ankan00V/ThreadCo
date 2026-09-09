@@ -149,28 +149,34 @@ def list_campaigns(db: Session = Depends(get_db)):
 
 @router.get("/dashboard/stats")
 def get_global_dashboard_stats(db: Session = Depends(get_db)):
-    """Returns global metrics for the entire CRM."""
-    from app.models import Order
+    """Global CRM metrics, read from the shared definitions in app/metrics.py.
 
-    total_customers = db.query(func.count(Customer.id)).scalar() or 0
+    This endpoint previously computed revenue as SUM(orders.amount) over every
+    order, including returned and cancelled ones, while the analytics page used
+    completed orders only. Both numbers were displayed at the same time, neither
+    said which question it answered, and they differed by ~28%.
+    """
+    from app.metrics import all_metrics
+
+    shared = all_metrics(db)
+    values = {k: m["value"] for k, m in shared["metrics"].items()}
+
     total_campaigns = db.query(func.count(Campaign.id)).scalar() or 0
-    
-    total_messages_sent = db.query(func.sum(Campaign.total_sent)).scalar() or 0
-    
     total_engagements = db.query(func.count(Communication.id)).filter(
         Communication.status.in_(["clicked", "converted"])
     ).scalar() or 0
-    
-    revenue_generated = db.query(func.sum(Order.amount)).scalar() or 0.0
-    avg_order_value = db.query(func.avg(Order.amount)).scalar() or 0.0
 
     return {
-        "total_customers": total_customers,
+        "total_customers": values["total_customers"],
         "total_campaigns": total_campaigns,
-        "total_messages_sent": int(total_messages_sent),
+        "total_messages_sent": values["messages_sent"],
         "total_engagements": total_engagements,
-        "revenue_generated": float(revenue_generated),
-        "avg_order_value": float(avg_order_value)
+        "revenue_generated": values["net_revenue"],
+        "avg_order_value": values["aov"],
+        "open_rate": values["open_rate"],
+        "click_rate": values["click_rate"],
+        # Definitions travel with the values so the UI can explain each number.
+        "metrics": shared["metrics"],
     }
 
 # ── Campaign completion ──────────────────────────────────────────────────

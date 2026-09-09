@@ -5,7 +5,7 @@ Customer routes — list, search, filter, and view customer data.
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import func, or_
+from sqlalchemy import func, or_, text
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -20,24 +20,30 @@ router = APIRouter(prefix="/api/customers", tags=["customers"])
 @router.get("/stats")
 def customer_stats(db: Session = Depends(get_db)):
     """Aggregate customer and revenue statistics."""
-    total_customers = db.query(Customer).count()
+    # Revenue and AOV come from the shared definitions rather than being
+    # recomputed here off customer aggregates, which gave a third figure again.
+    from app.metrics import all_metrics
+    shared = all_metrics(db)
+    values = {k: m["value"] for k, m in shared["metrics"].items()}
 
-    total_revenue = db.query(func.sum(Customer.total_spent)).scalar() or 0.0
-    total_orders = db.query(func.sum(Customer.total_orders)).scalar() or 0
-
-    avg_order_value = round(total_revenue / total_orders, 2) if total_orders else 0.0
+    total_customers = values["total_customers"]
+    total_revenue = values["net_revenue"]
+    avg_order_value = values["aov"]
 
     # City breakdown
     city_rows = db.query(Customer.city, func.count()).group_by(Customer.city).all()
     city_breakdown = {city: count for city, count in city_rows if city}
 
-    # Tag breakdown
-    tag_counts = {}
-    all_customers = db.query(Customer.tags).all()
-    for (tags,) in all_customers:
-        if tags:
-            for tag in tags:
-                tag_counts[tag] = tag_counts.get(tag, 0) + 1
+    # Tag breakdown, aggregated in SQL. The previous version pulled every
+    # customer's tag array into Python, which is one row over the wire per
+    # customer to produce four numbers.
+    tag_counts = {
+        row.tag: int(row.customers)
+        for row in db.execute(text("""
+            SELECT unnest(tags) AS tag, count(*) AS customers
+            FROM customers GROUP BY 1
+        """))
+    }
 
     # New this month (created_at within last 30 days)
     from datetime import datetime, timedelta, timezone
@@ -79,11 +85,11 @@ def _apply_customer_filters(
         query = query.filter(Customer.total_spent <= max_spent)
     if search:
         pattern = f"%{search.strip()}%"
+        # Matches ix_customers_search_trgm, a pg_trgm GIN index on
+        # (name || ' ' || email). Two separate ILIKE clauses OR'd together
+        # cannot use it and sequentially scan the whole table instead.
         query = query.filter(
-            or_(
-                Customer.name.ilike(pattern),
-                Customer.email.ilike(pattern),
-            )
+            func.concat(Customer.name, " ", Customer.email).ilike(pattern)
         )
     return query
 
