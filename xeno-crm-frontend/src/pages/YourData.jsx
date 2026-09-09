@@ -40,10 +40,17 @@ export default function YourData() {
   const onPick = async (picked) => {
     if (!picked) return;
     reset(); setFile(picked); setBusy('preview'); setError(null);
+
+    const looksTabular = /\.(csv|tsv|txt)$/i.test(picked.name);
     try {
+      if (!looksTabular) {
+        // Not a hard block: the server decides. This just sets expectations.
+        setError(`"${picked.name}" is not a .csv — trying to read it anyway. Export as CSV if this fails.`);
+      }
       const p = await previewDataset(picked);
       setPreview(p);
       setMapping({ ...p.detected });
+      setError(null);   // it parsed, so the extension warning no longer applies
     } catch (e) {
       setError(e.response?.data?.detail || e.message);
     } finally { setBusy(null); }
@@ -96,7 +103,7 @@ export default function YourData() {
         >
           <Upload className="mx-auto mb-3 text-neutral-400" size={28} />
           <p className="text-sm text-neutral-700 mb-4">Drop a CSV here, or choose a file.</p>
-          <input ref={inputRef} type="file" accept=".csv,text/csv" className="hidden"
+          <input ref={inputRef} type="file" className="hidden"
                  onChange={(e) => onPick(e.target.files?.[0])} />
           <button onClick={() => inputRef.current?.click()}
                   className="bg-[#ef4d23] hover:bg-[#d9421b] text-white px-5 py-2.5 rounded-xl text-sm font-medium">
