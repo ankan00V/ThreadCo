@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Loading from '../components/Loading';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { CheckCircle2, XCircle, FileText, Target } from 'lucide-react';
 import { getDataAudit, getRetention, getConcentration, getRecommendation } from '../api';
@@ -79,7 +80,7 @@ export default function Analysis() {
   }, []);
 
   if (error) return <div className="mx-auto mt-12 max-w-xl rounded-2xl border border-rose-200 bg-rose-50 p-6 text-sm text-rose-800">{error}</div>;
-  if (!audit) return <div className="flex min-h-[500px] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-b-2 border-[#ef4d23]" /></div>;
+  if (!audit) return <Loading label="Loading the analysis" />;
 
   const f = rec.finding;
 

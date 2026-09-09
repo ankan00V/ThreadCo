@@ -229,5 +229,23 @@ Delivery and engagement events are produced by the channel simulator. They are r
 transitions through the real webhook pipeline, but they are not real customer behaviour, and the app
 labels them as such rather than reporting them as campaign lift.
 
-Deployed on free tiers: the Render instance sleeps after inactivity, so the first request can take
-~30s to wake.
+### Keeping a free-tier backend awake
+
+Render's free tier sleeps after ~15 minutes idle and takes ~30-50s to wake. The obvious fix — a
+GitHub Actions `*/5 * * * *` cron — **does not work**, and the run history on this repo shows why:
+GitHub throttles scheduled workflows on a best-effort queue, and the 5-minute schedule actually
+fired every **121 to 277 minutes**. The service was asleep the large majority of the time.
+
+Two mitigations, because neither is sufficient alone:
+
+1. **The workflow holds the runner.** Instead of pinging once and exiting, each run pings every 5
+   minutes for up to 5 hours, which covers the largest observed gap between triggers. Actions
+   minutes are free on public repositories.
+2. **The frontend prewarms on load.** `warmBackend()` in `src/api.js` fires a `/healthz` request the
+   moment the bundle loads — before React renders — so the wake-up overlaps with the visitor reading
+   the landing page rather than with their first click. If a request is still slow, the loading state
+   says so explicitly instead of spinning silently.
+
+Honest limits: this is best-effort, not uptime. Render's free tier allows 750 instance-hours a month
+against a ~730-hour month, so keeping one service continuously awake consumes essentially the whole
+allowance and a second free service would exceed it. The $7/month instance is the real fix.

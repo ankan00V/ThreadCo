@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Loading from '../components/Loading';
 import { Database, Play, Zap, AlertTriangle, ShieldCheck, ChevronDown } from 'lucide-react';
 import { getPerfCases, runPerfCase, runSafeQuery } from '../api';
 
@@ -223,7 +224,7 @@ export default function PerfLab() {
   }, []);
 
   if (error) return <div className="mx-auto mt-12 max-w-xl rounded-2xl border border-rose-200 bg-rose-50 p-6 text-sm text-rose-800">{error}</div>;
-  if (!data) return <div className="flex min-h-[500px] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-b-2 border-[#ef4d23]" /></div>;
+  if (!data) return <Loading label="Loading the performance lab" />;
 
   return (
     <div className="w-full px-4 sm:px-6 md:px-12 max-w-[1200px] mx-auto pt-8 md:pt-12 pb-24 font-body">

@@ -6,6 +6,29 @@ const api = axios.create({
   baseURL: BASE,
 });
 
+// ── Cold-start prewarm ────────────────────────────────────────────────────
+// The API runs on Render's free tier, which sleeps after ~15 minutes idle and
+// then takes ~30-50s to wake. The keep-awake workflow covers most of that, but
+// GitHub throttles scheduled runs so there is always a window where the first
+// visitor pays the cold start.
+//
+// This fires the moment the bundle loads - before React renders, and while the
+// visitor is still reading the landing page - so the wake-up overlaps with
+// their reading rather than with their first click. It is deliberately
+// fire-and-forget: /healthz touches no database, and a failure here must never
+// affect the page.
+let warming = null;
+
+export const warmBackend = () => {
+  if (warming) return warming;
+  warming = fetch(`${BASE}/healthz`, { method: 'GET', mode: 'cors', cache: 'no-store' })
+    .then(() => true)
+    .catch(() => false);
+  return warming;
+};
+
+warmBackend();
+
 // Customers
 export const getCustomers = async (filters = {}) => {
   const response = await api.get('/api/customers', { params: filters });

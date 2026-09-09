@@ -1,19 +1,81 @@
 name: Keep Render backend awake
 
+# WHY THIS IS SHAPED LIKE A LOOP AND NOT A "*/5" CRON
+#
+# The obvious version of this file is `cron: "*/5 * * * *"` with a single curl.
+# It does not work. GitHub runs scheduled workflows on a best-effort queue and
+# heavily throttles short intervals; measured on this repository, a */5 schedule
+# actually fired every 121-277 minutes. Render's free tier sleeps after 15
+# minutes idle, so the service was asleep for the great majority of the time.
+#
+# So each run now HOLDS the runner and pings every 5 minutes for up to 5 hours.
+# One triggered run covers the largest observed gap between triggers. Actions
+# minutes are free on public repositories, so the only cost is Render instance
+# hours - see the note at the bottom of this file.
+
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    # Hourly. The interval barely matters given the throttling above; what
+    # matters is that *a* run starts before the previous one finishes.
+    - cron: "0 * * * *"
   workflow_dispatch:
 
 permissions: {}
 
+concurrency:
+  # A fresh run replaces the running one rather than stacking up beside it.
+  group: keep-render-awake
+  cancel-in-progress: true
+
 jobs:
   ping:
     runs-on: ubuntu-latest
-    timeout-minutes: 2
+    # GitHub caps a job at 6 hours; stay under it.
+    timeout-minutes: 330
+    env:
+      HEALTH_URL: https://threadco-api.onrender.com/healthz
+      DURATION_MINUTES: 300
+      INTERVAL_SECONDS: 300
     steps:
-      - name: Request the liveness endpoint
+      - name: Keep the service warm
         run: |
-          curl --fail --silent --show-error --location \
-            --connect-timeout 15 --max-time 90 --retry 2 --retry-all-errors \
-            "https://threadco-api.onrender.com/healthz"
+          set -uo pipefail
+          deadline=$(( SECONDS + DURATION_MINUTES * 60 ))
+          attempts=0
+          failures=0
+
+          while [ "$SECONDS" -lt "$deadline" ]; do
+            attempts=$(( attempts + 1 ))
+
+            # A cold start can take ~50s, so allow generously and retry. A single
+            # failed ping is not interesting; only a total blackout is.
+            if curl --fail --silent --show-error --location \
+                 --connect-timeout 20 --max-time 120 \
+                 --retry 3 --retry-delay 10 --retry-all-errors \
+                 "$HEALTH_URL" > /dev/null; then
+              echo "$(date -u +%H:%M:%S) ping $attempts ok"
+            else
+              failures=$(( failures + 1 ))
+              echo "$(date -u +%H:%M:%S) ping $attempts FAILED (${failures}/${attempts})"
+            fi
+
+            [ "$SECONDS" -ge "$deadline" ] && break
+            sleep "$INTERVAL_SECONDS"
+          done
+
+          echo "---"
+          echo "attempts=$attempts failures=$failures"
+
+          # Fail the run only if every ping failed - that means the service is
+          # genuinely down, not merely slow to wake.
+          if [ "$attempts" -gt 0 ] && [ "$failures" -eq "$attempts" ]; then
+            echo "::error::Every ping failed; the backend appears to be down."
+            exit 1
+          fi
+
+# COST NOTE
+# Render's free tier allows 750 instance-hours per month and a month is ~730
+# hours, so keeping ONE service continuously awake consumes essentially the
+# whole allowance. A second free service on the same account would exceed it and
+# get suspended. If this needs to be genuinely reliable rather than
+# best-effort, the $7/month Render instance removes the problem outright.
