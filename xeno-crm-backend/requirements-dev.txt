@@ -1,0 +1,5 @@
+# Test and check dependencies. Kept out of requirements.txt so the Render build
+# stays lean — the API never imports pytest.
+#
+#   pip install -r requirements-dev.txt && python -m pytest tests/ -q
+pytest==8.4.1

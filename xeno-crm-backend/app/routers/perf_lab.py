@@ -191,6 +191,33 @@ ORDER BY customers DESC""",
         naive_label="Ship every matching row to the app",
         optimized_label="GROUP BY in SQL",
     ),
+    CaseStudy(
+        id="partition-pruning",
+        title="One month out of two years",
+        question="Total completed revenue for a single month — the shape behind every "
+                 "month-on-month report.",
+        diagnosis="On a plain table the planner reads an index over the whole two-year range "
+                  "and filters. It is not slow, but every month-scoped query still consults one "
+                  "structure covering every month that exists.",
+        fix="RANGE partition by month on created_at. The planner discards the partitions that "
+            "cannot contain matching rows before execution starts, so a one-month query opens "
+            "one partition instead of the whole table.",
+        caveat="The time saved here is modest — the control table is indexed, so it was never "
+               "in trouble. Pruning earns its keep elsewhere: retention becomes DROP TABLE "
+               "orders_p_2024_09 instead of a DELETE that leaves dead tuples to vacuum, each "
+               "partition's index stays small enough to cache, and maintenance runs per month "
+               "rather than over everything. The costs are real too — every unique constraint "
+               "must include the partition key, and a query WITHOUT a created_at predicate now "
+               "touches all 26 partitions instead of one table.",
+        naive_sql="""SELECT count(*) AS orders, sum(amount) AS revenue
+FROM orders_flat
+WHERE created_at >= '2025-10-01' AND created_at < '2025-11-01'""",
+        optimized_sql="""SELECT count(*) AS orders, sum(amount) AS revenue
+FROM orders_partitioned
+WHERE created_at >= '2025-10-01' AND created_at < '2025-11-01'""",
+        naive_label="Plain table, indexed",
+        optimized_label="Monthly RANGE partitions",
+    ),
 ]
 
 _BY_ID = {c.id: c for c in CASES}

@@ -56,41 +56,45 @@ slower-to-update index. For a search box over a mostly-static customer table, th
 
 ## 3. Partitioning
 
-**Not deployed. Analysed, and the reason it wasn't deployed is the storage budget, stated plainly
-rather than dressed up as a design preference.**
-
-`orders` is the partitioning candidate: it is the largest table, it is almost always queried with a
-date predicate, and it has a natural retention story. The design would be monthly `RANGE` partitions
-on `created_at`:
+**Deployed and measured.** `orders_partitioned` holds the same 538,026 rows as a plain control
+table, `orders_flat`, in 25 monthly `RANGE` partitions plus a default. Identical columns, identical
+rows — the only variable is the partitioning, so the comparison means something.
 
 ```sql
-CREATE TABLE orders (...) PARTITION BY RANGE (created_at);
-CREATE TABLE orders_2026_09 PARTITION OF orders
-  FOR VALUES FROM ('2026-09-01') TO ('2026-10-01');
+CREATE TABLE orders_partitioned (...) PARTITION BY RANGE (created_at);
+CREATE TABLE orders_p_2025_10 PARTITION OF orders_partitioned
+  FOR VALUES FROM ('2025-10-01') TO ('2025-11-01');
 ```
 
-What that buys:
+A one-month aggregate:
 
-- **Partition pruning.** A query for one month touches one partition; the planner discards the rest
-  before execution. The monthly rollup currently scans 18,053 blocks to answer a 12-month question.
-- **Cheap retention.** `DROP TABLE orders_2024_09` instead of a `DELETE` that leaves dead tuples and
-  demands a vacuum.
-- **Smaller indexes per partition**, so each fits in cache more comfortably.
+| | Relations scanned | Execution |
+|---|---|---|
+| `orders_flat` (indexed) | 1 table covering 2 years | 15.2 ms |
+| `orders_partitioned` | 1 partition — **25 of 26 pruned** | 7.6 ms |
 
-What it costs, and why it is not automatically correct:
+**The time saved is the least interesting part.** The control is indexed, so it was never in
+trouble; 2× is a modest win. Pruning earns its keep elsewhere:
 
-- Every unique constraint must include the partition key. `order_number` is currently globally
-  unique; under partitioning it would have to become unique per-partition, or move to a separate
-  lookup table. That is a real schema concession.
-- Queries **without** a `created_at` predicate get slower, not faster — they now scan every
-  partition. `SELECT … WHERE order_number = ?` is exactly that query.
-- Partition maintenance becomes an operational job that can fail at midnight.
+- **Retention becomes `DROP TABLE orders_p_2024_09`** instead of a `DELETE` that leaves dead tuples
+  for vacuum to reclaim — which, on this free-tier branch, is the difference between reclaiming
+  space instantly and running out of it.
+- **Each partition's index stays small** enough to stay cached.
+- **Maintenance runs per month** rather than over the whole table.
 
-**Why it isn't running here:** a partitioned copy of `orders` needs the heap again before the
-original can be dropped — roughly 130 MB plus indexes, against ~30 MB of headroom on a 0.5 GB Neon
-branch. Building it on a truncated subset would demonstrate pruning but produce timings not
-comparable to the 1M-row table, which would be worse than not showing it. The honest position is
-that the analysis is sound and the demonstration is unfunded.
+The costs are just as real, and they are why this is a decision rather than a default:
+
+- Every unique constraint must include the partition key. `order_number` is globally unique on the
+  real `orders` table; under partitioning it would have to become unique per-partition or move to a
+  lookup table.
+- A query **without** a `created_at` predicate now touches all 26 partitions instead of one table.
+  `WHERE order_number = ?` is exactly that query.
+- Partition creation becomes an operational job that can fail at midnight.
+
+The narrow column set (`id, customer_id, amount, status, created_at`) is deliberate: a second copy
+of the full table would not fit the 512 MB branch, and the omitted columns play no part in a
+date-range scan. Built by `scripts_build_partitions.py`; the comparison runs live as the
+"partition-pruning" case study in the Performance Lab.
 
 ---
 

@@ -42,6 +42,7 @@ mostly measures the network round trip.
 | Customer text search (`ILIKE '%…%'`) | 51 ms | 4 ms | ~13× |
 | Revenue by city (unnecessary join) | 361 ms | 184 ms | ~2× |
 | Lifecycle tags (aggregate in app) | 25 ms | 82 ms | **slower** — but 79k rows → 4 |
+| One month of revenue (partitioning) | 15 ms | 7.6 ms | 2× — but **25 of 26 partitions pruned** |
 
 Run them yourself at [/workbench](https://thread-co-beige.vercel.app/workbench). Numbers vary a
 little per run; the page shows whatever it just measured.
@@ -289,7 +290,40 @@ pip install -r requirements-ml.txt && python -m app.ml_churn_prediction
 
 ---
 
-## 8. Scope
+## 8. Tests and CI
+
+```bash
+cd xeno-crm-backend
+pip install -r requirements-dev.txt
+python -m pytest tests/ -q          # 65 tests
+./check_python311.sh                # compiles every module on a real 3.11
+```
+
+CI runs on every push: the 3.11 compile, an import of the app, the test suite, a frontend build,
+and a scan for credential patterns.
+
+The suite covers the parts where being wrong is quiet rather than loud — CSV column detection and
+type coercion, the rows the parser refuses and how it reports them, every refusal the SQL guard
+makes, the plan-diagnosis rules, and the spoken-number formatting in the briefings.
+
+Two of the tests exist because the bug shipped first:
+
+- `test_handles_float_row_counts_from_postgres_16_plus` — PG16+ reports `Actual Rows` as a float,
+  which rendered "OFFSET discarded 400,000.0 rows". The first version of this test asserted
+  `"400,000" in title`, which **passes with the bug present** because it is a substring of
+  "400,000.0". It now asserts the exact rendering and the absence of the float tail, and was
+  verified by reintroducing the bug and watching it fail.
+- `test_cte_delete_passes_text_checks_and_relies_on_the_role` — documents that
+  `WITH x AS (DELETE ...)` gets past the string checks, so the read-only Postgres role is the
+  control that actually matters.
+
+`check_python311.sh` exists because `ast.parse(source, feature_version=(3, 11))` does **not** catch
+f-string syntax that requires 3.12 — it gates some grammar but not the f-string tokenizer. That gave
+false confidence twice, and both times the deploy failed at import on Render.
+
+---
+
+## 9. Scope
 
 Built: the analytics and query-performance layer, AI segment compilation, and the two-service
 delivery callback loop. **Not** built: authentication, billing, multi-tenant RBAC. Those are table
