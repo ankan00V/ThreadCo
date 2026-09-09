@@ -32,16 +32,45 @@ logger = logging.getLogger("xeno-crm.ai")
 # NVIDIA NIM client (OpenAI-compatible)
 # ---------------------------------------------------------------------------
 
-_client = OpenAI(
-    base_url=os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1"),
-    api_key=os.getenv("NVIDIA_API_KEY", ""),
-)
 _model = os.getenv("NVIDIA_MODEL", "nvidia/nemotron-3-super-120b-a12b")
+
+# Built on first use, not at import.
+#
+# The OpenAI constructor raises when it has no key, so building it at module
+# level meant a missing or blank NVIDIA_API_KEY took the whole service down at
+# startup — every endpoint, including the ones that never touch the LLM. CI
+# caught exactly that on a runner with no key set. Deferring it means an
+# unconfigured key costs you the AI features and nothing else.
+_client: OpenAI | None = None
+
+
+class AIUnavailable(RuntimeError):
+    """Raised when the LLM is not configured, so callers can degrade rather than 500."""
+
+
+def ai_available() -> bool:
+    return bool(os.getenv("NVIDIA_API_KEY"))
+
+
+def _get_client() -> OpenAI:
+    global _client
+    if _client is None:
+        api_key = os.getenv("NVIDIA_API_KEY")
+        if not api_key:
+            raise AIUnavailable(
+                "NVIDIA_API_KEY is not configured, so AI drafting is unavailable. "
+                "Everything else in the service works without it."
+            )
+        _client = OpenAI(
+            base_url=os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1"),
+            api_key=api_key,
+        )
+    return _client
 
 
 def _call_llm(system_prompt: str, user_message: str) -> str:
     """Synchronous LLM call — run via asyncio.to_thread from async context."""
-    response = _client.chat.completions.create(
+    response = _get_client().chat.completions.create(
         model=_model,
         messages=[
             {"role": "system", "content": system_prompt},

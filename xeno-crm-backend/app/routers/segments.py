@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Segment
 from app.schemas import NLSegmentRequest, SegmentResponse
-from app.ai import generate_segment, draft_message, recommend_channel, apply_segment_filters
+from app.ai import AIUnavailable, generate_segment, draft_message, recommend_channel, apply_segment_filters
 
 logger = logging.getLogger("xeno-crm.segments")
 router = APIRouter(prefix="/api/segments", tags=["segments"])

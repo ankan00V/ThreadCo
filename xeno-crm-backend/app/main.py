@@ -20,6 +20,9 @@ from app.database import engine, Base, ensure_performance_indexes, get_db
 from app import models  # noqa: F401
 
 # Import routers
+from fastapi.responses import JSONResponse
+
+from app.ai import AIUnavailable
 from app.routers import (
     analytics, customers, segments, campaigns, webhooks, channel_stub,
     perf_lab, insights, datasets,
@@ -106,6 +109,16 @@ app.include_router(channel_stub.router)
 app.include_router(perf_lab.router)
 app.include_router(insights.router)
 app.include_router(datasets.router)
+
+
+@app.exception_handler(AIUnavailable)
+async def ai_unavailable_handler(request, exc):
+    """The LLM being unconfigured is a 503, not a crash.
+
+    Registered centrally so every AI-backed endpoint degrades the same way
+    instead of each one needing its own try/except.
+    """
+    return JSONResponse(status_code=503, content={"detail": str(exc)})
 
 # ---------------------------------------------------------------------------
 # Health check

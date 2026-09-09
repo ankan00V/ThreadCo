@@ -13,7 +13,7 @@ from sqlalchemy import func
 from app.database import get_db
 from app.models import Campaign, Communication, Customer, Segment
 from app.schemas import CampaignResponse, CreateCampaignRequest, GenerateMessageRequest
-from app.ai import apply_segment_filters, draft_message
+from app.ai import AIUnavailable, apply_segment_filters, draft_message
 import httpx
 
 logger = logging.getLogger("xeno-crm.campaigns")

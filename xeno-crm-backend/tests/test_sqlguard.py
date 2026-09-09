@@ -74,3 +74,14 @@ def test_cte_delete_passes_text_checks_and_relies_on_the_role():
 def test_strip_sql_comments_removes_both_forms():
     assert "secret" not in strip_sql_comments("SELECT 1 -- secret")
     assert "secret" not in strip_sql_comments("SELECT /* secret */ 1")
+
+
+def test_ai_client_is_not_built_at_import():
+    """A missing LLM key must cost the AI features, not the whole service.
+
+    The OpenAI constructor raises without a key. Building it at module level
+    meant an unset NVIDIA_API_KEY took every endpoint down at startup, including
+    the ones that never touch the LLM. CI caught this on a runner with no key.
+    """
+    import app.ai as ai
+    assert ai._client is None or ai.ai_available()
