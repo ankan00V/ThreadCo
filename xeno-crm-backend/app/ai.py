@@ -80,12 +80,18 @@ def _extract_json(text: str) -> dict:
 # Shared: apply segment filters to Customer table
 # ---------------------------------------------------------------------------
 
-def apply_segment_filters(filters: Dict[str, Any], db: Session) -> List[Customer]:
+def apply_segment_filters(
+    filters: Dict[str, Any], db: Session, as_query: bool = False
+):
     """
     Apply structured filter rules to the Customer table.
 
     Accepts both AI-generated filter format and simpler pre-built formats.
-    Returns list of matching Customer objects.
+
+    Returns a list of Customer objects by default. Pass ``as_query=True`` to get
+    the unexecuted Query back instead, so the caller can select just the columns
+    it needs or apply its own limit — dispatch does this, because hydrating full
+    ORM objects for every recipient is the dominant cost on a large segment.
     """
     query = db.query(Customer).filter(Customer.is_active == True)  # noqa: E712
     now = datetime.now(timezone.utc)
@@ -152,7 +158,7 @@ def apply_segment_filters(filters: Dict[str, Any], db: Session) -> List[Customer
     if tags and isinstance(tags, list) and len(tags) > 0:
         query = query.filter(Customer.tags.overlap(tags))
 
-    return query.all()
+    return query if as_query else query.all()
 
 
 def _customer_to_dict(c: Customer) -> dict:

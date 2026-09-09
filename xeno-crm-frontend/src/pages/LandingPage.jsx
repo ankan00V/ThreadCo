@@ -218,7 +218,7 @@ const LandingPage = () => {
             }}
           >
             <span style={{ width: 6, height: 6, borderRadius: 999, backgroundColor: '#ef4d23' }} />
-            Retail CRM · live Postgres
+            Customer engagement at retail scale
           </motion.div>
 
           <motion.h1
@@ -235,9 +235,9 @@ const LandingPage = () => {
               color: 'white'
             }}
           >
-            <span className="block">Dashboards are easy.</span>
+            <span className="block">Reach every customer.</span>
             <span className="block">
-              <span style={{ color: '#ef4d23' }}>Trust</span> is the hard part.
+              <span style={{ color: '#ef4d23' }}>Trust</span> every number.
             </span>
           </motion.h1>
 
@@ -255,8 +255,8 @@ const LandingPage = () => {
               lineHeight: 1.65
             }}
           >
-            Every metric shows its definition. Every slow query shows its plan.
-            On {dataset ? fmt(dataset.orders) : 'a million'} real orders.
+            AI-composed campaigns dispatched in the background, every delivery tracked per message,
+            and every metric carrying its own definition. On {dataset ? fmt(dataset.orders) : 'half a million'} real orders.
           </motion.p>
 
           {/* One next action. The dashboard is the entry point; the Performance Lab

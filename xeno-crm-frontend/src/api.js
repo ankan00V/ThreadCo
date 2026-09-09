@@ -161,3 +161,19 @@ export const getRecommendation = async () => {
   const response = await api.get('/api/insights/recommendation');
   return response.data;
 };
+
+// ── Performance sandbox ──────────────────────────────────────────────────
+export const getPerfSchema = async () => {
+  const response = await api.get('/api/perf/schema');
+  return response.data;
+};
+
+export const getChallenges = async () => {
+  const response = await api.get('/api/perf/challenges');
+  return response.data;
+};
+
+export const attemptChallenge = async (challengeId, query) => {
+  const response = await api.post(`/api/perf/challenges/${challengeId}/attempt`, { query });
+  return response.data;
+};

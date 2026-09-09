@@ -3,6 +3,8 @@ import Loader from '../components/Loader';
 import Loading from '../components/Loading';
 import { Database, Play, Zap, AlertTriangle, ShieldCheck, ChevronDown } from 'lucide-react';
 import { getPerfCases, runPerfCase, runSafeQuery } from '../api';
+import SchemaBrowser from '../components/SchemaBrowser';
+import Challenges from '../components/Challenges';
 
 const fmtMs = (ms) =>
   ms == null ? '—' : ms < 1 ? `${ms.toFixed(2)} ms` : ms < 1000 ? `${ms.toFixed(1)} ms` : `${(ms / 1000).toFixed(2)} s`;
@@ -12,6 +14,31 @@ function Sql({ children }) {
     <pre className="bg-[#0d1117] text-[#c9d1d9] rounded-xl p-4 text-[12px] leading-relaxed font-mono overflow-x-auto whitespace-pre">
       {children}
     </pre>
+  );
+}
+
+function Diagnosis({ diagnosis }) {
+  if (!diagnosis) return null;
+  const tone = { high: 'border-rose-200 bg-rose-50 text-rose-900',
+                 medium: 'border-amber-200 bg-amber-50 text-amber-900',
+                 low: 'border-neutral-200 bg-neutral-50 text-neutral-800' };
+  return (
+    <div className="mt-4">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-neutral-500 mb-2">
+        <span className="font-semibold uppercase tracking-wider">{diagnosis.verdict}</span>
+        {diagnosis.indexes_used?.length > 0 && (
+          <span>indexes: <span className="font-mono text-neutral-700">{diagnosis.indexes_used.join(', ')}</span></span>
+        )}
+      </div>
+      <div className="space-y-2">
+        {diagnosis.findings.map((f, i) => (
+          <div key={i} className={`rounded-xl border px-3.5 py-2.5 ${tone[f.severity] || tone.low}`}>
+            <p className="text-[12.5px] font-semibold">{f.title}</p>
+            <p className="mt-1 text-[12px] leading-relaxed opacity-90">{f.detail}</p>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -163,12 +190,18 @@ function Console() {
         </button>
       </div>
 
-      <textarea
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        spellCheck={false}
-        className="w-full h-40 p-4 rounded-xl font-mono text-[13px] bg-[#0d1117] text-[#c9d1d9] focus:outline-none focus:ring-2 focus:ring-[#ef4d23]/40 resize-y"
-      />
+      <div className="grid gap-4 lg:grid-cols-[1fr_280px]">
+        <textarea
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          spellCheck={false}
+          className="w-full h-64 p-4 rounded-xl font-mono text-[13px] bg-[#0d1117] text-[#c9d1d9] focus:outline-none focus:ring-2 focus:ring-[#ef4d23]/40 resize-y"
+        />
+        <div className="lg:max-h-64 lg:overflow-y-auto">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1.5">Schema</p>
+          <SchemaBrowser onInsert={(col) => setQ((prev) => prev + col)} />
+        </div>
+      </div>
 
       <div className="mt-3 flex items-start gap-2 text-[12px] text-neutral-500">
         <ShieldCheck size={14} className="shrink-0 mt-0.5 text-emerald-600" />
@@ -209,6 +242,7 @@ function Console() {
               </tbody>
             </table>
           </div>
+          <Diagnosis diagnosis={res.diagnosis} />
           <Plan lines={res.plan} />
         </div>
       )}
@@ -261,6 +295,17 @@ export default function PerfLab() {
 
       <div className="flex flex-col gap-6">
         {data.cases.map((c) => <Case key={c.id} study={c} dataset={data.dataset} />)}
+
+        <section className="rounded-3xl border border-neutral-200 bg-white/70 backdrop-blur-md p-6 md:p-8 shadow-sm">
+          <h3 className="font-display text-2xl text-neutral-900">Your turn</h3>
+          <p className="mt-2 mb-5 text-sm text-neutral-600 max-w-2xl leading-relaxed">
+            Same dataset, same measurement. Write a faster query than the reference and it is
+            timed against it — but it only counts if it returns the same rows, so a query that
+            is fast because it answers something easier does not score.
+          </p>
+          <Challenges />
+        </section>
+
         <Console />
       </div>
     </div>

@@ -3,6 +3,7 @@ import logging
 import os
 import uuid
 from datetime import datetime, timezone
+from time import perf_counter
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
@@ -31,6 +32,13 @@ def _get_recipient(customer: Customer, channel: str) -> str:
     if channel == "email":
         return customer.email
     return customer.phone or customer.email
+
+
+def _get_recipient_from_row(row: dict, channel: str) -> str:
+    """Same rule as _get_recipient, for the lightweight dicts dispatch uses."""
+    if channel == "email":
+        return row["email"]
+    return row["phone"] or row["email"]
 
 
 async def _send_to_channel(client: httpx.AsyncClient, payload: dict) -> dict:
@@ -252,90 +260,180 @@ def get_campaign(campaign_id: str, db: Session = Depends(get_db)):
 
 # ── Send campaign ────────────────────────────────────────────────────────
 
-@router.post("/{campaign_id}/dispatch")
-async def dispatch_campaign(campaign_id: str, db: Session = Depends(get_db)):
-    """
-    Dispatch a campaign to all matching customers.
+# Recipients handled per chunk. Chosen so one chunk is a single bulk INSERT and
+# a bounded burst of outbound requests, rather than one statement and one
+# coroutine per recipient.
+DISPATCH_CHUNK = 2_000
 
-    1. Resolve segment filters → matching customers
-    2. Create Communication records per customer
-    3. POST each to the channel stub in parallel
-    4. Return dispatch summary
+# Concurrent in-flight requests to the channel provider. Real providers rate-limit;
+# unbounded fan-out is how you get throttled or blocked rather than fast.
+DISPATCH_CONCURRENCY = 40
+
+# Hard ceiling on a single dispatch. Each communication row costs roughly 1 KB
+# with its event history, so an unbounded send against the largest segment would
+# exhaust the free-tier database mid-campaign and leave it read-only. A real
+# deployment raises or removes this; it is a resource guard, not a design limit.
+MAX_RECIPIENTS_PER_DISPATCH = 5_000
+
+
+def _resolve_recipient_rows(segment_filters: dict, db: Session, limit: int) -> list[dict]:
+    """Resolve a segment to the columns dispatch actually needs.
+
+    The previous version called apply_segment_filters(), which hydrates every
+    matching row into a full ORM Customer object. At a few thousand customers
+    that is invisible; against a large segment it is the single biggest cost in
+    the request — most of it spent building objects to read three fields from.
+    """
+    query = apply_segment_filters(segment_filters or {}, db, as_query=True)
+    rows = (
+        query.with_entities(Customer.id, Customer.name, Customer.email, Customer.phone)
+        .limit(limit)
+        .all()
+    )
+    return [{"id": r[0], "name": r[1], "email": r[2], "phone": r[3]} for r in rows]
+
+
+async def _deliver_chunk(client: httpx.AsyncClient, payloads: list[dict]) -> int:
+    """Send one chunk with bounded concurrency; return the number accepted."""
+    sem = asyncio.Semaphore(DISPATCH_CONCURRENCY)
+
+    async def _send(payload):
+        async with sem:
+            return await _send_to_channel(client, payload)
+
+    results = await asyncio.gather(*(_send(p) for p in payloads), return_exceptions=True)
+    return sum(1 for r in results if isinstance(r, dict) and r.get("success"))
+
+
+async def _run_dispatch(campaign_id: str, message_template: str, channel: str,
+                        recipients: list[dict]) -> None:
+    """Background worker: insert in bulk, deliver in chunks, update counters once.
+
+    Runs outside the request so the HTTP call returns immediately. A campaign to
+    a large segment takes longer than any sensible request timeout, and holding
+    the connection open for it is what made the old endpoint fail at scale rather
+    than merely be slow.
+    """
+    from app.database import SessionLocal
+
+    delivered = 0
+    db = SessionLocal()
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            for offset in range(0, len(recipients), DISPATCH_CHUNK):
+                chunk = recipients[offset:offset + DISPATCH_CHUNK]
+
+                rows, payloads = [], []
+                for customer in chunk:
+                    comm_id = uuid.uuid4()
+                    recipient = _get_recipient_from_row(customer, channel)
+                    rows.append({
+                        "id": comm_id,
+                        "campaign_id": uuid.UUID(campaign_id),
+                        "customer_id": customer["id"],
+                        "recipient": recipient,
+                        "channel": channel,
+                        "status": "queued",
+                        "events_json": [],
+                    })
+                    payloads.append({
+                        "external_id": str(comm_id),
+                        "recipient": recipient,
+                        "channel": channel,
+                        "message": message_template.replace("{{name}}", customer["name"] or "there"),
+                        "campaign_id": campaign_id,
+                        "customer_id": str(customer["id"]),
+                    })
+
+                # One INSERT per chunk instead of one ORM add() per recipient.
+                db.bulk_insert_mappings(Communication, rows)
+                db.commit()
+
+                delivered += await _deliver_chunk(client, payloads)
+                logger.info("Campaign %s: %d/%d dispatched", campaign_id,
+                            delivered, len(recipients))
+
+        campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
+        if campaign:
+            campaign.status = "completed" if delivered else "failed"
+            campaign.total_sent = delivered
+            campaign.completed_at = datetime.now(timezone.utc)
+            db.commit()
+    except Exception:
+        logger.exception("Campaign %s: dispatch failed", campaign_id)
+        db.rollback()
+        campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
+        if campaign:
+            campaign.status = "failed"
+            db.commit()
+    finally:
+        db.close()
+
+
+@router.post("/{campaign_id}/dispatch")
+async def dispatch_campaign(
+    campaign_id: str,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
+    """Queue a campaign for delivery and return immediately.
+
+    The response confirms acceptance, not completion. Delivery progress is read
+    from /api/campaigns/{id}/stats, which is computed from the communications
+    event table rather than from a counter this endpoint sets optimistically.
     """
     campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
     if not campaign:
         raise HTTPException(status_code=404, detail="Campaign not found")
     if campaign.status != "draft":
-        raise HTTPException(status_code=400, detail=f"Campaign is '{campaign.status}', must be 'draft' to send")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Campaign is '{campaign.status}', must be 'draft' to send",
+        )
 
-    # Load segment and resolve matching customers
     segment = db.query(Segment).filter(Segment.id == campaign.segment_id).first()
     if not segment:
         raise HTTPException(status_code=404, detail="Segment not found")
 
-    customers = apply_segment_filters(segment.filter_logic or {}, db)
-    if not customers:
-        raise HTTPException(status_code=400, detail="No customers match this segment's filters")
+    started = perf_counter()
+    recipients = _resolve_recipient_rows(
+        segment.filter_logic, db, MAX_RECIPIENTS_PER_DISPATCH
+    )
+    resolve_ms = round((perf_counter() - started) * 1000, 1)
 
-    now = datetime.now(timezone.utc)
-
-    # Create Communication records
-    communications = []
-    payloads = []
-
-    for customer in customers:
-        # Personalise message
-        message = campaign.message_template.replace("{{name}}", customer.name)
-        recipient = _get_recipient(customer, campaign.channel)
-
-        comm = Communication(
-            id=uuid.uuid4(),
-            campaign_id=campaign.id,
-            customer_id=customer.id,
-            recipient=recipient,
-            channel=campaign.channel,
-            status="queued",
-            events_json=[],
+    if not recipients:
+        raise HTTPException(
+            status_code=400, detail="No customers match this segment's filters"
         )
-        communications.append(comm)
-        db.add(comm)
 
-        payloads.append({
-            "external_id": str(comm.id),
-            "recipient": recipient,
-            "channel": campaign.channel,
-            "message": message,
-            "campaign_id": str(campaign.id),
-            "customer_id": str(customer.id),
-        })
+    capped = len(recipients) >= MAX_RECIPIENTS_PER_DISPATCH
 
-    # Update campaign status
     campaign.status = "sending"
-    campaign.sent_at = now
-    campaign.total_sent = len(communications)
-
+    campaign.sent_at = datetime.now(timezone.utc)
+    campaign.total_sent = 0
     db.commit()
 
-    logger.info(f"Campaign {campaign.id}: dispatching to {len(payloads)} recipients")
-
-    # Send all to channel stub in parallel but limit concurrency
-    sem = asyncio.Semaphore(20)
-    async def _sem_send(p):
-        async with sem:
-            return await _send_to_channel(client, p)
-
-    async with httpx.AsyncClient() as client:
-        tasks = [_sem_send(p) for p in payloads]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-
-    success_count = sum(1 for r in results if isinstance(r, dict) and r.get("success"))
-    logger.info(f"Campaign {campaign.id}: {success_count}/{len(payloads)} dispatched successfully")
+    background_tasks.add_task(
+        _run_dispatch,
+        str(campaign.id),
+        campaign.message_template,
+        campaign.channel,
+        recipients,
+    )
 
     return {
         "campaign_id": str(campaign.id),
-        "status": campaign.status,
-        "total_sent": success_count,
-        "message": f"Campaign dispatched to {success_count} recipients"
+        "status": "sending",
+        "queued_recipients": len(recipients),
+        "segment_resolved_ms": resolve_ms,
+        "capped": capped,
+        "cap": MAX_RECIPIENTS_PER_DISPATCH if capped else None,
+        "message": (
+            f"Queued {len(recipients):,} recipients. Delivery runs in the background; "
+            "poll /stats for progress."
+            + (f" Capped at {MAX_RECIPIENTS_PER_DISPATCH:,} to protect the free-tier "
+               "database — see MAX_RECIPIENTS_PER_DISPATCH." if capped else "")
+        ),
     }
 
 

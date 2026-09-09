@@ -179,6 +179,7 @@ def run_query(sql: str, want_plan: bool = True, trusted: bool = False) -> dict[s
         ]
 
         plan: list[str] = []
+        plan_json = None
         planning_ms = execution_ms = None
         if want_plan and not statement.lower().lstrip().startswith("explain"):
             try:
@@ -186,6 +187,10 @@ def run_query(sql: str, want_plan: bool = True, trusted: bool = False) -> dict[s
                 # was already validated and executed once under the same timeout.
                 pr = conn.execute(text(f"EXPLAIN (ANALYZE, BUFFERS) {statement}"))
                 plan = [r[0] for r in pr.fetchall()]
+                # JSON form too: the text plan is for reading, the structured one
+                # is what the diagnostics in app/plan_explain.py operate on.
+                jr = conn.execute(text(f"EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) {statement}"))
+                plan_json = jr.scalar_one()
                 for line in plan:
                     if line.startswith("Planning Time:"):
                         planning_ms = float(line.split(":")[1].strip().split(" ")[0])
@@ -205,6 +210,7 @@ def run_query(sql: str, want_plan: bool = True, trusted: bool = False) -> dict[s
         "planning_ms": planning_ms,
         "execution_ms": execution_ms,
         "plan": plan,
+        "plan_json": plan_json,
     }
 
 

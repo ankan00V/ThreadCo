@@ -13,6 +13,7 @@ pattern that was actually in this codebase before the dataset grew.
 
 from __future__ import annotations
 
+import logging
 import re
 from typing import Any
 
@@ -20,10 +21,12 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 
+from app.plan_explain import explain_plan
 from app.sqlguard import (
     SqlGuardError, get_trusted_engine, readonly_available, run_query,
 )
 
+logger = logging.getLogger("xeno-crm.perf")
 router = APIRouter(prefix="/api/perf", tags=["performance"])
 
 
@@ -301,6 +304,8 @@ def run_case(case_id: str) -> dict[str, Any]:
         if a and b:
             transfer_reduction = round(a / b, 1)
 
+    naive.pop("plan_json", None)
+    optimized.pop("plan_json", None)
     naive["sql_executed"] = naive_sql
     return {
         "case": resolved,
@@ -342,10 +347,222 @@ def free_query(request: QueryRequest) -> dict[str, Any]:
                    "configured. It will not fall back to a privileged role.",
         )
     try:
-        return run_query(request.query)
+        result = run_query(request.query)
+        # Raw EXPLAIN output says what happened; this says what is wrong with it.
+        if result.get("plan_json"):
+            try:
+                result["diagnosis"] = explain_plan(result["plan_json"])
+            except Exception:
+                logger.warning("Plan diagnosis failed", exc_info=True)
+        result.pop("plan_json", None)
+        return result
     except SqlGuardError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
         # Surface the database's own message (statement timeout, syntax error,
         # permission denied) — it is more useful to the reader than a generic 500.
         raise HTTPException(status_code=400, detail=str(exc).splitlines()[0][:300]) from exc
+
+
+# ---------------------------------------------------------------------------
+# Schema reference — you cannot write SQL against a database you cannot see
+# ---------------------------------------------------------------------------
+
+@router.get("/schema")
+def schema_reference() -> dict[str, Any]:
+    """Tables, columns, row counts and indexes, read live from the catalog.
+
+    The SQL console is unusable without this: a visitor has no way to know the
+    column names, and no way to reason about why their query did or did not use
+    an index.
+    """
+    engine = get_trusted_engine()
+    with engine.connect() as conn:
+        columns = conn.execute(text("""
+            SELECT table_name, column_name, data_type, is_nullable
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+              AND table_name IN ('customers','orders','campaigns','segments','communications')
+            ORDER BY table_name, ordinal_position
+        """)).mappings().all()
+
+        counts = conn.execute(text("""
+            SELECT relname AS table_name, n_live_tup AS rows,
+                   pg_size_pretty(pg_total_relation_size(relid)) AS size
+            FROM pg_stat_user_tables
+            WHERE relname IN ('customers','orders','campaigns','segments','communications')
+        """)).mappings().all()
+
+        indexes = conn.execute(text("""
+            SELECT tablename AS table_name, indexname, indexdef,
+                   pg_size_pretty(pg_relation_size(indexname::regclass)) AS size
+            FROM pg_indexes
+            WHERE schemaname = 'public'
+              AND tablename IN ('customers','orders','campaigns','segments','communications')
+            ORDER BY tablename, indexname
+        """)).mappings().all()
+
+    by_table: dict[str, dict[str, Any]] = {}
+    stats = {c["table_name"]: c for c in counts}
+
+    for col in columns:
+        t = col["table_name"]
+        entry = by_table.setdefault(t, {
+            "table": t,
+            "rows": int(stats.get(t, {}).get("rows") or 0),
+            "size": stats.get(t, {}).get("size") or "—",
+            "columns": [],
+            "indexes": [],
+        })
+        entry["columns"].append({
+            "name": col["column_name"],
+            "type": col["data_type"],
+            "nullable": col["is_nullable"] == "YES",
+        })
+
+    for idx in indexes:
+        t = idx["table_name"]
+        if t in by_table:
+            definition = idx["indexdef"]
+            by_table[t]["indexes"].append({
+                "name": idx["indexname"],
+                "size": idx["size"],
+                # Just the indexed expression, not the whole CREATE statement.
+                "on": definition[definition.index("(") :] if "(" in definition else definition,
+                "unique": definition.strip().upper().startswith("CREATE UNIQUE"),
+            })
+
+    return {"tables": [by_table[t] for t in sorted(by_table)]}
+
+
+# ---------------------------------------------------------------------------
+# Challenges — write a faster query, get scored against the slow one
+# ---------------------------------------------------------------------------
+
+class Challenge(BaseModel):
+    id: str
+    title: str
+    task: str
+    hint: str
+    slow_sql: str
+    # Rows the submission must return for the answer to count as correct.
+    check_sql: str
+    # Values the solver legitimately has but cannot cheaply derive inside the
+    # query. Keyset pagination is the case that matters: a real client already
+    # holds the previous page's sort key, so requiring the solver to compute it
+    # with the OFFSET they are trying to avoid would make the task unsolvable.
+    context_sql: str | None = None
+    context_label: str | None = None
+    # Pass bar, per challenge. A flat threshold is wrong: removing an
+    # unnecessary join caps out near 2x, while switching OFFSET for a keyset
+    # seek is four orders of magnitude. Holding both to the same bar would make
+    # the correct answer to one of them unwinnable.
+    pass_speedup: float = 2.0
+
+
+CHALLENGES: list[Challenge] = [
+    Challenge(
+        id="recent-orders-page",
+        title="Jump to a late page of the order log",
+        task="Return the 20 orders immediately after the cursor below, newest first. "
+             "Beat the OFFSET version.",
+        hint="OFFSET still walks every row it skips. Compare the (created_at, id) tuple against "
+             "the cursor instead — Postgres supports row-value comparison directly.",
+        context_label="Cursor from the previous page (a real client already has this)",
+        context_sql="SELECT created_at, id FROM orders "
+                    "ORDER BY created_at DESC, id DESC LIMIT 1 OFFSET 400000",
+        pass_speedup=10.0,
+        slow_sql="SELECT id, amount, created_at FROM orders ORDER BY created_at DESC, id DESC "
+                 "LIMIT 20 OFFSET 400000",
+        check_sql="SELECT count(*) FROM ({sql}) q",
+    ),
+    Challenge(
+        id="city-revenue",
+        title="Completed revenue by city",
+        task="Total completed-order revenue per city. Beat the version that joins to customers.",
+        hint="Check the schema — does orders already carry the column you are joining for?",
+        pass_speedup=1.5,
+        slow_sql="SELECT c.city, sum(o.amount) AS revenue FROM orders o "
+                 "JOIN customers c ON c.id = o.customer_id WHERE o.status = 'completed' "
+                 "GROUP BY c.city ORDER BY revenue DESC",
+        check_sql="SELECT count(*) FROM ({sql}) q",
+    ),
+    Challenge(
+        id="customer-search",
+        title="Find customers by a fragment of name or email",
+        task="Count customers whose name or email contains 'sharm'. Beat the two-ILIKE version.",
+        hint="A leading wildcard cannot use a B-tree. Look at the indexes on customers.",
+        pass_speedup=3.0,
+        slow_sql="SELECT count(*) FROM customers WHERE name ILIKE '%sharm%' OR email ILIKE '%sharm%'",
+        check_sql="SELECT count(*) FROM ({sql}) q",
+    ),
+]
+
+_CHALLENGE_BY_ID = {c.id: c for c in CHALLENGES}
+
+
+@router.get("/challenges")
+def list_challenges() -> dict[str, Any]:
+    """Challenges, with any context values resolved live from the database."""
+    engine = get_trusted_engine()
+    out = []
+    for challenge in CHALLENGES:
+        data = challenge.model_dump(exclude={"check_sql", "context_sql"})
+        if challenge.context_sql:
+            with engine.connect() as conn:
+                row = conn.execute(text(challenge.context_sql)).mappings().one()
+            data["context"] = {k: str(v) for k, v in row.items()}
+        out.append(data)
+    return {"challenges": out}
+
+
+class AttemptRequest(BaseModel):
+    query: str = Field(..., max_length=5000)
+
+
+@router.post("/challenges/{challenge_id}/attempt")
+def attempt_challenge(challenge_id: str, request: AttemptRequest) -> dict[str, Any]:
+    """Run the submission and the slow reference, and compare honestly.
+
+    Both are timed the same way — PostgreSQL's own Execution Time — and the
+    submission has to return the same number of rows, so a 'fast' query that
+    answers a different question does not score.
+    """
+    challenge = _CHALLENGE_BY_ID.get(challenge_id)
+    if challenge is None:
+        raise HTTPException(status_code=404, detail=f"Unknown challenge '{challenge_id}'.")
+
+    if not readonly_available():
+        raise HTTPException(status_code=503, detail="Challenges need DATABASE_URL_READONLY.")
+
+    try:
+        submitted = run_query(request.query)
+    except SqlGuardError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc).splitlines()[0][:300]) from exc
+
+    reference = run_query(challenge.slow_sql, trusted=True)
+
+    mine = submitted.get("execution_ms")
+    theirs = reference.get("execution_ms")
+    speedup = round(theirs / mine, 1) if mine and theirs and mine > 0 else None
+
+    same_shape = submitted["row_count"] == reference["row_count"]
+
+    return {
+        "challenge_id": challenge_id,
+        "your_ms": mine,
+        "reference_ms": theirs,
+        "speedup": speedup,
+        "returns_same_row_count": same_shape,
+        "passed": bool(same_shape and speedup and speedup >= challenge.pass_speedup),
+        "pass_speedup": challenge.pass_speedup,
+        "your_result": submitted,
+        "verdict": (
+            "Different number of rows than the reference — this answers a different question."
+            if not same_shape else
+            f"{speedup}x faster than the reference." if speedup and speedup >= challenge.pass_speedup else
+            f"Correct, but {speedup}x is short of the {challenge.pass_speedup}x bar for this one."
+        ),
+    }

@@ -1,19 +1,29 @@
-# ThreadCo — customer analytics on a million-row Postgres dataset
+# ThreadCo — customer engagement at retail scale
 
 **Live:** https://thread-co-beige.vercel.app · **API:** https://threadco-api.onrender.com/health
 
-A retail CRM whose interesting part is underneath the UI: **1,010,928 orders and 145,000 customers
-in Neon Postgres**, the query-performance work needed to keep it responsive at that size, one
-definition per metric, and a data-quality audit that tells you which questions this dataset cannot
-answer.
+## Why this exists
 
-Three pages are worth your time:
+A retailer with tens of thousands of customers wants to run a campaign. The hard part is not the
+send button — it is that at that size, everything around the send button stops working:
+
+- Resolving "high-value customers who haven't ordered in 45 days" scans the customer table.
+- Creating one delivery record per recipient, one row at a time, takes longer than any request timeout.
+- Tracking what happened to each message means aggregating hundreds of thousands of events on every
+  dashboard load.
+- And the marketer still has to trust the open rate they are shown.
+
+None of that is visible at 1,500 customers. All of it bites at 80,000. **This project is about the
+part that bites** — the query performance, the dispatch throughput, and the metric definitions that
+decide whether anyone can act on the result.
 
 | Page | What it shows |
 |------|---------------|
-| **[/workbench](https://thread-co-beige.vercel.app/workbench)** — Query Performance Lab | Six queries run live, both the slow way and the fast way, reporting PostgreSQL's own execution time. Plus a SQL console you can type into. |
-| **[/analysis](https://thread-co-beige.vercel.app/analysis)** — Written analysis | A cohort retention audit that concludes the dataset **cannot** support retention conclusions, and explains how that was detected. |
+| **[/workbench](https://thread-co-beige.vercel.app/workbench)** — Query Performance Lab | Six queries run live, the slow way and the fast way, reporting PostgreSQL's own execution time. Plus a SQL console you can type into. |
+| **[/analysis](https://thread-co-beige.vercel.app/analysis)** — Written analysis | A data-quality audit that once failed, why it failed, and what changed. |
 | **[/analytics](https://thread-co-beige.vercel.app/analytics)** | Business metrics, each carrying its own definition. |
+
+**Working set:** 537,965 orders · 80,000 customers · Neon Postgres, 408 MB of a 512 MB free branch.
 
 ---
 
@@ -26,12 +36,12 @@ mostly measures the network round trip.
 
 | Case | Before | After | Change |
 |------|-------:|------:|--------|
-| Deep pagination (`OFFSET` ~910k) | 1,039 ms | 0.09 ms | **~12,000×** |
-| Monthly revenue rollup | 318 ms | 0.04 ms | ~7,000× |
-| Pagination total (`COUNT(*)`) | 22 ms | 0.04 ms | ~500× |
-| Customer text search (`ILIKE '%…%'`) | 107 ms | 7 ms | ~15× |
-| Revenue by city (unnecessary join) | 774 ms | 303 ms | ~2.5× |
-| Lifecycle tags (aggregate in app) | 35 ms | 146 ms | **slower** — but 143,096 rows → 4 |
+| Deep pagination (`OFFSET` ~484k) | 514 ms | 0.10 ms | **~5,200×** |
+| Monthly revenue rollup | 295 ms | 0.04 ms | ~6,700× |
+| Pagination total (`COUNT(*)`) | 13 ms | 0.04 ms | ~320× |
+| Customer text search (`ILIKE '%…%'`) | 51 ms | 4 ms | ~13× |
+| Revenue by city (unnecessary join) | 361 ms | 184 ms | ~2× |
+| Lifecycle tags (aggregate in app) | 25 ms | 82 ms | **slower** — but 79k rows → 4 |
 
 Run them yourself at [/workbench](https://thread-co-beige.vercel.app/workbench). Numbers vary a
 little per run; the page shows whatever it just measured.
@@ -62,6 +72,31 @@ early rather than pushing a free-tier Neon branch into a read-only state. The da
 sits at 480 MB against a 0.5 GB limit, which is why `orders.items` is null for bulk rows and why the
 partitioning work below is described rather than deployed.
 
+### Dispatching to a large segment
+
+The original dispatch endpoint resolved the segment into full ORM objects, called `db.add()` once
+per recipient, then held the HTTP connection open until every message had been sent. Against a few
+hundred recipients that is fine. Against a large segment it does not get slow — it fails, because no
+request survives long enough to finish.
+
+The rewrite:
+
+- **Resolves only the columns dispatch needs** (`id`, `name`, `email`, `phone`) instead of hydrating
+  a Customer object per recipient.
+- **Bulk-inserts communications per 2,000-recipient chunk** rather than one ORM `add()` per row.
+- **Bounds outbound concurrency at 40.** Real providers rate-limit; unbounded fan-out gets you
+  throttled, not fast.
+- **Returns immediately and delivers in the background.** The response confirms acceptance, not
+  completion — progress is read from the communications event table.
+
+Measured: 5,000 recipients queued and the request returned in **2.4s**, with segment resolution
+taking 502 ms of that. All 5,000 delivered.
+
+`MAX_RECIPIENTS_PER_DISPATCH` caps a single send at 5,000. Each communication row costs roughly 1 KB
+with its event history, so an uncapped send would exhaust the free-tier database mid-campaign and
+leave it read-only. It is a resource guard, not a design limit.
+
+
 ---
 
 ## 2. One definition per metric
@@ -88,41 +123,76 @@ delivered and opened. The real open rate is 69.2%.
 
 ---
 
-## 3. The analysis: knowing when to say no
+## 3. The analysis: a check that actually failed
 
-[/analysis](https://thread-co-beige.vercel.app/analysis) answers "how is our retention trending?"
+[/analysis](https://thread-co-beige.vercel.app/analysis) runs three data-quality checks live, each
+with a stated threshold. All three pass now. **Two of them failed on the first version of the
+dataset, and that is why they exist.**
 
-The cohort query is correct and the matrix renders cleanly. It shows retention between **21.1% and
-25.6% across 66 cohort-months, standard deviation 0.86 points, with no decay from month 1 to month
-6.** Flat retention is not a behaviour that occurs in retail. It is the signature of a generator
-assigning order dates uniformly at random.
+The cohort query came back showing retention between 21% and 26% in every cohort-month, with a
+standard deviation of **0.86 points** and no decay from month 1 to month 6. Flat retention is not a
+behaviour that occurs in retail — it is the signature of a generator assigning order dates uniformly
+at random, independent of the customer. Average order value was also identical across channels to
+within 0.27%, for the same reason.
 
-So the finding is: **this dataset cannot support retention, churn-timing or win-back-window
-conclusions.** Two of three data-quality checks fail; the failures are reported as failures.
+The diagnosis was confirmed independently: a churn model built on that data, with features computed
+strictly before the cutoff and the label strictly after, scored **ROC-AUC 0.502** — chance. Past
+purchasing carried no information about future purchasing, exactly as the retention curve implied.
 
-That conclusion was then tested a second way. `app/ml_churn_prediction.py` trains a random forest to
-predict whether a customer orders again in a 90-day window, with features computed strictly *before*
-the cutoff and the label strictly *after* it. It scores **ROC-AUC 0.502** — chance. Two independent
-methods, same answer.
+So the generator was rewritten to model behaviour rather than noise — per-customer purchase
+intensity, exponential inter-purchase intervals, exponential customer lifetimes so most customers
+lapse early, basket size conditioned on channel, and festive-season seasonality. After the rebuild:
 
-> An earlier version of that script defined churn as `recency_days > 90` and then fed
-> `recency_days` to the classifier. That scores near-perfect AUC and means nothing — it reads the
-> answer off the label's own definition. The rewrite guards against it explicitly, and the script
-> flags an implausibly high AUC as a leakage warning rather than a success.
+| | Before | After |
+|---|---|---|
+| Month-1 → month-6 retention | 23% → 23% (flat) | 47% → 18% (decays) |
+| AOV by channel | identical to 0.27% | in-store ₹4,596 vs online ₹2,900 |
+| Top decile share of revenue | 22.5% | 53.7% |
+| Churn model ROC-AUC | **0.502** (chance) | **0.944** |
+| Dominant churn feature | none | `recency_days` (0.744) |
 
-What the data *can* support is segment value: revenue concentration passed the audit (top decile =
-22.5% of revenue), because it emerges from the basket-size distribution rather than being imposed.
-So the one recommendation the app makes is a high-value win-back segment — with an explicit note that
-the 45-day threshold is a business convention, not a finding, and that on production data you would
-derive it from the observed survival curve.
+Recency dominating is the result RFM theory predicts, which is the point: the model is not just
+scoring higher, it is scoring higher *for the right reason*.
+
+> **The honest caveat, which the app also states:** 0.944 is higher than a real retail churn model
+> would score. The generator's churn process is cleaner than reality, where lapsing is noisier and
+> partly unobservable. It is evidence the pipeline is sound, not a production accuracy claim.
+
+> An earlier version of that script defined churn as `recency_days > 90` and then fed `recency_days`
+> to the classifier. That scores near-perfect AUC and means nothing — it reads the answer off the
+> label's own definition. The rewrite guards against it explicitly, and flags an implausibly high
+> AUC as a leakage warning rather than a success.
 
 ---
 
-## 4. The SQL console
+## 4. The sandbox — the part with actual users
 
-[/workbench](https://thread-co-beige.vercel.app/workbench) lets you type your own SQL against the
-live dataset. That is the most dangerous thing you can put on a public URL, so it is layered — each
-layer assuming the ones above it have been bypassed:
+[/workbench](https://thread-co-beige.vercel.app/workbench) is not a screenshot. It is a working
+Postgres performance sandbox on a realistic retail schema, which is the thing most SQL tutorials
+cannot offer: they teach indexing on hundred-row toy tables, where every plan is a sequential scan
+and every query is instant.
+
+- **Six case studies** run live, the slow way and the fast way, reporting PostgreSQL's own
+  `Execution Time` rather than wall clock.
+- **Three challenges** where you write the faster query and it is scored against the reference.
+  Each has its own pass bar — removing an unnecessary join caps out near 1.5×, while swapping
+  `OFFSET` for a keyset seek is four orders of magnitude, and holding both to one threshold would
+  make the correct answer to one of them unwinnable. A submission only counts if it returns the
+  same number of rows, so a query that is fast because it answers something easier does not score.
+- **A schema browser** reading the live catalog: tables, row counts, column types, and every index
+  with its size and definition. You cannot reason about why a plan did or did not use an index
+  without it.
+- **Plan diagnostics in plain English** (`app/plan_explain.py`). `EXPLAIN` tells you what the
+  planner did; these rules tell you which part is the problem — sequential scans over large tables,
+  sorts spilling to disk, planner estimates off by 10× or more, nested loops running their inner
+  side thousands of times, `OFFSET` discarding rows it just produced. Deliberately rule-based
+  rather than an LLM: the diagnosis has to be reproducible, and every rule maps to a documented
+  Postgres behaviour.
+
+### Why the console is safe to leave open
+
+Letting strangers run SQL against a live database is the most dangerous thing on this site, so it
+is layered — each layer assuming the ones above it have been bypassed:
 
 1. **A Postgres role with `SELECT` and nothing else.** This is the layer that actually matters.
 2. **Session defaults set via `ALTER ROLE`** — `default_transaction_read_only`, a 4s
@@ -248,81 +318,3 @@ So the cold start is handled in the product rather than papered over:
   and says so plainly if it overruns instead of spinning silently.
 - **`.github/workflows/keep-render-awake.yml`** is manual-only. Trigger it from the Actions tab a few
   minutes before sharing the link and it pings for 30 minutes, so a scheduled demo lands warm.
-
----
-
-## 6. Stack
-
-| Layer | Technology |
-|-------|------------|
-| Frontend | React 19, Vite, TailwindCSS, Framer Motion, Recharts |
-| Backend | Python 3.11, FastAPI, SQLAlchemy 2.0, Pydantic |
-| Database | Neon Serverless Postgres 18 (`pg_trgm`, materialized views) |
-| ML | scikit-learn (random forest, offline — see `requirements-ml.txt`) |
-| LLM | NVIDIA NIM, `nvidia/llama-3.1-nemotron-ultra-253b-v1` |
-| Deployment | Render (API), Vercel (frontend) |
-
-`requirements-ml.txt` is deliberately separate: the API never imports pandas or scikit-learn, and
-adding ~200 MB of scientific Python to every deploy would slow builds and cold starts for code that
-runs offline.
-
----
-
-## 7. Running it locally
-
-```bash
-# Backend
-cd xeno-crm-backend
-python3 -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env        # fill in DATABASE_URL and DATABASE_URL_READONLY
-psql "$DATABASE_URL" -f SETUP_READONLY_ROLE.sql
-uvicorn app.main:app --reload
-
-# Frontend
-cd xeno-crm-frontend
-npm install
-echo "VITE_API_URL=http://localhost:8000" > .env
-npm run dev
-```
-
-Optional, against your own database:
-
-```bash
-python scripts_load_scale.py --orders 1000000 --customers 120000 --budget-mb 400
-python scripts_refresh_rollups.py
-pip install -r requirements-ml.txt && python -m app.ml_churn_prediction
-```
-
----
-
-## 8. Scope
-
-Built: the analytics and query-performance layer, AI segment compilation, and the two-service
-delivery callback loop. **Not** built: authentication, billing, multi-tenant RBAC. Those are table
-stakes for a production CRM and would not have shown anything this project is trying to show.
-
-Delivery and engagement events are produced by the channel simulator. They are real state
-transitions through the real webhook pipeline, but they are not real customer behaviour, and the app
-labels them as such rather than reporting them as campaign lift.
-
-### Keeping a free-tier backend awake
-
-Render's free tier sleeps after ~15 minutes idle and takes ~30-50s to wake. The obvious fix — a
-GitHub Actions `*/5 * * * *` cron — **does not work**, and the run history on this repo shows why:
-GitHub throttles scheduled workflows on a best-effort queue, and the 5-minute schedule actually
-fired every **121 to 277 minutes**. The service was asleep the large majority of the time.
-
-Two mitigations, because neither is sufficient alone:
-
-1. **The workflow holds the runner.** Instead of pinging once and exiting, each run pings every 5
-   minutes for up to 5 hours, which covers the largest observed gap between triggers. Actions
-   minutes are free on public repositories.
-2. **The frontend prewarms on load.** `warmBackend()` in `src/api.js` fires a `/healthz` request the
-   moment the bundle loads — before React renders — so the wake-up overlaps with the visitor reading
-   the landing page rather than with their first click. If a request is still slow, the loading state
-   says so explicitly instead of spinning silently.
-
-Honest limits: this is best-effort, not uptime. Render's free tier allows 750 instance-hours a month
-against a ~730-hour month, so keeping one service continuously awake consumes essentially the whole
-allowance and a second free service would exceed it. The $7/month instance is the real fix.
