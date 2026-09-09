@@ -94,8 +94,11 @@ const LandingPage = () => {
   // Headline numbers come from the database on load. Writing them into the copy
   // would mean the landing page quietly goes stale the moment the data changes.
   const [dataset, setDataset] = useState(null);
+  const [caseCount, setCaseCount] = useState(null);
   useEffect(() => {
-    getPerfCases().then(d => setDataset(d.dataset)).catch(() => {});
+    getPerfCases()
+      .then(d => { setDataset(d.dataset); setCaseCount(d.cases?.length ?? null); })
+      .catch(() => {});
   }, []);
   const fmt = (n) => Number(n).toLocaleString('en-IN');
 
@@ -199,8 +202,27 @@ const LandingPage = () => {
       <div className="relative z-10 max-w-[1280px] mx-auto" style={{ paddingTop: 'clamp(40px, 8vw, 72px)', paddingBottom: '48px' }}>
         <div className="max-w-[660px] mx-auto flex flex-col items-center text-center px-4">
           
-          <motion.h1
+          <motion.div
             custom={0}
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            className="mb-5 inline-flex items-center gap-2 rounded-full px-4 py-1.5"
+            style={{
+              border: '1px solid rgba(255,255,255,0.18)',
+              backgroundColor: 'rgba(255,255,255,0.06)',
+              fontSize: '0.7rem',
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: 'rgba(255,255,255,0.8)',
+            }}
+          >
+            <span style={{ width: 6, height: 6, borderRadius: 999, backgroundColor: '#ef4d23' }} />
+            Retail CRM · live Postgres
+          </motion.div>
+
+          <motion.h1
+            custom={1}
             initial="hidden"
             animate="visible"
             variants={fadeUp}
@@ -213,16 +235,14 @@ const LandingPage = () => {
               color: 'white'
             }}
           >
+            <span className="block">Anyone can build a dashboard.</span>
             <span className="block">
-              {dataset ? fmt(dataset.orders) : '1,010,928'} orders.
-            </span>
-            <span className="block">
-              Every number <span style={{ color: '#ef4d23' }}>defined</span>.
+              <span style={{ color: '#ef4d23' }}>Trusting it</span> is the hard part.
             </span>
           </motion.h1>
 
           <motion.p
-            custom={1}
+            custom={2}
             initial="hidden"
             animate="visible"
             variants={fadeUp}
@@ -235,15 +255,17 @@ const LandingPage = () => {
               lineHeight: 1.65
             }}
           >
-            A retail CRM running on live Postgres — with the query-performance work, the metric
-            definitions, and the data-quality checks that failed all left where you can read them.
+            So this one shows its working. Every metric carries its own definition, every slow
+            query shows its plan, and the data-quality checks that failed are still on the page
+            instead of quietly removed. Built on {dataset ? fmt(dataset.orders) : 'a million'} real
+            orders — large enough that the query plans actually diverge.
           </motion.p>
 
           {/* One next action. The dashboard is the entry point; the Performance Lab
               and the analysis are reached from there, so the landing page does not
               deep-link past them. */}
           <motion.button
-            custom={2}
+            custom={3}
             initial="hidden"
             animate="visible"
             variants={fadeUp}
@@ -269,7 +291,7 @@ const LandingPage = () => {
 
           {/* Live counts, so the scale above is evidence rather than a claim. */}
           <motion.div
-            custom={3}
+            custom={4}
             initial="hidden"
             animate="visible"
             variants={fadeUp}
@@ -283,9 +305,11 @@ const LandingPage = () => {
             }}
           >
             {[
-              { label: 'Orders', value: dataset && fmt(dataset.orders) },
+              // Each one backs a claim in the copy above rather than being a
+              // number for its own sake.
+              { label: 'Real orders', value: dataset && fmt(dataset.orders) },
               { label: 'Customers', value: dataset && fmt(dataset.customers) },
-              { label: 'Live Postgres', value: dataset && dataset.db_size },
+              { label: 'Query case studies', value: caseCount },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
                 <div
