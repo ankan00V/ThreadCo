@@ -1,7 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRightCircle, Zap, Users, Brain, Menu, X } from 'lucide-react';
+import { ArrowRightCircle, Menu, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { getPerfCases } from '../api';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
@@ -85,8 +86,18 @@ const LandingPage = () => {
     { label: "Dashboard", path: "/dashboard" },
     { label: "Customers", path: "/customers" },
     { label: "Segments", path: "/segments" },
-    { label: "Campaigns", path: "/campaigns" }
+    { label: "Campaigns", path: "/campaigns" },
+    { label: "Analysis", path: "/analysis" },
+    { label: "Perf Lab", path: "/workbench" }
   ];
+
+  // Headline numbers come from the database on load. Writing them into the copy
+  // would mean the landing page quietly goes stale the moment the data changes.
+  const [dataset, setDataset] = useState(null);
+  useEffect(() => {
+    getPerfCases().then(d => setDataset(d.dataset)).catch(() => {});
+  }, []);
+  const fmt = (n) => Number(n).toLocaleString('en-IN');
 
   return (
     <div className="relative w-full min-h-screen overflow-hidden" style={{ fontFamily: 'var(--font-body)', color: 'white', backgroundColor: '#000000', margin: 0, padding: 0 }}>
@@ -109,7 +120,7 @@ const LandingPage = () => {
         {/* Desktop CTA */}
         <div className="hidden md:flex gap-3">
           <button onClick={() => navigate('/dashboard')} className="text-sm font-semibold px-5 py-2.5 rounded-full hover:shadow-lg active:scale-95 transition-all" style={{ backgroundColor: 'white', color: 'black' }}>
-            Start For Free
+            Open the dashboard
           </button>
         </div>
 
@@ -176,7 +187,7 @@ const LandingPage = () => {
 
               <div className="px-6 mt-auto flex flex-col gap-3">
                 <button onClick={() => navigate('/dashboard')} className="w-full py-3.5 rounded-full font-semibold text-[0.95rem]" style={{ backgroundColor: '#0b0f1a', color: 'white' }}>
-                  Start For Free
+                  Open the dashboard
                 </button>
               </div>
             </motion.div>
@@ -202,14 +213,11 @@ const LandingPage = () => {
               color: 'white'
             }}
           >
-            <span className="block md:inline">
-              Drive <Zap size={24} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-2px', margin: '0 4px', color: 'white' }} />
+            <span className="block">
+              {dataset ? fmt(dataset.orders) : '1,010,928'} orders.
             </span>
-            <span className="block md:inline">
-              Hyper-Personalized <Users size={24} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-2px', margin: '0 4px', color: 'white' }} />
-            </span>
-            <span className="block md:inline">
-              Growth <br className="hidden md:block" /> with AI-Driven Segments <Brain size={24} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-2px', marginLeft: '6px', color: 'white' }} />
+            <span className="block">
+              Every number <span style={{ color: '#ef4d23' }}>defined</span>.
             </span>
           </motion.h1>
 
@@ -227,9 +235,13 @@ const LandingPage = () => {
               lineHeight: 1.65
             }}
           >
-            Zero stress, total control. Unbreakable infrastructure, one-tap campaign launches, and pro-grade insights for your enterprise.
+            A retail CRM running on live Postgres — with the query-performance work, the metric
+            definitions, and the data-quality checks that failed all left where you can read them.
           </motion.p>
 
+          {/* One next action. The dashboard is the entry point; the Performance Lab
+              and the analysis are reached from there, so the landing page does not
+              deep-link past them. */}
           <motion.button
             custom={2}
             initial="hidden"
@@ -243,17 +255,58 @@ const LandingPage = () => {
               backgroundColor: 'white',
               color: 'black',
               borderRadius: '50px',
-              padding: '17px 24px',
-              minWidth: '210px',
+              padding: '17px 26px',
+              minWidth: '230px',
               fontSize: 'clamp(0.9rem, 2vw, 1rem)',
-              boxShadow: '0 4px 24px rgba(255,255,255,0.1)',
+              boxShadow: '0 4px 24px rgba(255,255,255,0.12)',
               fontWeight: 600,
               gap: '32px'
             }}
           >
-            Get It Free
+            Open the dashboard
             <ArrowRightCircle size={20} />
           </motion.button>
+
+          {/* Live counts, so the scale above is evidence rather than a claim. */}
+          <motion.div
+            custom={3}
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            className="mt-12 grid grid-cols-3 gap-6 sm:gap-10 rounded-2xl px-6 sm:px-10 py-5"
+            style={{
+              // The video behind this strip runs from near-black to a bright
+              // earth limb; without a scrim the labels wash out on some frames.
+              backgroundColor: 'rgba(0,0,0,0.42)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255,255,255,0.10)',
+            }}
+          >
+            {[
+              { label: 'Orders', value: dataset && fmt(dataset.orders) },
+              { label: 'Customers', value: dataset && fmt(dataset.customers) },
+              { label: 'Live Postgres', value: dataset && dataset.db_size },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center">
+                <div
+                  style={{
+                    fontFamily: 'var(--font-heading)',
+                    fontSize: 'clamp(1.1rem, 3vw, 1.6rem)',
+                    color: 'white',
+                    minHeight: '1.6em',
+                  }}
+                >
+                  {stat.value || <span style={{ opacity: 0.25 }}>—</span>}
+                </div>
+                <div
+                  className="uppercase"
+                  style={{ fontSize: '0.65rem', letterSpacing: '0.18em', color: 'white', opacity: 0.72, marginTop: '5px' }}
+                >
+                  {stat.label}
+                </div>
+              </div>
+            ))}
+          </motion.div>
         </div>
       </div>
     </div>
