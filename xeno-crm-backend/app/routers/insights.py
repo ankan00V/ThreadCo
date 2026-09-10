@@ -236,7 +236,33 @@ def data_quality_audit(db: Session = Depends(get_db)) -> dict[str, Any]:
 
 @router.get("/recommendation")
 def recommendation(db: Session = Depends(get_db)) -> dict[str, Any]:
-    """The one recommendation this dataset can actually support, with its numbers."""
+    """The segment worth acting on, with the lapse window derived from the data.
+
+    The first version hard-coded 45 days and said so, because on the uniform
+    generator repeat-purchase timing carried no information and there was
+    nothing to derive a window from. With real purchase behaviour there is: the
+    distribution of gaps between a customer's consecutive orders says how long
+    customers who come back actually take to come back.
+    """
+    gaps = db.execute(text("""
+        WITH gaps AS (
+          SELECT EXTRACT(EPOCH FROM created_at
+                   - lag(created_at) OVER (PARTITION BY customer_id ORDER BY created_at)
+                 ) / 86400 AS gap
+          FROM orders WHERE status = 'completed'
+        )
+        SELECT count(*)                                                   AS n,
+               percentile_cont(0.5) WITHIN GROUP (ORDER BY gap)::numeric(8,0) AS p50,
+               percentile_cont(0.9) WITHIN GROUP (ORDER BY gap)::numeric(8,0) AS p90
+        FROM gaps WHERE gap IS NOT NULL
+    """)).mappings().one()
+
+    # Past the 90th percentile of gaps, a customer has waited longer than nine in
+    # ten returning customers ever do. That is a behavioural definition of
+    # "lapsed", not a guess — though choosing p90 over p80 is itself a judgement.
+    window = int(gaps["p90"] or 45)
+    median_gap = int(gaps["p50"] or 0)
+
     row = db.execute(text("""
         SELECT count(*)                                   AS customers,
                sum(total_spent)::numeric(16,0)            AS historical_spend,
@@ -246,8 +272,8 @@ def recommendation(db: Session = Depends(get_db)) -> dict[str, Any]:
         WHERE is_active = true
           AND total_spent >= 15000
           AND last_order_date IS NOT NULL
-          AND last_order_date < now() - interval '45 days'
-    """)).mappings().one()
+          AND last_order_date < now() - make_interval(days => :window)
+    """), {"window": window}).mappings().one()
 
     baseline = db.execute(text("""
         SELECT avg(total_spent)::numeric(12,0) FROM customers
@@ -264,19 +290,28 @@ def recommendation(db: Session = Depends(get_db)) -> dict[str, Any]:
             "baseline_avg_spend": float(baseline or 0),
             "avg_orders": float(row["avg_orders"] or 0),
         },
-        "reasoning": "These customers have spent above ₹15,000 and have not completed an order "
-                     "in 45 days. They are worth more per head than the average purchasing "
-                     "customer, which is what makes the segment worth a campaign rather than a "
-                     "discount blast.",
+        "lapse_window": {
+            "days": window,
+            "median_gap_days": median_gap,
+            "gaps_measured": int(gaps["n"]),
+            "method": "90th percentile of days between consecutive completed orders",
+        },
+        "reasoning": f"These customers have spent above ₹15,000 and have gone {window} days without "
+                     f"a completed order. That window is not a convention: across "
+                     f"{int(gaps['n']):,} repeat purchases, 90% came within {window} days and the "
+                     f"median gap was {median_gap}. Someone silent for longer has already waited "
+                     f"past nine in ten returning customers.",
         "action": "Run a controlled win-back on this segment with a holdout group, and measure "
                   "completed orders in the 30 days after send — not opens.",
         "how_to_measure": "Open and click rates are simulated in this environment and cannot "
                           "validate lift. The only honest success metric is incremental "
                           "completed-order revenue against the holdout.",
-        "caveat": "The 45-day threshold is a business convention, not a finding. The audit shows "
-                  "this dataset cannot tell us the real lapse point, because repeat-purchase "
-                  "timing is uniformly distributed. On production data, derive the window from "
-                  "the observed survival curve before committing to it.",
+        "caveat": f"Two judgements sit inside this. Choosing the 90th percentile rather than the "
+                  f"80th ({window} days rather than a shorter window) trades reach for precision — "
+                  f"a shorter window catches customers earlier but flags more who were coming back "
+                  f"anyway. And ₹15,000 as the value floor is a business choice, not a finding. "
+                  f"The window happens to land close to the 45-day convention this used to "
+                  f"hard-code; the difference is that now it is measured.",
     }
 
 

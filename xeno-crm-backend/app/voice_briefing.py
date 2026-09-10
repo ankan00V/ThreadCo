@@ -180,10 +180,16 @@ def build_project_script(audit: dict, recommendation: dict, dataset: dict) -> st
         )
 
     if finding.get("customers"):
+        window = (recommendation.get("lapse_window") or {}).get("days")
+        # The window is derived from purchase gaps, so speak the derived number
+        # rather than a hard-coded one that would drift from the page.
+        when = (f"{window} days — the point by which nine in ten returning customers have "
+                f"already come back" if window else "the lapse window")
         parts.append(
             f"On the current data, the segment worth acting on is "
             f"{int(finding['customers']):,} high value customers who have not ordered in "
-            f"forty five days, holding {_inr(finding.get('historical_spend', 0))} of historical spend."
+            f"{when}. Between them they hold {_inr(finding.get('historical_spend', 0))} "
+            f"of historical spend."
         )
 
     parts.append(

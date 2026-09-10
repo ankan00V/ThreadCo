@@ -2,7 +2,7 @@
 Defence-in-depth for the browser-facing SQL surface.
 
 An analytics demo is much more convincing if a reviewer can run their own
-SQL against the real dataset. That is also the most dangerous thing you can
+SQL against the live database. That is also the most dangerous thing you can
 put on a public URL, so access is layered. Every layer assumes the ones
 above it have already been bypassed:
 

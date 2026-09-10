@@ -13,21 +13,28 @@ const inr = (v) => `₹${Number(v || 0).toLocaleString('en-IN', { maximumFractio
 function Check({ check }) {
   const pass = check.status === 'pass';
   const Icon = pass ? CheckCircle2 : XCircle;
+  // Only rows that have content. A label over nothing reads as a broken page.
+  const rows = [
+    ['Observed', check.observed, 'text-neutral-800'],
+    ['Threshold', check.threshold, 'text-neutral-700'],
+    ['Why it matters', check.why_it_matters, 'text-neutral-800 font-medium'],
+  ].filter(([, value]) => value);
   return (
-    <div className={`rounded-2xl border p-5 ${pass ? 'border-emerald-200 bg-emerald-50/50' : 'border-rose-200 bg-rose-50/50'}`}>
-      <div className="flex items-center gap-2 mb-3">
-        <Icon size={17} className={pass ? 'text-emerald-600' : 'text-rose-600'} />
-        <h4 className="font-semibold text-neutral-900">{check.name}</h4>
-        <span className={`ml-auto text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${pass ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'}`}>
+    <div className={`rounded-2xl border p-5 ${pass ? 'border-emerald-200 bg-emerald-50/60' : 'border-rose-200 bg-rose-50/60'}`}>
+      <div className="flex items-start gap-2 mb-3">
+        <Icon size={17} className={`shrink-0 mt-0.5 ${pass ? 'text-emerald-600' : 'text-rose-600'}`} />
+        <h4 className="font-semibold text-neutral-900 leading-snug">{check.name}</h4>
+        <span className={`ml-auto shrink-0 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${pass ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'}`}>
           {check.status}
         </span>
       </div>
       <dl className="space-y-2.5 text-[13px] leading-relaxed">
-        <div><dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">Observed</dt><dd className="text-neutral-800">{check.observed}</dd></div>
-        <div><dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">Expected</dt><dd className="text-neutral-700">{check.expected}</dd></div>
-        <div><dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">Diagnosis</dt><dd className="text-neutral-700">{check.diagnosis}</dd></div>
-        <div><dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">So what</dt><dd className="text-neutral-800 font-medium">{check.consequence}</dd></div>
-        {check.to_fix && <div><dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">To fix</dt><dd className="text-neutral-700">{check.to_fix}</dd></div>}
+        {rows.map(([label, value, tone]) => (
+          <div key={label}>
+            <dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">{label}</dt>
+            <dd className={tone}>{value}</dd>
+          </div>
+        ))}
       </dl>
     </div>
   );
@@ -89,6 +96,9 @@ export default function Analysis() {
   if (!audit) return <Loading label="Loading the analysis" />;
 
   const f = rec.finding;
+  const retentionPasses = audit.checks.some(
+    (c) => c.name.toLowerCase().includes('decay') && c.status === 'pass'
+  );
 
   return (
     <div className="w-full px-4 sm:px-6 md:px-12 max-w-[1100px] mx-auto pt-8 md:pt-12 pb-24 font-body">
@@ -102,8 +112,10 @@ export default function Analysis() {
         </h1>
         <p className="text-muted-foreground mt-4 text-sm md:text-base max-w-3xl leading-relaxed">
           "How is our retention trending?" is the question a growth lead actually asks. Before answering
-          it, the dataset has to be able to answer it. Three checks were run. Two of them failed — and
-          the failures are the finding.
+          it, the dataset has to be able to answer it. {audit.total} checks run against it and{' '}
+          {audit.passing} of {audit.total} pass today{audit.provenance ? (
+            <> — but the first time they ran, two failed, and that is the more useful story. It is below.</>
+          ) : '.'}
         </p>
       </div>
 
@@ -135,15 +147,45 @@ export default function Analysis() {
           <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-500 mb-1.5">Verdict</p>
           <p className="text-[14px] text-neutral-800 leading-relaxed">{audit.verdict}</p>
         </div>
+
+        {audit.provenance && (
+          <div className="mt-5 rounded-3xl border border-neutral-200 bg-white/80 backdrop-blur-md p-6 md:p-7 shadow-sm">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-[#ef4d23] mb-2">Why these checks exist</p>
+            <h3 className="font-display text-2xl text-neutral-900 mb-4">{audit.provenance.headline}</h3>
+            <dl className="grid gap-5 md:grid-cols-2 text-[13.5px] leading-relaxed">
+              <div>
+                <dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-500 mb-1">What failed</dt>
+                <dd className="text-neutral-800">{audit.provenance.detail}</dd>
+              </div>
+              <div>
+                <dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-500 mb-1">What changed</dt>
+                <dd className="text-neutral-800">{audit.provenance.fix}</dd>
+              </div>
+            </dl>
+            {audit.provenance.caveat && (
+              <p className="mt-5 rounded-xl border border-amber-300/60 bg-amber-50 px-4 py-3 text-[13px] text-amber-900 leading-relaxed">
+                <strong className="font-semibold">Read this with care: </strong>{audit.provenance.caveat}
+              </p>
+            )}
+          </div>
+        )}
       </section>
 
       {/* Retention */}
       <section className="mb-12">
         <h2 className="font-display text-3xl text-foreground mb-1">The retention matrix</h2>
         <p className="text-[13px] text-muted-foreground mb-4 max-w-3xl leading-relaxed">
-          The query is correct and the matrix renders cleanly — which is exactly why this is worth
-          showing. A stakeholder handed this chart would read a healthy flat retention curve. It is an
-          artifact of how the data was generated. Read across any row: no decay.
+          {retentionPasses ? (
+            <>Read across any row: each cohort loses a large share of its customers after the first
+            month, then flattens into a loyal tail. That is what real retail looks like — and it is the
+            shape this dataset did <em>not</em> have the first time this query ran, when every row sat
+            flat at the same rate. A flat matrix renders just as cleanly as this one, which is why the
+            shape has to be checked rather than trusted.</>
+          ) : (
+            <>Read across any row: there is no decay. A stakeholder handed this chart would read a
+            healthy, stable retention curve. It is an artifact of how the data was generated, and no
+            lifecycle conclusion drawn from it is safe.</>
+          )}
         </p>
         <div className="rounded-3xl border border-neutral-200 bg-white/70 backdrop-blur-md p-5 md:p-6 shadow-sm">
           <RetentionMatrix matrix={retention.matrix} />
@@ -157,10 +199,11 @@ export default function Analysis() {
 
       {/* Concentration */}
       <section className="mb-12">
-        <h2 className="font-display text-3xl text-foreground mb-1">What the data <span className="italic font-normal">can</span> support</h2>
+        <h2 className="font-display text-3xl text-foreground mb-1">Where the revenue <span className="italic font-normal">sits</span></h2>
         <p className="text-[13px] text-muted-foreground mb-4 max-w-3xl leading-relaxed">
-          Revenue concentration passed the audit — it emerges from the basket-size distribution rather
-          than being imposed. So segment-value work built on it is sound.
+          The top tenth of customers by spend account for {conc.deciles[0].pct_of_revenue}% of revenue,
+          and the top three tenths for {conc.deciles[2].cumulative_pct}%. That concentration is what makes
+          targeting worth doing: if value were spread evenly, a segment would buy nothing over a blast.
         </p>
         <div className="rounded-3xl border border-neutral-200 bg-white/70 backdrop-blur-md p-5 md:p-6 shadow-sm">
           <div className="h-[280px]">
@@ -207,6 +250,16 @@ export default function Analysis() {
               <p className="mt-1 font-display text-3xl text-neutral-900">{inr(f.historical_spend)}</p>
             </div>
           </div>
+          {rec.lapse_window && (
+            <div className="mb-5 rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1">Lapse window — derived, not assumed</p>
+              <p className="text-[13.5px] text-neutral-800 leading-relaxed">
+                <strong className="font-display text-2xl text-neutral-900 mr-1">{rec.lapse_window.days} days</strong>
+                — {rec.lapse_window.method}, across {rec.lapse_window.gaps_measured.toLocaleString()} repeat
+                purchases. The median gap is {rec.lapse_window.median_gap_days} days.
+              </p>
+            </div>
+          )}
           <dl className="space-y-3 text-[14px] leading-relaxed">
             <div><dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">Reasoning</dt><dd className="text-neutral-800">{rec.reasoning}</dd></div>
             <div><dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">Action</dt><dd className="text-neutral-800">{rec.action}</dd></div>
@@ -214,7 +267,7 @@ export default function Analysis() {
           </dl>
           <div className="mt-5 rounded-xl border border-amber-300/60 bg-amber-50 px-4 py-3">
             <p className="text-[13px] text-amber-900 leading-relaxed">
-              <strong className="font-semibold">What I don't know: </strong>{rec.caveat}
+              <strong className="font-semibold">The judgement calls inside this: </strong>{rec.caveat}
             </p>
           </div>
         </div>

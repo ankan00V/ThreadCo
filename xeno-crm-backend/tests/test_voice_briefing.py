@@ -63,7 +63,8 @@ class TestProjectBriefing:
     def test_tells_the_audit_story(self):
         script = build_project_script(
             {"passing": 3, "total": 3, "provenance": {"headline": "h"}},
-            {"finding": {"customers": 16535, "historical_spend": 774_000_000}},
+            {"finding": {"customers": 16535, "historical_spend": 774_000_000},
+             "lapse_window": {"days": 47}},
             {"orders": 538026, "customers": 80000},
         )
         assert "538,026" in script
@@ -71,6 +72,8 @@ class TestProjectBriefing:
         assert "point five zero two" in script     # spoken, not "0.502"
         assert "point nine four four" in script
         assert "generated" in script               # the caveat survives
+        assert "47 days" in script                 # derived window, not a hard-coded one
+        assert "forty five" not in script
 
     def test_works_without_provenance(self):
         script = build_project_script(
